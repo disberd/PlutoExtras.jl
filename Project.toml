@@ -1,0 +1,8 @@
+name = "PlutoUtils"
+uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
+authors = ["Alberto Mengali <disberd@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
