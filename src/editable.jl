@@ -70,17 +70,6 @@ begin
 			const formatter = s => d3format.format($(repr(format)))(s)
 			const el = elp.querySelector("span")
 
-
-			const onBlur = (e) => {
-				if (el.innerText === "") {
-				elp.value = $(s.default)   
-				} else {
-				elp.value =  parseFloat(el.innerText)
-				}
-				elp.dispatchEvent(new CustomEvent("input"))
-			}
-					
-					
 			let localVal = parseFloat($(s.default))
 			
 			Object.defineProperty(elp,"value",{
@@ -95,12 +84,23 @@ begin
 			const onEnter = (e) => {
 				if (e.keyCode === 13) {
 				e.preventDefault();
+				if (el.innerText === "") {
+					elp.value = $(s.default)   
+				} else {
+					elp.value =  el.innerText
+				}
+				elp.dispatchEvent(new CustomEvent("input"))
 				el.blur()
 				}
 			}
 
+			el.addEventListener('input',(e) => {
+				console.log(e)
+				e.preventDefault()
+				e.stopImmediatePropagation()
+			})
+
 			el.addEventListener('keydown',onEnter)
-			el.addEventListener('blur',onBlur)
 			elp.addEventListener('click',(e) => {
 				el.innerText = ""
 				el.focus()
