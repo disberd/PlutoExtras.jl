@@ -54,7 +54,7 @@ begin
 
 		write(io, """
         
-        <script>
+		<script>
 
 			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
 
@@ -68,37 +68,46 @@ begin
 			`
 
 			const formatter = s => d3format.format($(repr(format)))(s)
-            const el = elp.querySelector("span")
+			const el = elp.querySelector("span")
 
-			// initial value
-			el.innerText = formatter($(s.default))
-            elp.value = parseFloat($(s.default))
 
-            const onBlur = (e) => {
-                if (el.innerText === "") {
-                    elp.value = $(s.default)   
-                } else {
-                    elp.value =  parseFloat(el.innerText)
-                }
-                el.innerText = formatter(elp.value)
-                elp.dispatchEvent(new CustomEvent("input"))
-            }
+			const onBlur = (e) => {
+				if (el.innerText === "") {
+				elp.value = $(s.default)   
+				} else {
+				elp.value =  parseFloat(el.innerText)
+				}
+				elp.dispatchEvent(new CustomEvent("input"))
+			}
+					
+					
+			let localVal = parseFloat($(s.default))
+			
+			Object.defineProperty(elp,"value",{
+				get: () => localVal,
+				set: x => {
+					localVal = parseFloat(x)
+					el.innerText = formatter(x)
+				}
+			})
 
-            // Function to blur the element when pressing enter instead of adding a newline
-            const onEnter = (e) => {
-                if (e.keyCode === 13) {
-                    e.preventDefault();
-                    el.blur()
-                }
-            }
+			// Function to blur the element when pressing enter instead of adding a newline
+			const onEnter = (e) => {
+				if (e.keyCode === 13) {
+				e.preventDefault();
+				el.blur()
+				}
+			}
 
-            el.addEventListener('keydown',onEnter)
-            el.addEventListener('blur',onBlur)
+			el.addEventListener('keydown',onEnter)
+			el.addEventListener('blur',onBlur)
+			elp.addEventListener('click',(e) => {
+				el.innerText = ""
+				el.focus()
+				el.select()
+			})
 
-			// el.onselectstart = () => false
-
-            return elp
-			</script>""")
+		</script>""")
 	end
 	
 	Editable
