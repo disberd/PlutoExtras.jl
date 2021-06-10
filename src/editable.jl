@@ -107,6 +107,8 @@ begin
 				el.select()
 			})
 
+			return elp
+
 		</script>""")
 	end
 	
