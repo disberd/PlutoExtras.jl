@@ -13,6 +13,12 @@ macro bind(def, element)
     end
 end
 
+# ╔═╡ cfb4d354-e0b2-4a04-a559-4fb88df33954
+begin
+	using HypertextLiteral
+	using HypertextLiteral: JavaScript
+end
+
 # ╔═╡ 57c51c71-fd8d-440d-8262-9cccd1617c08
 md"""
 # Editable Object
@@ -52,7 +58,7 @@ begin
 			String(s.format)
 		end
 
-		write(io, """
+		show(io,m,@htl """
         
 		<script>
 
@@ -61,16 +67,17 @@ begin
 			const elp = html`
 			<span style="
 			touch-action: none;
-			background: rgb(252, 209, 204);
+			background: rgb(175, 222, 253);
 			padding: 0em .2em;
 			border-radius: .3em;
-			font-weight: bold;">$((s.prefix))<span contentEditable=true>$(s.default)</span>$((s.suffix))</span>
+			font-weight: bold;">$(JavaScript(s.prefix))<span contentEditable=true>$(s.default)</span>$(JavaScript(s.suffix))</span>
 			`
 
-			const formatter = s => d3format.format($(repr(format)))(s)
+			const formatter = s => d3format.format($(format))(s)
 			const el = elp.querySelector("span")
 
 			let localVal = parseFloat($(s.default))
+			el.innerText = formatter($(s.default))
 			
 			Object.defineProperty(elp,"value",{
 				get: () => localVal,
@@ -100,12 +107,31 @@ begin
 				e.stopImmediatePropagation()
 			})
 
+			function selectText(el){
+				var sel, range;
+				if (window.getSelection && document.createRange) { //Browser compatibility
+				sel = window.getSelection();
+				if(sel.toString() == ''){ //no text selection
+					window.setTimeout(function(){
+						range = document.createRange(); //range object
+						range.selectNodeContents(el); //sets Range
+						sel.removeAllRanges(); //remove all ranges from selection
+						sel.addRange(range);//add Range to a Selection.
+					},1);
+				}
+				}else if (document.selection) { //older ie
+					sel = document.selection.createRange();
+					if(sel.text == ''){ //no text selection
+						range = document.body.createTextRange();//Creates TextRange object
+						range.moveToElementText(el);//sets Range
+						range.select(); //make selection.
+					}
+				}
+			}
+
 			el.addEventListener('keydown',onEnter)
-			elp.addEventListener('click',(e) => {
-				el.innerText = ""
-				el.focus()
-				el.select()
-			})
+			el.addEventListener('click',(e) => e.stopImmediatePropagation()) // modify text
+			elp.addEventListener('click',(e) => selectText(el)) // Select all text
 
 			return elp
 
