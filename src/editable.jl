@@ -36,8 +36,8 @@ md"""
 
 # ╔═╡ a1be6790-c932-11eb-0b3a-23cc77d240e9
 begin
-	Base.@kwdef struct Editable
-		default::Real
+	Base.@kwdef struct Editable{T <: Number}
+		default::T
 		format::Union{AbstractString,Nothing}=nothing
 		prefix::AbstractString=""
 		suffix::AbstractString=""
@@ -45,6 +45,46 @@ begin
 	Editable(x::Number; kwargs...) = Editable(; default=x, kwargs...)
 	
 	Base.get(s::Editable) = s.default
+	
+	function Base.show(io::IO, m::MIME"text/html", s::Editable{Bool})
+		show(io,m,@htl """
+        
+		<script>
+
+			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
+
+			const el = html`
+			<span style="
+			cursor: pointer;
+			touch-action: none;
+			background: rgb(175, 222, 253);
+			padding: 0em .2em;
+			border-radius: .3em;
+			font-weight: bold;">$(s.default)</span>
+			`
+			const formatter = x => x ? 'true' : 'false'
+
+			let localVal = $(s.default)
+			el.innerText = formatter($(s.default))
+			
+			Object.defineProperty(el,"value",{
+				get: () => localVal,
+				set: x => {
+					localVal = x
+					el.innerText = formatter(x)
+				}
+			})
+
+			el.addEventListener('click',(e) => {
+				el.value = el.value ? false : true 
+				})
+			
+			el.onselectstart = () => false
+			
+			return el
+
+		</script>""")
+	end
 	
 	function Base.show(io::IO, m::MIME"text/html", s::Editable)
 		format = if s.format === nothing
@@ -138,7 +178,10 @@ begin
 		</script>""")
 	end
 	
+	
+	
 	Editable
+
 end;
 
 # ╔═╡ cbeff2f3-3ffe-4aaa-8d4c-43c44ee6d59f
@@ -161,6 +204,7 @@ This has also a unit $(@bind unitnum Editable(3.0;suffix=" dB"))
 unitnum
 
 # ╔═╡ Cell order:
+# ╠═cfb4d354-e0b2-4a04-a559-4fb88df33954
 # ╟─57c51c71-fd8d-440d-8262-9cccd1617c08
 # ╟─d9762fc1-fa2c-4315-a360-cc1cd9d70055
 # ╠═cbeff2f3-3ffe-4aaa-8d4c-43c44ee6d59f
