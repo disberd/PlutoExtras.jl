@@ -4,7 +4,12 @@ authors = ["Alberto Mengali <disberd@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+Cascadia = "54eefc05-d75b-58de-a785-1a3403f0919f"
+Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
 Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
+Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
+HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
