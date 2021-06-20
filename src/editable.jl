@@ -43,9 +43,11 @@ begin
 		suffix::AbstractString=""
 	end
 	Editable(x::Number; kwargs...) = Editable(; default=x, kwargs...)
+	Editable(x::Bool,truestr::AbstractString="true",falsestr::AbstractString="false"; kwargs...) = Editable(; default=x, kwargs...,prefix=truestr,suffix=falsestr)
 	
 	Base.get(s::Editable) = s.default
 	
+	# In case of Bool type, the prefix and suffix are used as strings to display for the 'true' and 'false' flags respectively
 	function Base.show(io::IO, m::MIME"text/html", s::Editable{Bool})
 		show(io,m,@htl """
         
@@ -57,26 +59,27 @@ begin
 			<span style="
 			cursor: pointer;
 			touch-action: none;
-			background: rgb(175, 222, 253);
+			background: hsl(133, 47%, 68%);
 			padding: 0em .2em;
 			border-radius: .3em;
 			font-weight: bold;">$(s.default)</span>
 			`
-			const formatter = x => x ? 'true' : 'false'
+			const formatter = x => x ? $((s.prefix)) : $((s.suffix))
 
 			let localVal = $(s.default)
 			el.innerText = formatter($(s.default))
 			
 			Object.defineProperty(el,"value",{
-				get: () => localVal,
+				get: () => Boolean(localVal),
 				set: x => {
-					localVal = x
+					localVal = Boolean(x)
 					el.innerText = formatter(x)
 				}
 			})
 
 			el.addEventListener('click',(e) => {
 				el.value = el.value ? false : true 
+				el.dispatchEvent(new CustomEvent("input"))
 				})
 			
 			el.onselectstart = () => false
@@ -203,6 +206,12 @@ This has also a unit $(@bind unitnum Editable(3.0;suffix=" dB"))
 # ╔═╡ 245fad1a-2f1e-4776-b048-6873e8c33f3b
 unitnum
 
+# ╔═╡ 456a3579-3c33-496c-bbf2-6e6e0d0ff102
+bool_bond = @bind bool_val Editable(true)
+
+# ╔═╡ 3347054b-6d72-41f9-9ddf-39f8499ed5da
+bool_val
+
 # ╔═╡ Cell order:
 # ╠═cfb4d354-e0b2-4a04-a559-4fb88df33954
 # ╟─57c51c71-fd8d-440d-8262-9cccd1617c08
@@ -213,4 +222,6 @@ unitnum
 # ╠═d171e8f9-c939-4747-a748-5568ae4a4064
 # ╟─9dfb5236-9475-4bf6-990a-19f8f5519003
 # ╠═245fad1a-2f1e-4776-b048-6873e8c33f3b
+# ╠═456a3579-3c33-496c-bbf2-6e6e0d0ff102
+# ╠═3347054b-6d72-41f9-9ddf-39f8499ed5da
 # ╠═a1be6790-c932-11eb-0b3a-23cc77d240e9
