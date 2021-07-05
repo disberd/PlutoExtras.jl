@@ -112,12 +112,12 @@ end
 
 # ╔═╡ 19f5749a-b535-4a03-9b79-5f98182b0e84
 md"""
-dio gesu bambino  asfsdf asdf asdf as df asdf asfd asdf asdf asdf asdf asdf asdf asdf asdf asdre $(title_ref("[1]","https://html.com/attributes/a-title/",@htl("<b>This is a Title</b><br><i>Author 1, Author 2</i>"))) mare
+asfsdf asdf asdf as df asdf asfd asdf asdf asdf asdf asdf asdf asdf asdf asdre $(title_ref("[1]","https://html.com/attributes/a-title/",@htl("<b>This is a Title</b><br><i>Author 1, Author 2</i>"))) 
 """
 
 # ╔═╡ 32097aab-ca67-4f5c-858e-79e32e287b29
 md"""
-dio gesu bambino  asfsdf asdf asdf as df asdf asfd asdf asdf asdf asdf asdf asdf asdf asdf asdre $(title_ref("[1]","https://html.com/attributes/a-title/")) mare
+f asdf asdf as df asdf asfd asdf asdf asdf asdf asdf asdf asdf asdf asdre $(title_ref("[1]","https://html.com/attributes/a-title/")) 
 """
 
 # ╔═╡ 2d9a450f-0b1e-4178-a978-3068488ca4c5

@@ -13,95 +13,153 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ df10bb60-ca8c-11eb-0788-af4eb2ef9fa1
+# ╔═╡ c1e79b08-c9fe-4d0c-9266-a9fe364b2119
 begin
-	using HypertextLiteral: @htl, @htl_str
 	using PlutoUtils
+	using HypertextLiteral
 end
 
-# ╔═╡ 662b8f7f-3dee-4ad1-806a-3accbcfc7209
-T = NamedTuple{(:idx, Symbol("A <Value>")), Tuple{Int64, String}};
+# ╔═╡ b30c5506-5385-497a-b5a3-707112bcfa80
+md"## Define Parameters (Bonds)"
 
-# ╔═╡ d5ac916b-1b4e-40d8-a0f0-55fd39e6b110
-database = [T((1, "A&B"))];
+# ╔═╡ a33a6799-ce3d-4f03-9ca2-8fefa6723adf
+bonds_dict = Dict{String,Dict{String,Main.PlutoRunner.Bond}}()
 
-# ╔═╡ bde2d117-d98b-4260-87d1-3d6652f6d0d1
-asd_bond = @bind asd Editable(3,suffix=" W/GHz")
+# ╔═╡ 43a30718-e688-4201-b66c-234fbed876bd
+table_bond_dict = Dict{String,HypertextLiteral.Result}(); 
 
-# ╔═╡ d8cb6bfe-46fb-4848-bb80-9075dfb38c32
-dict = Dict("Gesu cristo" => 5,"Re" => asd_bond)
+# ╔═╡ e9c113f1-3137-412e-a63f-4d9f8e8e2275
+params_ref = Ref{NamedTuple}()
 
-# ╔═╡ 12b0602c-ca32-4102-8cfa-cedc54b9144d
-dict2 = Dict("Gesu cristo" => 5,"Re" => asd_bond, "Madonna" => asd_bond);
+# ╔═╡ ad0a6274-e659-4038-b9a2-7f4bf4c72543
+table_bond_dict["Test"] = table_bond_dict["Power"]
 
-# ╔═╡ 3e00443f-cf89-44bb-aca8-5e9248be181d
-fields = T.parameters[1]
+# ╔═╡ e5f1da69-d325-4d0e-a7ac-cc8527e034a2
+md"## Editable Widget"
 
-# ╔═╡ c349bb9f-3cd5-4ca8-8236-80c91089e41a
-head = @htl("""
-	<tr><th colspan="2"> Test
-	<tr>$([@htl("<th>$x") for x in fields])
-	""")
+# ╔═╡ dc61cc8d-74ad-4753-a747-569f941d720d
+# Editable is basical a copy of the Scrubbable widget from PlutoUI, but allows to have data that can be given with keyboard input
+begin	
+	Base.@kwdef struct Editable
+		default::Real
+		format::Union{AbstractString,Nothing}=nothing
+		prefix::AbstractString=""
+		suffix::AbstractString=""
+	end
+	Editable(x::Number; kwargs...) = Editable(; default=x, kwargs...)
+	
+	Base.get(s::Editable) = s.default
+	
+	function Base.show(io::IO, m::MIME"text/html", s::Editable)
+		format = if s.format === nothing
+			# TODO: auto format
+			if eltype(s.default) <: Integer
+				""
+			else
+				".4~g"
+			end
+		else
+			String(s.format)
+		end
 
-# ╔═╡ 9cdbdb8d-8db2-4d5f-bc4c-348f1e78f66f
-head2 = @htl("""
-	<tr><th colspan="2"> Parameters Of This Jesus Christ
-	<tr><th>Name <th>Value
-	""")
+		write(io, """
+        
+		<script>
 
-# ╔═╡ 25f485fe-d297-4cc7-884d-f62ab0a310a3
-@htl("<table>$head2</table")
+			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
 
-# ╔═╡ 6ac745a3-0ad6-45d1-9d14-0597eb525c69
-row_template = """
-	<tr>$(join(["<td>\$(row[$(repr(x))])" for x in fields]))
-"""
+			const elp = html`
+			<span style="
+			touch-action: none;
+			background: rgb(175, 222, 253);
+			padding: 0em .2em;
+			border-radius: .3em;
+			font-weight: bold;">$((s.prefix))<span contentEditable=true>$(s.default)</span>$((s.suffix))</span>
+			`
 
-# ╔═╡ 4ab920f5-16f4-4081-a970-7566a0f36801
-row_template2 = """
-	<tr><td>\$(row.first)<td>\$(row.second)
-"""
+			const formatter = s => d3format.format($(repr(format)))(s)
+			const el = elp.querySelector("span")
 
-# ╔═╡ fa010756-a78d-422d-8aee-45172d4b0f88
-eval(:(tablerow(row) = @htl_str $row_template))
+			let localVal = parseFloat($(s.default))
+			el.innerText = formatter($(s.default))
+			
+			Object.defineProperty(elp,"value",{
+				get: () => localVal,
+				set: x => {
+					localVal = parseFloat(x)
+					el.innerText = formatter(x)
+				}
+			})
 
-# ╔═╡ b766170a-3c1a-434c-bcdb-e410ded47994
-eval(:(tablepair(row) = @htl_str $row_template2))
+			// Function to blur the element when pressing enter instead of adding a newline
+			const onEnter = (e) => {
+				if (e.keyCode === 13) {
+				e.preventDefault();
+				if (el.innerText === "") {
+					elp.value = $(s.default)   
+				} else {
+					elp.value =  el.innerText
+				}
+				elp.dispatchEvent(new CustomEvent("input"))
+				el.blur()
+				}
+			}
 
-# ╔═╡ 3a84b92f-f03e-4bba-ae70-ab20259f3ff6
-for p ∈ pairs(dict)
-	println(tablepair(p))
+			el.addEventListener('input',(e) => {
+				console.log(e)
+				e.preventDefault()
+				e.stopImmediatePropagation()
+			})
+
+			function selectText(el){
+				var sel, range;
+				if (window.getSelection && document.createRange) { //Browser compatibility
+				sel = window.getSelection();
+				if(sel.toString() == ''){ //no text selection
+					window.setTimeout(function(){
+						range = document.createRange(); //range object
+						range.selectNodeContents(el); //sets Range
+						sel.removeAllRanges(); //remove all ranges from selection
+						sel.addRange(range);//add Range to a Selection.
+					},1);
+				}
+				}else if (document.selection) { //older ie
+					sel = document.selection.createRange();
+					if(sel.text == ''){ //no text selection
+						range = document.body.createTextRange();//Creates TextRange object
+						range.moveToElementText(el);//sets Range
+						range.select(); //make selection.
+					}
+				}
+			}
+
+			el.addEventListener('keydown',onEnter)
+			elp.addEventListener('click',(e) => {
+				//el.innerText = ""
+				selectText(el)
+				el.focus()
+				el.select()
+			})
+
+			return elp
+
+		</script>""")
+	end
+	
+	Editable
 end
 
-# ╔═╡ bd076fea-f412-4639-aa4f-cd0d46719afa
-table_template = "<table>$head\$([tablerow(row) for row in data])</table>"
+# ╔═╡ 7a361c0e-6900-4cd0-92aa-685387efbd83
+trigger_bond = @bind trigger Button("Trigger Calculation");
 
-# ╔═╡ af7626a5-fa72-4324-a849-24d542e83ec7
-table_template2 = """
-<table style="padding: 3em">$head2\$([tablepair(p) for p in pairs(data)])</table>
-"""
+# ╔═╡ fc0d5547-5487-4d12-a314-9b3f835059e0
+begin
+	trigger
+	params = params_ref[]
+end
 
-# ╔═╡ 4e08e8f0-36d9-4ad8-8775-5e790cf92a69
-eval(:(print_table(data) = @htl_str $table_template))
-
-# ╔═╡ fef577c2-815a-462e-badc-778a26161d5e
-eval(:(print_table2(data) = @htl_str $table_template2))
-
-# ╔═╡ ba5b6a92-df94-4c0c-996e-c37c3df0756c
-asd_bond.defines
-
-# ╔═╡ 74fffa85-42fc-48ab-a5ee-292fa44586fd
-td = print_table2(dict)
-
-# ╔═╡ 23e20d3e-508d-4534-a5b5-3dff0023ccaf
-@htl("""
-	$td $(print_table2(dict2))
-	<script>
-		let div = currentScript.parentElement
-		div.style.display = "flex"
-	""")
-
-# ╔═╡ 1185583b-6d6f-44af-8224-c27acdddddf4
+# ╔═╡ f901b817-a1c0-43d6-bd41-3a9c7f2f1edd
+"Function that takes as input a Dict that associates String (names of parameters) to Pluto Bonds an create a nice table to have easy access the the values for modification"
 function parameters_table(dict;head_name="Parameters",kwargs...)
 	# Define the header of the table
 	head = @htl("""
@@ -109,87 +167,127 @@ function parameters_table(dict;head_name="Parameters",kwargs...)
 	<tr><th>Name <th>Value
 	""")
 	
-	# Define the template to be used for each pair of keys-vals in the dict, which will represent a separate row
-	row_template = "<tr><td>\$(pair.first)<td>\$(pair.second)"
+	out = @htl("$head")
 	
-	# Create the function to process the rows
-	eval(:(tablerow(pair) = @htl_str $row_template))
+	# Populate the rows
+	for (k,v) ∈ pairs(dict)
+		out = @htl("""
+			$out
+			<tr>
+				<td>$k
+				<td>$v
+			""")
+	end
 	
-	# Define the string template for the whole table
-	table_template = """
-	<table style="padding: 3em">$head\$([tablerow(p) for p in pairs(dict)])</table>
-"""
-	# Create the function to generate the table
-	eval(:(print_table(dict) = @htl_str $table_template))
+	# Put the table tag around
+	out = @htl("""
+		<table style="margin=2em; flex: 0 0 12em;">
+			$out
+		</table>
+		""")
 	
-	print_table(dict)
+	out
 end
 
-# ╔═╡ b2aa852e-5572-49a1-bc76-9ae0e51ad3bd
-parameters_table(dict2)
+# ╔═╡ 7082a9d5-b0e9-4085-b7b7-3379927c1596
+# Power parameters
+bonds_dict["Power"],table_bond_dict["Power"] = let
+	dict = Dict{String,Main.PlutoRunner.Bond}()
+	dict["ADC DC power per GHz"] = @bind ADC_W_pGHz Editable(2,suffix=" W/GHz")
+	dict["LNA DC power per element"] = @bind LNA_W_pel Editable(.5,format=".2~s",suffix="W")
+	dict["Amplifier Efficiency"] = @bind amp_eff Editable(.5,format=".1~%")
 
-# ╔═╡ 517a6017-5413-4716-9ca6-af0b685e0043
-begin
-	power_bonds = let
-		dict = Dict{String,Main.PlutoRunner.Bond}()
-		## OBP bonds
-		dict["OBP W per GHz"] = @bind OBP_noBFN_ppGHz Editable(2,suffix=" W/GHz")
-		dict["DBFN W per GHz"] = @bind OBP_DBFN_ppGHz Editable(0.006,suffix=" W/GHz")
-		dict
-	end
-	power_bonds_table = parameters_table(power_bonds)
+	# Generate the table
+	table = parameters_table(dict;head_name="Power Consumption")
+	(dict,table)
 end;
 
-# ╔═╡ 68d784dc-2594-454e-aee8-3f78b08e4d70
-power_bonds_table
+# ╔═╡ c11e109f-d139-47c8-b77e-36f6450a1e48
+# Mass parameters
+bonds_dict["Mass"],table_bond_dict["Mass"] = let
+	dict = Dict{String,Main.PlutoRunner.Bond}()
+	dict["ADC mass per GHz"] = @bind ADC_g_pGHz Editable(500,format=".2~s",suffix="g/GHz")
+	dict["LNA mass per element"] = @bind LNA_g_pel Editable(1000,format=".2~s",suffix="g")
+	# Generate the table
+	table = parameters_table(dict;head_name="Mass")
+	(dict,table)
+end;
 
-# ╔═╡ ab2f37c2-aaae-4f5b-8dad-cd92aa36bbf6
-print_table(database)
+# ╔═╡ 6b15458f-44f0-476c-965e-f550117c5f0b
+bonds_dict["Other"],table_bond_dict["Other"] = let
+	dict = Dict{String,Main.PlutoRunner.Bond}()
+	dict["Coverage Radius"] = @bind cov_deg Editable(3,suffix="˚")
+	dict["Bandwidth"] = @bind Bu Editable(2e9;format=".2~s",suffix="Hz")
+	dict["Single Antenna Flag"] = @bind single_antenna Editable(1;format=".0d")
 
-# ╔═╡ ea7486f0-6a4e-4f18-bcfa-efaa29eefbcb
-a = @htl("""
-  <tr>
-    <th colspan="2">Mars
-    <th colspan="2">Venu
-  </tr>
-  <tr>
-    <th scope="col">Produced</th>
-    <th scope="col">Sold</th>
-    <th scope="col">Produced</th>
-    <th scope="col">Sold</th>
-  </tr>
-	""")
+	# Generate the table
+	table = parameters_table(dict;head_name="Other")
+	(dict,table)
+end;
 
-# ╔═╡ 6d4b494d-de21-4cac-9d10-2c989a50d228
-@htl("<table>$a</table")
+# ╔═╡ f26c2923-9146-47fd-b172-0d4f41b52d36
+params_ref[] = (
+	ADC_W_pGHz = ADC_W_pGHz,
+	LNA_W_pel = LNA_W_pel,
+	amp_eff = amp_eff,
+	ADC_g_pGHz = ADC_g_pGHz,
+	LNA_g_pel = LNA_g_pel,
+	cov_deg = cov_deg,
+	Bu = Bu,
+	single_antenna = single_antenna
+	)
+
+# ╔═╡ 6aca033c-9eb2-43c3-9431-c8eb32ccb291
+function table_merge(table_dict;names=keys(table_dict),button=nothing)
+	
+	out = @htl("")
+	for k ∈ names
+		out = @htl("""
+
+				$out $(table_dict[k]) <span style="flex: 0 0 10px;"></span>
+
+			""")
+	end
+	# Put this in a separate div
+	out = @htl("""
+		<div style="display: flex; align-items: center;justify-content: flex-start; overflow: auto;">
+			$out
+		</div>
+		""")
+	if button !== nothing
+		# Add the button in a subsequent div
+		out = @htl("""
+			$out
+			<div align='center'>
+				$(@htl(button))
+			</div>
+			""")
+	end
+	# return @htl("""
+	# 	<div align="center">
+	# 		$out
+	# 	</div>
+	# 	""")
+end
+
+# ╔═╡ 2e8ce03b-44d9-4619-b255-e5ccf1d068f3
+table_merge(table_bond_dict;button=trigger_bond)
 
 # ╔═╡ Cell order:
-# ╠═df10bb60-ca8c-11eb-0788-af4eb2ef9fa1
-# ╠═662b8f7f-3dee-4ad1-806a-3accbcfc7209
-# ╠═d5ac916b-1b4e-40d8-a0f0-55fd39e6b110
-# ╠═bde2d117-d98b-4260-87d1-3d6652f6d0d1
-# ╠═d8cb6bfe-46fb-4848-bb80-9075dfb38c32
-# ╠═12b0602c-ca32-4102-8cfa-cedc54b9144d
-# ╠═3e00443f-cf89-44bb-aca8-5e9248be181d
-# ╠═c349bb9f-3cd5-4ca8-8236-80c91089e41a
-# ╠═9cdbdb8d-8db2-4d5f-bc4c-348f1e78f66f
-# ╠═25f485fe-d297-4cc7-884d-f62ab0a310a3
-# ╠═6ac745a3-0ad6-45d1-9d14-0597eb525c69
-# ╠═4ab920f5-16f4-4081-a970-7566a0f36801
-# ╠═fa010756-a78d-422d-8aee-45172d4b0f88
-# ╠═b766170a-3c1a-434c-bcdb-e410ded47994
-# ╠═3a84b92f-f03e-4bba-ae70-ab20259f3ff6
-# ╠═bd076fea-f412-4639-aa4f-cd0d46719afa
-# ╠═af7626a5-fa72-4324-a849-24d542e83ec7
-# ╠═4e08e8f0-36d9-4ad8-8775-5e790cf92a69
-# ╠═fef577c2-815a-462e-badc-778a26161d5e
-# ╠═ba5b6a92-df94-4c0c-996e-c37c3df0756c
-# ╠═74fffa85-42fc-48ab-a5ee-292fa44586fd
-# ╠═23e20d3e-508d-4534-a5b5-3dff0023ccaf
-# ╠═b2aa852e-5572-49a1-bc76-9ae0e51ad3bd
-# ╠═1185583b-6d6f-44af-8224-c27acdddddf4
-# ╠═517a6017-5413-4716-9ca6-af0b685e0043
-# ╠═68d784dc-2594-454e-aee8-3f78b08e4d70
-# ╠═ab2f37c2-aaae-4f5b-8dad-cd92aa36bbf6
-# ╠═ea7486f0-6a4e-4f18-bcfa-efaa29eefbcb
-# ╠═6d4b494d-de21-4cac-9d10-2c989a50d228
+# ╠═c1e79b08-c9fe-4d0c-9266-a9fe364b2119
+# ╟─b30c5506-5385-497a-b5a3-707112bcfa80
+# ╠═a33a6799-ce3d-4f03-9ca2-8fefa6723adf
+# ╠═43a30718-e688-4201-b66c-234fbed876bd
+# ╠═7082a9d5-b0e9-4085-b7b7-3379927c1596
+# ╠═c11e109f-d139-47c8-b77e-36f6450a1e48
+# ╠═6b15458f-44f0-476c-965e-f550117c5f0b
+# ╠═e9c113f1-3137-412e-a63f-4d9f8e8e2275
+# ╠═f26c2923-9146-47fd-b172-0d4f41b52d36
+# ╠═7a361c0e-6900-4cd0-92aa-685387efbd83
+# ╠═ad0a6274-e659-4038-b9a2-7f4bf4c72543
+# ╠═2e8ce03b-44d9-4619-b255-e5ccf1d068f3
+# ╠═fc0d5547-5487-4d12-a314-9b3f835059e0
+# ╟─e5f1da69-d325-4d0e-a7ac-cc8527e034a2
+# ╠═dc61cc8d-74ad-4753-a747-569f941d720d
+# ╠═f901b817-a1c0-43d6-bd41-3a9c7f2f1edd
+# ╠═6aca033c-9eb2-43c3-9431-c8eb32ccb291
