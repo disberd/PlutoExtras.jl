@@ -37,11 +37,11 @@ All cells before the first Heading are hidden by default, as they usually contai
 
 # Keyword Arguments
 
-`hide::Bool` : Set to true to have a heading appear hidden in the ToC (and in the notebook if the ToC title is clicked while pressing alt), defaults to false
+`hide::Bool` : Set to true to have a heading appear hidden in the ToC (and in the notebook if the ToC title is clicked while pressing alt), defaults to true
 
 `collapse::Bool`: Set to true to have a heading (and all its children) appear collapsed in the ToC
 """
-function toc_heading(text,level::Int;hide=false,collapse=false) 
+function toc_heading(text,level::Int;hide=true,collapse=false) 
 	tag = "h$level"
 	attribute_names = []
 	hide && (push!(attribute_names,"hide-heading"))
@@ -70,7 +70,7 @@ md"""
 """
 
 # ╔═╡ d5eccf35-9aa6-48b4-9140-7ccb5d311820
-toc_heading("Test1",1;collapse=true)
+toc_heading("Test1",1;hide=false,collapse=true)
 
 # ╔═╡ d1784dd2-9a25-4add-90a8-121f1e2620e6
 @htl """
@@ -222,7 +222,7 @@ const Toc = () => {
 
 	node.getHeaderState = getHeaderState
 
-	const [hide,set_hide] = useState(false)
+	const [hide,set_hide] = useState(true)
 	const [collapseAll,set_collapseAll] = useState(0)
 	const [state, set_toc_state] = useState(getHeaderState())
 	const [collapseToc, set_collapseToc] = useState(false)
@@ -623,7 +623,7 @@ export ToC, toc_heading
 # ╠═5e2f2d6b-949e-4b91-af0a-0a6baf23d00e
 # ╟─3ea419e5-f70c-404f-813d-be8cfad99b79
 # ╠═561c2bcf-d405-4e46-bd9d-c74500995a94
-# ╟─d5eccf35-9aa6-48b4-9140-7ccb5d311820
+# ╠═d5eccf35-9aa6-48b4-9140-7ccb5d311820
 # ╠═d1784dd2-9a25-4add-90a8-121f1e2620e6
 # ╠═1228ed04-b62f-4703-9e5d-e1f5cb0bf640
 # ╠═358d4034-20c6-4746-8c37-f91e79a369eb
