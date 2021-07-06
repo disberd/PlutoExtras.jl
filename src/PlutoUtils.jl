@@ -3,6 +3,9 @@ using Base: stackframe_function_color
 using Requires
 using PlutoTest
 using PlutoDevMacros
+using Reexport
+@reexport using HypertextLiteral: @htl, @htl_str, JavaScript
+@reexport using PlutoUI: Clock, Slider, Button
 
 include("imagepaste.jl")
 include("editable.jl")
