@@ -4,8 +4,8 @@ using Requires
 using PlutoTest
 using PlutoDevMacros
 using Reexport
-@reexport using HypertextLiteral: @htl, @htl_str, JavaScript
-@reexport using PlutoUI: Clock, Slider, Button
+@reexport using HypertextLiteral: @htl, @htl_str, JavaScript, Result
+@reexport using PlutoUI 
 
 include("imagepaste.jl")
 include("editable.jl")
