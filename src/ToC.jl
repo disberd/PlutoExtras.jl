@@ -133,10 +133,11 @@ let div_attrs = {
 		class: hidden ? "hidden" : "",
 		onClick: (e) => onClick(e,id),
 		collapsed: collapsed && (children.length > 0),
+		class: 'toc-row',
 	}
 let a_attrs = {
 		href: `#\${id}`,
-		class: `toc-row H\${depth}`,
+		class: `H\${depth}`,
 	}
 
 	return html`<div ...\${div_attrs}><a ...\${a_attrs}>\${text}</a></div>`
@@ -481,7 +482,7 @@ cursor: pointer;
 		box-shadow: 0 0 11px 0px #00000010;
 		/* That is, viewport minus top minus Live Docs */
 		max-height: calc(100vh - 5rem - 56px);
-		overflow: hidden;
+		overflow: auto;
 		z-index: 50;
 		background: white;
 	}
