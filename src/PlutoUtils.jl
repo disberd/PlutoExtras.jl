@@ -6,6 +6,7 @@ using PlutoDevMacros
 using Reexport
 @reexport using HypertextLiteral: @htl, @htl_str, JavaScript, Result
 @reexport using PlutoUI 
+@reexport using Chain
 
 include("imagepaste.jl")
 include("editable.jl")
