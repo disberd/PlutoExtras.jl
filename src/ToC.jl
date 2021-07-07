@@ -130,10 +130,12 @@ const Item = ({text, hidden, hide, id, onClick, depth, collapsed, collapsed_pare
 
 
 let div_attrs = {
-		class: hidden ? "hidden" : "",
 		onClick: (e) => onClick(e,id),
 		collapsed: collapsed && (children.length > 0),
-		class: 'toc-row',
+		class: [
+			'toc-row',
+			hidden ? "hidden" : ""
+		].filter(Boolean).join(" ")
 	}
 let a_attrs = {
 		href: `#\${id}`,
@@ -282,13 +284,14 @@ const Toc = () => {
 
 	const customClick = (e,id) => {
 		const cell = document.getElementById(id)
-			e.preventDefault()
+		e.preventDefault()
 		if (e.altKey) {
 			cell.toggleAttribute('hide-heading')
 			set_toc_state(oldState => {
 				return getHeaderState()
 			}
 			)
+			return
 		}
 		if (e.ctrlKey) {
 			cell.toggleAttribute('collapsed')
@@ -297,6 +300,7 @@ const Toc = () => {
 			}
 			)
 			set_collapseAll(0)
+			return
 		}
 		const h = document.getElementById(id)
 		// console.log(h)
@@ -482,9 +486,11 @@ cursor: pointer;
 		box-shadow: 0 0 11px 0px #00000010;
 		/* That is, viewport minus top minus Live Docs */
 		max-height: calc(100vh - 5rem - 56px);
-		overflow: auto;
+		overflow: hidden;
 		z-index: 50;
 		background: white;
+		display: flex;
+		flex-direction: column;
 	}
 	.plutoui-toc.aside.collapse-toc header {
 		margin: 0px 0px;
@@ -624,7 +630,7 @@ export ToC, toc_heading
 # ╠═5e2f2d6b-949e-4b91-af0a-0a6baf23d00e
 # ╟─3ea419e5-f70c-404f-813d-be8cfad99b79
 # ╠═561c2bcf-d405-4e46-bd9d-c74500995a94
-# ╠═d5eccf35-9aa6-48b4-9140-7ccb5d311820
+# ╟─d5eccf35-9aa6-48b4-9140-7ccb5d311820
 # ╠═d1784dd2-9a25-4add-90a8-121f1e2620e6
 # ╠═1228ed04-b62f-4703-9e5d-e1f5cb0bf640
 # ╠═358d4034-20c6-4746-8c37-f91e79a369eb
