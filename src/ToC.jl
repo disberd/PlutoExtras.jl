@@ -529,7 +529,7 @@ cursor: pointer;
 	padding-bottom: 2px;
 }
 
-.plutoui-toc section .toc-row {
+.plutoui-toc section {
 	overflow: auto;
 }
 
