@@ -474,15 +474,12 @@ span.text {
 cursor: pointer;
 }
 
-@media screen and (min-width: 1081px) {
-
 	// Hide the TOC in presentation mode
-body.presentation #helpbox-wrapper {
-	display: none !important;
+body.presentation .plutoui-toc.aside {
+	display: none;
 }
 
-
-
+@media screen and (min-width: 1081px) {
 	.plutoui-toc.aside {
 		position:fixed; 
 		right: 1rem;
