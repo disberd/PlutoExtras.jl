@@ -475,6 +475,14 @@ cursor: pointer;
 }
 
 @media screen and (min-width: 1081px) {
+
+	// Hide the TOC in presentation mode
+body.presentation #helpbox-wrapper {
+	display: none !important;
+}
+
+
+
 	.plutoui-toc.aside {
 		position:fixed; 
 		right: 1rem;
