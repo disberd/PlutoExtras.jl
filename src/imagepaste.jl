@@ -14,7 +14,7 @@ end
 """
 Function to move a pasted image downloaded from the Pluto Cell into the folder where the notebook is located (inside a subfolder pastedImages
 """
-function show_pasted_image(str;searchdir="")
+function show_pasted_image(str,args...;searchdir="",kwargs...)
 	# Separate the eventaul directory from the provided string
 	dir,filename = splitdir(str)
 	if isempty(dir)
@@ -56,7 +56,7 @@ function show_pasted_image(str;searchdir="")
 		cp(file,img_path;force=true)
 	end
 	# Return a LocalResource pointing to the newly created file
-	LocalResource(img_path)
+	LocalResource(img_path,args...;kwargs...)
 end
 
 # ╔═╡ b4507f04-ae53-462a-9cf3-864774dabe62
