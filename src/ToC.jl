@@ -528,6 +528,11 @@ cursor: pointer;
 	text-overflow: ellipsis;
 	padding-bottom: 2px;
 }
+
+.plutoui-toc section .toc-row {
+	overflow: auto;
+}
+
 .plutoui-toc section .toc-row a{
 	text-overflow: ellipsis;
 }
