@@ -13,7 +13,7 @@ md"""
 """
 
 # ╔═╡ b8782294-d6b9-43ac-b745-b2cbb6ed06b1
-a = 2:15
+a = 1:10
 
 # ╔═╡ 1471265c-4934-45e3-a4b2-37da94ff7472
 md"## Update eqref hyperlinks"
@@ -107,6 +107,9 @@ md"""
 ## TeX equations
 """
 
+# ╔═╡ 2ad9500c-187b-4b69-8e7b-ef76af8fc39a
+js(x) = HypertextLiteral.JavaScript(x)
+
 # ╔═╡ f58427a7-f540-4667-93eb-57f1f53905f4
 """
 `texeq(code::String)`
@@ -119,14 +122,17 @@ Equations can be given labels by adding `"\\\\label{name}"` inside the `code` st
 Unfortunately backward slashes have to be doubled when creating the TeX code to be put inside the equation
 When Pluto will support interpretation of string literal macros, this could be made into a macro
 """
-function texeq(code)
-	code_escaped = replace(code,"\\" => "\\\\")
+function texeq(code,env="equation")
+	code_escaped = code 			|>
+	x -> replace(x,"\\" => "\\\\")	|>
+	x -> replace(x,"\n" => " ")
+	println(code_escaped)
 	@htl """
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" integrity="sha384-Um5gpz1odJg5Z4HAmzPtgZKdTBHZdw8S29IecapCSB31ligYPhHQZMIlWLYQGVoc" crossorigin="anonymous">
 	<script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js" integrity="sha384-YNHdsYkH6gMx9y3mRkmcJ2mFUjTd0qNQQvY9VYZgQd7DcN7env35GzlmFaZ23JGp" crossorigin="anonymous"></script>
 	
 	<script>
-	katex.render('\\\\begin{equation} $(HypertextLiteral.JavaScript(code_escaped)) \\\\end{equation}',currentScript.parentElement,{
+	katex.render('\\\\begin{$(js(env))} $(js(code_escaped)) \\\\end{$(js(env))}',currentScript.parentElement,{
 					displayMode: true,
 					trust: context => [
 						'\\\\htmlId', 
@@ -140,11 +146,30 @@ function texeq(code)
 	"""
 end
 
-# ╔═╡ b9213424-f814-4bb8-a05f-33249f4f0a8f
-texeq("3+2 = 5")
+# ╔═╡ 0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
+texeq("3+2=5")
 
 # ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
-texeq("\\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \\label{interactive}")
+texeq("
+	\\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \\label{interactive}
+	")
+
+# ╔═╡ 0bd44757-90b8-452f-999f-6109239ac826
+md"""
+$(texeq("
+3
++
+2
+"))
+"""
+
+# ╔═╡ b9213424-f814-4bb8-a05f-33249f4f0a8f
+md"""
+$(texeq("
+	(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\\\
+	&= 10"
+,"align"))
+"""
 
 # ╔═╡ cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 """
@@ -189,15 +214,18 @@ version = "0.8.0"
 # ╔═╡ Cell order:
 # ╠═945ee770-e082-11eb-0c8b-25e53f4d718c
 # ╟─b35233a0-6d2f-4eac-8cb0-e317eef4c835
-# ╠═958531c1-fa83-477c-be3d-927155800f1b
-# ╠═b9213424-f814-4bb8-a05f-33249f4f0a8f
 # ╠═b8782294-d6b9-43ac-b745-b2cbb6ed06b1
+# ╠═958531c1-fa83-477c-be3d-927155800f1b
+# ╠═0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
 # ╠═1482e175-cf32-42f3-b8fb-64f1f14c1501
 # ╠═0df86e0e-6813-4f9f-9f36-7badf2f85597
+# ╠═0bd44757-90b8-452f-999f-6109239ac826
+# ╠═b9213424-f814-4bb8-a05f-33249f4f0a8f
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472
 # ╟─b6b08bf0-7282-40b9-ae87-b776a64c519f
 # ╠═6584afb8-b085-4c56-93cb-a5b57e16520c
 # ╟─d14197d8-cab1-4d92-b81c-d826ea8183f3
+# ╠═2ad9500c-187b-4b69-8e7b-ef76af8fc39a
 # ╠═f58427a7-f540-4667-93eb-57f1f53905f4
 # ╠═cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 # ╟─00000000-0000-0000-0000-000000000001
