@@ -15,6 +15,16 @@ md"""
 # ╔═╡ b8782294-d6b9-43ac-b745-b2cbb6ed06b1
 a = 1:10
 
+# ╔═╡ de8473c1-dea1-4221-9562-30679ae58e34
+md"""
+$$3+2$$
+"""
+
+# ╔═╡ 9446acfc-a310-4de6-8876-e30ede527e9c
+md"""
+$$Y = \overline {A} - m \phi (\overline {r} - \gamma \pi)$$
+"""
+
 # ╔═╡ 1471265c-4934-45e3-a4b2-37da94ff7472
 md"## Update eqref hyperlinks"
 
@@ -43,6 +53,8 @@ a.eq_href {
 
 <script id="katex-eqnum-script">
 
+const a_vec = [] // This will hold the list of a tags with custom click, used for cleaning listeners up upon invalidation
+
 const eqrefClick = (e) => {
 	e.preventDefault() // This prevent normal scrolling to link
 	const a = e.target
@@ -54,17 +66,26 @@ const eqrefClick = (e) => {
 		block: 'center',
 	})
 }
-	
+
+const checkCounter = (item, i) => {
+	return item.classList.contains('enclosing')	?
+	i											:
+	i + 1
+}
+
 const updateCallback = () => {
+a_vec.splice(0,a_vec.length) // Reset the array
 const eqs = document.querySelectorAll('span.enclosing, span.eqn-num')
 let i = 0;
 eqs.forEach(item => {
-	i += 1
+	i = checkCounter(item,i)
+	console.log('item',i,'=',item)
 	if (item.classList.contains('enclosing')) {
 		const id = item.id
 		const a_vals = document.querySelectorAll(`[eq_id=\${id}]`)
 		a_vals !== null && a_vals.forEach(a => {
-			a.innerText = `(\${i})`
+			a_vec.push(a) // Add this to the vector
+			a.innerText = `(\${i+1})`
 			a.addEventListener('click',eqrefClick)
 		})
 	}
@@ -98,6 +119,7 @@ notebookObserver.observe(notebook, {childList: true})
 invalidation.then(() => {
 	notebookObserver.disconnect()
 	observers.current.forEach((o) => o.disconnect())
+	a_vec.forEach(a => a.removeEventListener('click',eqrefClick))
 })
 </script>
 """
@@ -149,11 +171,6 @@ end
 # ╔═╡ 0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
 texeq("3+2=5")
 
-# ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
-texeq("
-	\\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \\label{interactive}
-	")
-
 # ╔═╡ 0bd44757-90b8-452f-999f-6109239ac826
 md"""
 $(texeq("
@@ -169,6 +186,21 @@ $(texeq("
 	(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\\\
 	&= 10"
 ,"align"))
+"""
+
+# ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
+texeq("
+	\\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \\label{interactive}
+	")
+
+# ╔═╡ 7879d7e3-38ad-4a06-8057-ec30da534d76
+texeq("y=2x^2")
+
+# ╔═╡ 6d750d01-b851-4614-b448-1a6e00fa5754
+md"""
+$(texeq("
+	\\pi =  \\pi^e + \\gamma (P - Y^P) + \\rho \\label{seven}"
+))
 """
 
 # ╔═╡ cddc93d2-1b24-4bda-8113-4a1ec781b2b6
@@ -187,7 +219,8 @@ The sum in $(eqref("interactive")) is interactive!
 """
 
 # ╔═╡ 0df86e0e-6813-4f9f-9f36-7badf2f85597
-md"""Multiple links to the same equation $(eqref("interactive")) also work!"""
+md"""Multiple links to the same equation $(eqref("interactive")) also work! See also $(eqref("seven"))
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -215,12 +248,16 @@ version = "0.8.0"
 # ╠═945ee770-e082-11eb-0c8b-25e53f4d718c
 # ╟─b35233a0-6d2f-4eac-8cb0-e317eef4c835
 # ╠═b8782294-d6b9-43ac-b745-b2cbb6ed06b1
-# ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
 # ╠═1482e175-cf32-42f3-b8fb-64f1f14c1501
 # ╠═0df86e0e-6813-4f9f-9f36-7badf2f85597
 # ╠═0bd44757-90b8-452f-999f-6109239ac826
+# ╠═de8473c1-dea1-4221-9562-30679ae58e34
 # ╠═b9213424-f814-4bb8-a05f-33249f4f0a8f
+# ╠═958531c1-fa83-477c-be3d-927155800f1b
+# ╠═7879d7e3-38ad-4a06-8057-ec30da534d76
+# ╠═9446acfc-a310-4de6-8876-e30ede527e9c
+# ╠═6d750d01-b851-4614-b448-1a6e00fa5754
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472
 # ╟─b6b08bf0-7282-40b9-ae87-b776a64c519f
 # ╠═6584afb8-b085-4c56-93cb-a5b57e16520c
