@@ -1,7 +1,7 @@
 name = "PlutoUtils"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 Cascadia = "54eefc05-d75b-58de-a785-1a3403f0919f"
