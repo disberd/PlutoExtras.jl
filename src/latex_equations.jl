@@ -40,7 +40,12 @@ The code for the mutationobservers to trigger re-computation of the numbers are 
 """
 
 # ╔═╡ 6584afb8-b085-4c56-93cb-a5b57e16520c
-@htl """
+"""
+`PlutoUtils.initialize_eqref()`
+
+When run in a Pluto cell, this function generates the necessary javascript to correctly handle and display latex equations made with `PlutoUtils.texeq` and equation references made with `PlutoUtils.eqref`
+"""
+initialize_eqref() = @htl """
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" integrity="sha384-Um5gpz1odJg5Z4HAmzPtgZKdTBHZdw8S29IecapCSB31ligYPhHQZMIlWLYQGVoc" crossorigin="anonymous">
 
 <style>
@@ -79,7 +84,6 @@ const eqs = document.querySelectorAll('span.enclosing, span.eqn-num')
 let i = 0;
 eqs.forEach(item => {
 	i = checkCounter(item,i)
-	console.log('item',i,'=',item)
 	if (item.classList.contains('enclosing')) {
 		const id = item.id
 		const a_vals = document.querySelectorAll(`[eq_id=\${id}]`)
@@ -124,6 +128,9 @@ invalidation.then(() => {
 </script>
 """
 
+# ╔═╡ a78aa624-6504-4b3f-914a-833261b92f19
+initialize_eqref()
+
 # ╔═╡ d14197d8-cab1-4d92-b81c-d826ea8183f3
 md"""
 ## TeX equations
@@ -134,7 +141,7 @@ js(x) = HypertextLiteral.JavaScript(x)
 
 # ╔═╡ f58427a7-f540-4667-93eb-57f1f53905f4
 """
-`texeq(code::String)`
+`PlutoUtils.texeq(code::String)`
 
 Take an input string and renders it inside an equation environemnt (numbered) using KaTeX
 
@@ -205,7 +212,7 @@ $(texeq("
 
 # ╔═╡ cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 """
-`eqref(label::String)`
+`PlutoUtils.eqref(label::String)`
 
 Function that create an hyperlink pointing to a previously defined labelled equation using `texeq()`
 """
@@ -221,6 +228,9 @@ The sum in $(eqref("interactive")) is interactive!
 # ╔═╡ 0df86e0e-6813-4f9f-9f36-7badf2f85597
 md"""Multiple links to the same equation $(eqref("interactive")) also work! See also $(eqref("seven"))
 """
+
+# ╔═╡ cbf7a7b7-3dc9-488f-b891-26f1590dadc0
+export texeq, eqref, initialize_eqref
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -260,9 +270,11 @@ version = "0.8.0"
 # ╠═6d750d01-b851-4614-b448-1a6e00fa5754
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472
 # ╟─b6b08bf0-7282-40b9-ae87-b776a64c519f
-# ╠═6584afb8-b085-4c56-93cb-a5b57e16520c
+# ╟─6584afb8-b085-4c56-93cb-a5b57e16520c
+# ╠═a78aa624-6504-4b3f-914a-833261b92f19
 # ╟─d14197d8-cab1-4d92-b81c-d826ea8183f3
 # ╠═2ad9500c-187b-4b69-8e7b-ef76af8fc39a
+# ╠═cbf7a7b7-3dc9-488f-b891-26f1590dadc0
 # ╠═f58427a7-f540-4667-93eb-57f1f53905f4
 # ╠═cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 # ╟─00000000-0000-0000-0000-000000000001
