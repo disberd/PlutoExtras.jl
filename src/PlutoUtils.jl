@@ -1,7 +1,6 @@
 module PlutoUtils
 using Base: stackframe_function_color
 using Requires
-using PlutoTest
 using PlutoDevMacros
 using Reexport
 @reexport using HypertextLiteral: @htl, @htl_str, JavaScript, Result
