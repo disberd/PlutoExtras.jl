@@ -1,0 +1,389 @@
+### A Pluto.jl notebook ###
+# v0.15.0
+
+using Markdown
+using InteractiveUtils
+
+# ╔═╡ 104611e0-e53f-11eb-1bb5-61dd3dd0acf2
+using PrettyTables, HypertextLiteral, Chain, UUIDs
+
+# ╔═╡ afebdbb9-42a5-4640-ae38-12a105a70e05
+md"""
+PrettyTables does not provide yet a way to directly output a _showable_ HTML object so the function has to be customized to have nice printing on Pluto.
+
+We will create a custom function that always prints directly an html output (with the :html backend) and that won't allow for the `standalone` kwargs to be set to true as that always provide a full html page with header, that needs to be rendered in an `iframe` inside the pluto frontend
+"""
+
+# ╔═╡ b80ac7b8-11a4-45ef-8072-97a5ef0ab4e2
+pretty_table(String,rand(10,4);backend=:html) |> Text
+
+# ╔═╡ 5db046c0-48a2-478b-a8cd-a72c29c14444
+pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
+
+# ╔═╡ 22386594-49c7-4c3b-948e-fd13d326d360
+    css = """
+    table, td, th {
+        border-collapse: collapse;
+        font-family: sans-serif;
+    }
+
+    td, th {
+        border-bottom: 0;
+        background: #fff !important;
+        padding: 4px
+    }
+
+    tr.header {
+        background: #fff !important;
+        font-weight: bold;
+    }
+
+    tr.subheader {
+        background: #fff !important;
+        color: dimgray;
+    }
+
+    tr.headerLastRow {
+        border-bottom: 2px solid black;
+    }
+
+    th.rowNumber, td.rowNumber {
+        text-align: right;
+    }
+    """
+
+# ╔═╡ b18e8c7f-467e-427c-8487-e021bd8c283a
+@chain css begin
+	split(_,'}') # Separate different style groups
+	map(x -> lstrip(x,'\n'),_) # Remove trailing newlines		
+	filter(!isempty,_)
+	map(x -> split(x,','),_) # Find the differents combined CSS selectors as they have to be prepended with the class together
+	map(_) do style # Here we go to prepend the custom element
+		map!(style,style) do selector
+			"test " * strip(selector)
+		end
+		join(style,",\n")
+	end
+	map(x -> x * "\n}",_)
+	join(_,"\n\n")
+	Text
+end
+	
+
+# ╔═╡ e880d449-0e72-45ad-bea9-bbadcdcd523d
+"""
+`prettytable(data;kwargs...)`
+
+This function is a wrapper around `pretty_table` from [PrettyTables.jl](https://github.com/ronisbr/PrettyTables.jl) specifically made for working in Pluto notebooks and thus only supporting the `HTML` backend
+
+# Differences with PrettyTables.jl
+## Unsupported Keyword Arguments
+
+### `standalone`
+
+The function does not support the `standalone` kwarg (or rather only supports `standlone=false` which is provided by default) as that directly generates a full HTML page (with html and body tags) and would then need to be rendered inside an iframe in Pluto
+
+### `backend`
+
+As mentioned before, the function does not allow to specify a backend different than `HTML` (which is used by default) as it is supposed to be used inside Pluto to show table in cell outputs.
+
+## Additional Keyword Arguments
+
+### `css`
+The table allow to specify directly a string with they CSS Style to apply to this table.\
+If nothing is provided, the function will extract the `css` from the field with the same name in the `HTMLTableFormat` structure of `pretty_table`, optionally provided with the `tf` keyword argument.
+
+### `id`
+To allow specifying different tables with different styles within the same pluto-notebook, each table should be provided with a unique identifier to limit the eventually provided CSS styling to the table in question.
+
+This is done by wrapping the table into a div that has attributes id and data-uuid equivalent to the `id` keyword argument.\
+If `id` is not provided, it defaults to a random unique identifier (uuidv4)
+
+This is then used to limit the css styling by prepending each entry in the `css` string with a custom selector expliting the data-uuid attribute value of the div\
+
+#### Note
+The data-uuid custom attribute is used instead of id in the stylesheet because uuidv4 returns identifier that may start with numbers and thus can't be used as CSS selectors.
+"""
+function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), standalone=false, id=uuid4(), css=tf.css,kwargs...)
+	@assert backend === :html "Only the :html backend is supported"
+	@assert standalone === false "standalone = true is not supported"
+	
+	# First we create the string of the table output using the standard pretty_table
+	tab_str = pretty_table(String,data;kwargs...,backend=:html,tf=tf,standalone=false)
+	# Put this tabular data in a custom div with a unique identifier (data-UUID is also used on top of id because CSS selectors can not start with a number)
+	out = @htl """
+	<div id=$id data-uuid=$id class="prettytable_container">
+		$(HTML(tab_str))
+	</div>
+	"""
+	# Deal with the custom CSS Style
+	if !isempty(css)
+		# Pre-pend the div[data-UUID=$id] to all css selectors so that this applies only to the current table
+		css = @chain css begin
+			split(_,'}') # Separate different style groups
+			map(x -> lstrip(x,'\n'),_) # Remove trailing newlines		
+			filter(!isempty,_)
+			map(x -> split(x,','),_) # Find the differents combined CSS selectors as they have to be prepended with the class together
+			map(_) do style # Here we go to prepend the custom element
+				map!(style,style) do selector
+					"div[data-uuid='$id'] " * strip(selector) # Preprend the custom id to each selector 
+				end
+				join(style,",\n")
+			end
+			map(x -> x * "\n}",_)
+			join(_,"\n\n") # Join back into a single string
+		end
+		out = @htl """
+		$out
+		<style>
+		$css
+		</style>
+		"""
+	end
+	return out
+end
+
+# ╔═╡ e11a10bd-8d8c-4e7f-ba3a-873a3e8d349f
+export prettytable
+
+# ╔═╡ 98765fad-7349-4791-a2c9-b60d6a33b1f3
+a = rand(10,4)
+
+# ╔═╡ 81d55931-6c5e-4211-86c7-d67681183cb7
+prettytable(a)
+
+# ╔═╡ ca56394b-b4a9-4c8f-a8cc-1592dc1b6bd5
+prettytable(a;tf=tf_html_minimalist)
+
+# ╔═╡ b9953787-fd44-432a-b2c1-5f9de7cfccbe
+prettytable(a;tf=tf_html_dark)
+
+# ╔═╡ 2e5c16de-957e-4f19-9a7e-2edc3ae2707c
+prettytable(a)
+
+# ╔═╡ 00000000-0000-0000-0000-000000000001
+PLUTO_PROJECT_TOML_CONTENTS = """
+[deps]
+Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
+HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+
+[compat]
+Chain = "~0.4.7"
+HypertextLiteral = "~0.8.0"
+PrettyTables = "~1.1.0"
+"""
+
+# ╔═╡ 00000000-0000-0000-0000-000000000002
+PLUTO_MANIFEST_TOML_CONTENTS = """
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.7.0-beta2"
+manifest_format = "2.0"
+
+[[deps.ArgTools]]
+uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+
+[[deps.Artifacts]]
+uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+
+[[deps.Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.Chain]]
+git-tree-sha1 = "c72673739e02d65990e5e068264df5afaa0b3273"
+uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
+version = "0.4.7"
+
+[[deps.CompilerSupportLibraries_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+
+[[deps.Crayons]]
+git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.0.4"
+
+[[deps.DataAPI]]
+git-tree-sha1 = "ee400abb2298bd13bfc3df1c412ed228061a2385"
+uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
+version = "1.7.0"
+
+[[deps.DataValueInterfaces]]
+git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
+uuid = "e2d170a0-9d28-54be-80f0-106bbe20a464"
+version = "1.0.0"
+
+[[deps.Dates]]
+deps = ["Printf"]
+uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.Downloads]]
+deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+
+[[deps.Formatting]]
+deps = ["Printf"]
+git-tree-sha1 = "8339d61043228fdd3eb658d86c926cb282ae72a8"
+uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
+version = "0.4.2"
+
+[[deps.HypertextLiteral]]
+git-tree-sha1 = "1e3ccdc7a6f7b577623028e0095479f4727d8ec1"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.8.0"
+
+[[deps.InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[deps.IteratorInterfaceExtensions]]
+git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
+uuid = "82899510-4779-5014-852e-03e436cf321d"
+version = "1.0.0"
+
+[[deps.LibCURL]]
+deps = ["LibCURL_jll", "MozillaCACerts_jll"]
+uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+
+[[deps.LibCURL_jll]]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
+uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+
+[[deps.LibGit2]]
+deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
+uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+
+[[deps.LibSSH2_jll]]
+deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
+uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+
+[[deps.Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[[deps.LinearAlgebra]]
+deps = ["Libdl", "libblastrampoline_jll"]
+uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
+[[deps.Logging]]
+uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[deps.Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[deps.MbedTLS_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+
+[[deps.MozillaCACerts_jll]]
+uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+
+[[deps.NetworkOptions]]
+uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+
+[[deps.OpenBLAS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
+uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+
+[[deps.Pkg]]
+deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
+git-tree-sha1 = "0d1245a357cc61c8cd61934c07447aa569ff22e6"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "1.1.0"
+
+[[deps.Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[deps.REPL]]
+deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
+uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+
+[[deps.Random]]
+deps = ["Serialization"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[deps.Reexport]]
+git-tree-sha1 = "5f6c21241f0f655da3952fd60aa18477cf96c220"
+uuid = "189a3867-3050-52da-a836-e630ba90ab69"
+version = "1.1.0"
+
+[[deps.SHA]]
+uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[[deps.Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[deps.TOML]]
+deps = ["Dates"]
+uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+
+[[deps.TableTraits]]
+deps = ["IteratorInterfaceExtensions"]
+git-tree-sha1 = "c06b2f539df1c6efa794486abfb6ed2022561a39"
+uuid = "3783bdb8-4a98-5b6b-af9a-565f29a5fe9c"
+version = "1.0.1"
+
+[[deps.Tables]]
+deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
+git-tree-sha1 = "8ed4a3ea724dac32670b062be3ef1c1de6773ae8"
+uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+version = "1.4.4"
+
+[[deps.Tar]]
+deps = ["ArgTools", "SHA"]
+uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+
+[[deps.Test]]
+deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[deps.UUIDs]]
+deps = ["Random", "SHA"]
+uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+
+[[deps.Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[deps.Zlib_jll]]
+deps = ["Libdl"]
+uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+
+[[deps.libblastrampoline_jll]]
+deps = ["Artifacts", "Libdl", "OpenBLAS_jll", "Pkg"]
+uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+
+[[deps.nghttp2_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+
+[[deps.p7zip_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+"""
+
+# ╔═╡ Cell order:
+# ╠═104611e0-e53f-11eb-1bb5-61dd3dd0acf2
+# ╟─afebdbb9-42a5-4640-ae38-12a105a70e05
+# ╠═b80ac7b8-11a4-45ef-8072-97a5ef0ab4e2
+# ╠═5db046c0-48a2-478b-a8cd-a72c29c14444
+# ╠═22386594-49c7-4c3b-948e-fd13d326d360
+# ╠═b18e8c7f-467e-427c-8487-e021bd8c283a
+# ╠═e880d449-0e72-45ad-bea9-bbadcdcd523d
+# ╠═e11a10bd-8d8c-4e7f-ba3a-873a3e8d349f
+# ╠═98765fad-7349-4791-a2c9-b60d6a33b1f3
+# ╠═81d55931-6c5e-4211-86c7-d67681183cb7
+# ╠═ca56394b-b4a9-4c8f-a8cc-1592dc1b6bd5
+# ╠═b9953787-fd44-432a-b2c1-5f9de7cfccbe
+# ╠═2e5c16de-957e-4f19-9a7e-2edc3ae2707c
+# ╟─00000000-0000-0000-0000-000000000001
+# ╟─00000000-0000-0000-0000-000000000002

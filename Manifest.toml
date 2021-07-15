@@ -3,11 +3,6 @@
 julia_version = "1.7.0-beta2"
 manifest_format = "2.0"
 
-[[deps.AbstractTrees]]
-git-tree-sha1 = "03e0550477d86222521d254b741d470ba17ea0b5"
-uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.3.4"
-
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
@@ -16,12 +11,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.Cascadia]]
-deps = ["AbstractTrees", "Gumbo"]
-git-tree-sha1 = "95629728197821d21a41778d0e0a49bc2d58ab9b"
-uuid = "54eefc05-d75b-58de-a785-1a3403f0919f"
-version = "1.0.1"
 
 [[deps.Chain]]
 git-tree-sha1 = "c72673739e02d65990e5e068264df5afaa0b3273"
@@ -65,18 +54,6 @@ version = "0.4.2"
 git-tree-sha1 = "4df9f7e06108728ebf00a0a11edee4b29a482bb2"
 uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
 version = "1.3.0"
-
-[[deps.Gumbo]]
-deps = ["AbstractTrees", "Gumbo_jll", "Libdl"]
-git-tree-sha1 = "e711d08d896018037d6ff0ad4ebe675ca67119d4"
-uuid = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
-version = "0.8.0"
-
-[[deps.Gumbo_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "86111f5523d7c42da0edd85ef7999c663881ac1e"
-uuid = "528830af-5a63-567c-a44a-034ed33b8444"
-version = "0.10.1+1"
 
 [[deps.HypertextLiteral]]
 git-tree-sha1 = "1e3ccdc7a6f7b577623028e0095479f4727d8ec1"

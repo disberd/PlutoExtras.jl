@@ -1,24 +1,16 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.15.0
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 908555d1-c408-4650-badb-52f25ead116f
-if isdefined(Main,:PlutoRunner)
-	import Pkg
-	Pkg.activate("../")
-end
-
 # ╔═╡ df85c8a0-cddf-11eb-36f5-2703c3db615d
-begin
-	using HypertextLiteral
-	using HypertextLiteral: JavaScript
-	using PrettyTables
-	using Gumbo
-	using Cascadia
-	using Chain
-end
+using HypertextLiteral
+
+# ╔═╡ c35b32b3-815e-4399-925b-e67838c860f7
+md"""
+### Details
+"""
 
 # ╔═╡ 2d4284af-7074-4ca2-81fe-af7517815813
 details(x, summary="Show more") = @htl("""
@@ -30,40 +22,6 @@ details(x, summary="Show more") = @htl("""
 
 # ╔═╡ 554371ac-e171-4e8d-9bce-992423e390f5
 export details
-
-# ╔═╡ e91780ec-ecaa-4017-b778-9e0ce61840d8
-md"### PrettyTable"
-
-# ╔═╡ ac456935-c964-4b7b-b51b-aaf99115f75f
-"Function to print the nicely styled HTML table using pretty print and @htl"
-function prettytable(tab;kwargs...)
-	# Extract the root of the standalone table
-	tabhtml = @chain tab begin
-		pretty_table(String,_;kwargs...,backend=:html,standalone=true)
-		parsehtml 
-		_.root
-	end
-	# Get style
-	style = @chain tabhtml begin
-		eachmatch(sel"style",_)
-		_[1]
-		sprint(println,_)
-	end
-	# Get table body
-	tbody = @chain tabhtml begin
-		eachmatch(sel"table",_)
-		_[1]
-		sprint(println,_)
-	end
-	# Eval the join string in @htl
-	eval(:(@htl $(join([style,tbody]))))
-end
-
-# ╔═╡ 79bc4418-4804-49de-8ed4-d7066a387154
-prettytable([1 2;3 4])
-
-# ╔═╡ da75e122-9a51-4a2c-9401-2d8263176996
-export prettytable
 
 # ╔═╡ f4a9dede-828f-4fe2-9469-43d332cfe99a
 md"### Title Reference"
@@ -123,17 +81,37 @@ f asdf asdf as df asdf asfd asdf asdf asdf asdf asdf asdf asdf asdf asdre $(titl
 # ╔═╡ 2d9a450f-0b1e-4178-a978-3068488ca4c5
 export title_ref
 
+# ╔═╡ 00000000-0000-0000-0000-000000000001
+PLUTO_PROJECT_TOML_CONTENTS = """
+[deps]
+HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+
+[compat]
+HypertextLiteral = "~0.8.0"
+"""
+
+# ╔═╡ 00000000-0000-0000-0000-000000000002
+PLUTO_MANIFEST_TOML_CONTENTS = """
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.7.0-beta2"
+manifest_format = "2.0"
+
+[[deps.HypertextLiteral]]
+git-tree-sha1 = "1e3ccdc7a6f7b577623028e0095479f4727d8ec1"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.8.0"
+"""
+
 # ╔═╡ Cell order:
-# ╠═908555d1-c408-4650-badb-52f25ead116f
 # ╠═df85c8a0-cddf-11eb-36f5-2703c3db615d
+# ╟─c35b32b3-815e-4399-925b-e67838c860f7
 # ╠═554371ac-e171-4e8d-9bce-992423e390f5
 # ╠═2d4284af-7074-4ca2-81fe-af7517815813
-# ╠═e91780ec-ecaa-4017-b778-9e0ce61840d8
-# ╠═79bc4418-4804-49de-8ed4-d7066a387154
-# ╠═da75e122-9a51-4a2c-9401-2d8263176996
-# ╠═ac456935-c964-4b7b-b51b-aaf99115f75f
 # ╟─f4a9dede-828f-4fe2-9469-43d332cfe99a
 # ╠═19f5749a-b535-4a03-9b79-5f98182b0e84
 # ╠═32097aab-ca67-4f5c-858e-79e32e287b29
 # ╠═2d9a450f-0b1e-4178-a978-3068488ca4c5
 # ╠═e7033fe5-79f8-493f-84bc-0e6074f787e7
+# ╟─00000000-0000-0000-0000-000000000001
+# ╟─00000000-0000-0000-0000-000000000002
