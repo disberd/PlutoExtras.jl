@@ -1,5 +1,4 @@
 module PlutoUtils
-using Base: stackframe_function_color
 using Requires
 using PlutoDevMacros
 using Reexport
