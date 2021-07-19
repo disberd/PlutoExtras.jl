@@ -24,7 +24,7 @@ function find_notebook_caller()
 		# Skip if the file does not contain the correct ending sequence
 		findnext("#==#",path_vec[end],1) === nothing && continue
 		name,uuid = split(path_vec[end],"#==#")
-		return (name,joinpath(path_vec[1:end-1]),uuid)
+		return (name,joinpath(path_vec[1:end-1]...),uuid)
 	end
 end
 
@@ -103,7 +103,7 @@ PlutoUI = "~0.7.9"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-beta2"
+julia_version = "1.6.2"
 manifest_format = "2.0"
 
 [[deps.Base64]]
