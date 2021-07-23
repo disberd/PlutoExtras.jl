@@ -157,6 +157,7 @@ function texeq(code,env="equation")
 	x -> replace(x,"\n" => " ")
 	println(code_escaped)
 	@htl """
+	<div>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" integrity="sha384-Um5gpz1odJg5Z4HAmzPtgZKdTBHZdw8S29IecapCSB31ligYPhHQZMIlWLYQGVoc" crossorigin="anonymous">
 	<script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js" integrity="sha384-YNHdsYkH6gMx9y3mRkmcJ2mFUjTd0qNQQvY9VYZgQd7DcN7env35GzlmFaZ23JGp" crossorigin="anonymous"></script>
 	
@@ -172,6 +173,7 @@ function texeq(code,env="equation")
 					},
 				})
 	</script>
+	</div>
 	"""
 end
 
@@ -210,6 +212,12 @@ $(texeq("
 ))
 """
 
+# ╔═╡ 2c82ab99-8e86-41c6-b938-3635d2d3ccde
+md"""
+The antenna pattern of a DRA antenna can at first approximation be expressed as:
+$(texeq("3+2"))
+"""
+
 # ╔═╡ cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 """
 `PlutoUtils.eqref(label::String)`
@@ -245,7 +253,7 @@ HypertextLiteral = "~0.8.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-beta2"
+julia_version = "1.6.2"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
@@ -276,6 +284,7 @@ version = "0.8.0"
 # ╠═2ad9500c-187b-4b69-8e7b-ef76af8fc39a
 # ╠═cbf7a7b7-3dc9-488f-b891-26f1590dadc0
 # ╠═f58427a7-f540-4667-93eb-57f1f53905f4
+# ╠═2c82ab99-8e86-41c6-b938-3635d2d3ccde
 # ╠═cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
