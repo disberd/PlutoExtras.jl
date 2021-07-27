@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.0
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -94,6 +94,11 @@ The table allow to specify directly a string with they CSS Style to apply to thi
 
 If nothing is provided, the function will extract the `css` from the field with the same name in the `HTMLTableFormat` structure of `pretty_table`, optionally provided with the `tf` keyword argument.
 
+### `append_css`
+The css provided in this keyword argument is appended after the one specified in `css`
+
+Defaults to `""`
+
 ### `id`
 To allow specifying different tables with different styles within the same pluto-notebook, each table should be provided with a unique identifier to limit the eventually provided CSS styling to the table in question.
 
@@ -106,7 +111,7 @@ This is then used to limit the css styling by prepending each entry in the `css`
 #### Note
 The data-uuid custom attribute is used instead of id in the stylesheet because uuidv4 returns identifier that may start with numbers and thus can't be used as CSS selectors.
 """
-function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), standalone=false, id=uuid4(), css=tf.css,kwargs...)
+function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), standalone=false, id=uuid4(), css=tf.css, append_css="",kwargs...)
 	@assert backend === :html "Only the :html backend is supported"
 	@assert standalone === false "standalone = true is not supported"
 	
@@ -118,12 +123,16 @@ function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), 
 		$(HTML(tab_str))
 	</div>
 	"""
+	# Append the additional css
+	css *= append_css
+	println(css)
 	# Deal with the custom CSS Style
 	if !isempty(css)
 		# Pre-pend the div[data-UUID=$id] to all css selectors so that this applies only to the current table
 		css = @chain css begin
 			split(_,'}') # Separate different style groups
-			map(x -> lstrip(x,'\n'),_) # Remove trailing newlines		
+			map(x -> lstrip(x,['\n','\t',' ']),_) # Remove trailing newlines
+			@aside println(_)
 			filter(!isempty,_)
 			map(x -> split(x,','),_) # Find the differents combined CSS selectors as they have to be prepended with the class together
 			map(_) do style # Here we go to prepend the custom element
@@ -139,6 +148,7 @@ function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), 
 		$out
 		<style>
 		$css
+		3
 		</style>
 		"""
 	end
@@ -155,7 +165,11 @@ a = rand(10,4)
 prettytable(a)
 
 # ╔═╡ ca56394b-b4a9-4c8f-a8cc-1592dc1b6bd5
-prettytable(a;tf=tf_html_minimalist)
+prettytable(a;tf=tf_html_minimalist,append_css="
+tr:nth-child(5) {
+	font-weight: 800;
+}
+	")
 
 # ╔═╡ b9953787-fd44-432a-b2c1-5f9de7cfccbe
 prettytable(a;tf=tf_html_dark)
@@ -294,7 +308,7 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 # ╠═5db046c0-48a2-478b-a8cd-a72c29c14444
 # ╠═22386594-49c7-4c3b-948e-fd13d326d360
 # ╠═b18e8c7f-467e-427c-8487-e021bd8c283a
-# ╟─e880d449-0e72-45ad-bea9-bbadcdcd523d
+# ╠═e880d449-0e72-45ad-bea9-bbadcdcd523d
 # ╠═e11a10bd-8d8c-4e7f-ba3a-873a3e8d349f
 # ╠═98765fad-7349-4791-a2c9-b60d6a33b1f3
 # ╠═81d55931-6c5e-4211-86c7-d67681183cb7
