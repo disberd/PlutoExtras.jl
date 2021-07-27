@@ -20,6 +20,9 @@ md"""
 $$3+2$$
 """
 
+# ╔═╡ 900f494b-690d-43cf-b1b7-61c5d3e68a6d
+"\n"
+
 # ╔═╡ 9446acfc-a310-4de6-8876-e30ede527e9c
 md"""
 $$Y = \overline {A} - m \phi (\overline {r} - \gamma \pi)$$
@@ -153,6 +156,7 @@ When Pluto will support interpretation of string literal macros, this could be m
 """
 function texeq(code,env="equation")
 	code_escaped = code 			|>
+	x -> replace(x,"\\\n" => "\\\\\n")	|>
 	x -> replace(x,"\\" => "\\\\")	|>
 	x -> replace(x,"\n" => " ")
 	println(code_escaped)
@@ -196,6 +200,14 @@ $(texeq("
 	&= 10"
 ,"align"))
 """
+
+# ╔═╡ ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
+texeq("
+	\\begin{align*}
+		(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\
+									&= 10
+	\\end{align*}
+	")
 
 # ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
 texeq("
@@ -272,6 +284,8 @@ version = "0.8.0"
 # ╠═0bd44757-90b8-452f-999f-6109239ac826
 # ╠═de8473c1-dea1-4221-9562-30679ae58e34
 # ╠═b9213424-f814-4bb8-a05f-33249f4f0a8f
+# ╠═ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
+# ╠═900f494b-690d-43cf-b1b7-61c5d3e68a6d
 # ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═7879d7e3-38ad-4a06-8057-ec30da534d76
 # ╠═9446acfc-a310-4de6-8876-e30ede527e9c
