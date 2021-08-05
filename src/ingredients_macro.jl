@@ -98,15 +98,16 @@ function _ingredients(path::String,modname::Symbol,kwargstrs::String...)
 	m = ingredients(path)
 	kwargs = (Symbol(s) => true for s ∈ kwargstrs if s ∈ ("all","imported"))
 	varnames = names(m;kwargs...)
+	# Remove the symbols that start with a '#' (still to check what is the impact)
+	filter!(x -> first(String(x)) !== '#',varnames)
 	# Symbols to always exclude from imports
 	exclude_names = (
 			nameof(m),
-			Symbol("#eval"),
-			Symbol("#include"),
 			:PLUTO_MANIFEST_TOML_CONTENTS,
 			:PLUTO_PROJECT_TOML_CONTENTS,
 			:eval,
 			:include,
+			Symbol("@bind"),
 		)
 	# Create the block that will contain the various assignment expressions
 	block = Expr(:block)
