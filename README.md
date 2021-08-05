@@ -25,7 +25,7 @@ Compared to the TableOfContents from PlutoUI, it provides some additional functi
   - This is toggled by doing a left click on the right of the TableOfContents title
   - Doing so will collapse the ToC to take as little space as possible on the notebook and only expand on hover
 
-This functionality is implemented in [the ToC.jl notebook](./src/ToC.jl) 
+This functionality is implemented in the [ToC.jl](./src/ToC.jl) notebook 
 
 ## @ingredients macro
 
@@ -43,3 +43,5 @@ This overwrites shortcut for *Shift-Enter* inside the cell that contains the `@i
 It simply adds a function call to toggle adding and removing a whitespace at the end of the cell input before *running* the cell when pressing the keyboard shortcut *Shift-Enter*.
 
 This has the effect of re-expand the macro and recompute the symbols that are assigned in the cell, rather than using the cached version as it's done when the cell input didn't change.
+
+This functionality is implemented in the [ingredients_macro.jl](./src/ingredients_macro.jl) notebook 
