@@ -14,7 +14,7 @@ This is a custom feature I use to clean up notebooks and only execute the releva
 <br>
 This is heavily inspired by the cell disabling that exists in Pluto and the source code to save notebook exclusivity on the file is copied/adapted from <a href="https://github.com/fonsp/Pluto.jl/pull/1209">pull request #1209.</a>
 The actual modifications to achieve this functionalities
-are shown <a href="https://github.com/disberd/Pluto.jl/compare/master...disberd:notebook-exclusive-cells">here</a>
+are shown <a href="https://github.com/disberd/Pluto.jl/compare/master@%7B2021-08-05%7D...disberd:notebook-exclusive-cells@%7B2021-08-05%7D">here</a>
 <br>
 <br>
 When opening this notebook without that functionality, all cells after the macro and functions definition are <i>notebook_exclusive</i> and are thus surrounded by block comments.
