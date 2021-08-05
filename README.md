@@ -27,6 +27,10 @@ Compared to the TableOfContents from PlutoUI, it provides some additional functi
 
 This functionality is implemented in the [ToC.jl](./src/ToC.jl) notebook 
 
+### Example usage
+
+![ToC_example](https://user-images.githubusercontent.com/12846528/128350961-c4ccbcea-ba75-48dc-bd92-7c6551cc68f9.gif)
+
 ## @ingredients macro
 
 	@ingredients path nameskwargs...
@@ -48,4 +52,4 @@ This functionality is implemented in the [ingredients_macro.jl](./src/ingredient
 
 ### Example usage
 
-![@ingredients usage gif](gifs/ingredients_macro_example.gif?raw=true)
+![ingredients_macro_example](https://user-images.githubusercontent.com/12846528/128351051-487a3e79-10a5-4413-8934-1c0e0714a794.gif)
