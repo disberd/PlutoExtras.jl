@@ -26,3 +26,20 @@ Compared to the TableOfContents from PlutoUI, it provides some additional functi
   - Doing so will collapse the ToC to take as little space as possible on the notebook and only expand on hover
 
 This functionality is implemented in [the ToC.jl notebook](./src/ToC.jl) 
+
+## @ingredients macro
+
+	@ingredients path nameskwargs...
+	@ingredients modname=path namekwargs...
+
+This macro is used to include external julia files inside a pluto notebook and is inspired by the discussion on [this Pluto issue](https://github.com/fonsp/Pluto.jl/issues/1101).
+
+It requires Pluto > v0.15.1 (requires macro analysis functionality) and includes and external file, taking care of putting in the caller namespace all varnames that are tagged with `export varname` inside the included file.
+
+The macro relies on the use of `Base.names` to get the variable names to be exported, and support providing the names of the keyword arguments of `names` to be set to true as additional strings (as example, calling `@ingredients "file_path" "all"` will bring into the caller namespace all the variables that are defined in the included file, regardless of whether they are `exported` or not.)
+
+Finally, to allow to correctly reflect variations (in Pluto) in defined and exported variables inside of the included file, a custom `HTML` element is placed as last output of the macro block, so that it is sent to the cell output and executed on the browser.
+This overwrites shortcut for *Shift-Enter* inside the cell that contains the `@ingredients` macro.
+It simply adds a function call to toggle adding and removing a whitespace at the end of the cell input before *running* the cell when pressing the keyboard shortcut *Shift-Enter*.
+
+This has the effect of re-expand the macro and recompute the symbols that are assigned in the cell, rather than using the cached version as it's done when the cell input didn't change.
