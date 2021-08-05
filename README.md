@@ -45,3 +45,7 @@ It simply adds a function call to toggle adding and removing a whitespace at the
 This has the effect of re-expand the macro and recompute the symbols that are assigned in the cell, rather than using the cached version as it's done when the cell input didn't change.
 
 This functionality is implemented in the [ingredients_macro.jl](./src/ingredients_macro.jl) notebook 
+
+### Example usage
+
+[!@ingredients usage gif](gifs/ingredients_macro_example.gif?raw=true)
