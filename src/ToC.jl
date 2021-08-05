@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -9,6 +9,9 @@ using PlutoDevMacros
 
 # ╔═╡ 64a29f5e-3334-43bb-a23f-8bfda53af1a4
 using HypertextLiteral
+
+# ╔═╡ 1a9e349a-8856-4c39-9bbf-f89001b2b8f2
+@only_in_nb ToC(title="Table Of Contents")
 
 # ╔═╡ edd55419-df8a-45a5-8342-950749ae8980
 @htl """
@@ -66,7 +69,7 @@ toc_heading("Asd",2,hide=true,collapse=true)
 
 # ╔═╡ 561c2bcf-d405-4e46-bd9d-c74500995a94
 md"""
-### Gesu
+### TESTT
 """
 
 # ╔═╡ d5eccf35-9aa6-48b4-9140-7ccb5d311820
@@ -639,8 +642,34 @@ end
 # ╔═╡ 1ca8ba46-c816-488e-b728-061288a4d75f
 export ToC, toc_heading
 
-# ╔═╡ 1a9e349a-8856-4c39-9bbf-f89001b2b8f2
-@only_in_nb ToC(title="Table Of Contents")
+# ╔═╡ 00000000-0000-0000-0000-000000000001
+PLUTO_PROJECT_TOML_CONTENTS = """
+[deps]
+HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
+
+[compat]
+HypertextLiteral = "~0.9.0"
+PlutoDevMacros = "~0.1.0"
+"""
+
+# ╔═╡ 00000000-0000-0000-0000-000000000002
+PLUTO_MANIFEST_TOML_CONTENTS = """
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.7.0-beta2"
+manifest_format = "2.0"
+
+[[deps.HypertextLiteral]]
+git-tree-sha1 = "72053798e1be56026b81d4e2682dbe58922e5ec9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.0"
+
+[[deps.PlutoDevMacros]]
+git-tree-sha1 = "f565e937a4120628b05af38917802f9db8da66b6"
+uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
+version = "0.1.0"
+"""
 
 # ╔═╡ Cell order:
 # ╠═c2b4c427-e0d0-465b-8195-66eb15d93a72
@@ -670,3 +699,5 @@ export ToC, toc_heading
 # ╠═028c5069-fc3d-48a0-84e1-476689539f2c
 # ╟─9784edff-a6ac-4308-a1af-71fedd1f2096
 # ╠═844f74f6-d59a-4651-866b-fd1bd2dbfc3c
+# ╟─00000000-0000-0000-0000-000000000001
+# ╟─00000000-0000-0000-0000-000000000002
