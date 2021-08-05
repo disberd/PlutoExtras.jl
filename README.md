@@ -48,4 +48,4 @@ This functionality is implemented in the [ingredients_macro.jl](./src/ingredient
 
 ### Example usage
 
-[!@ingredients usage gif](gifs/ingredients_macro_example.gif?raw=true)
+![@ingredients usage gif](gifs/ingredients_macro_example.gif?raw=true)
