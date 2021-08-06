@@ -9,6 +9,14 @@ using InteractiveUtils
 using HypertextLiteral
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 1ca8ba46-c816-488e-b728-061288a4d75f
+export ToC, toc_heading, hide_heading, collapse_heading
+
+# ╔═╡ 1a9e349a-8856-4c39-9bbf-f89001b2b8f2
+#=╠═╡ notebook_exclusive
+ToC(title="Table Of Contents")
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ edd55419-df8a-45a5-8342-950749ae8980
 md"""
 # Helper Functions
@@ -147,8 +155,61 @@ md"""
 The documentation of the function has to be updated
 """
 
-# ╔═╡ 62f4b572-c28b-4f33-b1ac-355f147cbc24
-js(x) = HypertextLiteral.JavaScript(x)
+# ╔═╡ 003a7fd4-da9c-4f72-861f-0778b98aa912
+begin
+	"""Generate Table of Contents using Markdown cells. Headers h1-h6 are used. 
+
+	Custom re-implementation of the PlutoUI TableOfContents using preact. This was mostly done to experiment with preact and with creating preact components directly in the notebook.
+	As my first ever attempt to use React or preact, this is still very alpha but I use it regularly and it mostly works
+
+	Compared to the TableOfContents from PlutoUI, it provides some additional functionalities:
+	- Hiding cells from notebook and TableOfContents
+	- All cells before the first heading are automatically hidden from the notebook
+	- Showing of hidden cells can be toggled by Alt-clicking on the side of the TableOfContents title
+	- Hidden status of specific headings in the notebook can be toggled by Alt-clicking on the related entry in the ToC (When a heading is marked as hidden and the show of hidden cells is false, all the cells between the hidden heading and the next non-hidden heading are also hidden)
+	- Collapsing headings in the Table of Contents, done by Ctrl+click on a heading
+	- Shrinking of the TableOfContents when not hovered upon
+	- This is toggled by doing a left click on the right of the TableOfContents title
+	- Doing so will collapse the ToC to take as little space as possible on the notebook and only expand on hover
+
+	# Keyword arguments:
+	`title` header to this element, defaults to "Table of Contents"
+
+	`indent` flag indicating whether to vertically align elements by hierarchy
+
+	`depth` value to limit the header elements, should be in range 1 to 6 (default = 3)
+
+	`aside` fix the element to right of page, defaults to true
+
+	# Examples:
+
+	```julia
+	ToC()
+
+	ToC(title="Experiments 🔬")
+
+	ToC(title="📚 Table of Contents", indent=true, depth=4, aside=true)
+	```
+	"""
+	Base.@kwdef struct ToC
+		title::AbstractString="Table of Contents"
+		indent::Bool=true
+		depth::Integer=3
+		aside::Bool=true
+	end
+	function Base.show(io::IO, mimetype::MIME"text/html", toc::ToC)
+		show(io,mimetype,@htl """
+			
+<script type="module" id="asdf">
+			$(HypertextLiteral.JavaScript(toc_js(toc)))
+			</script>
+			
+			<style>
+			$toc_style
+			</style>
+			""")
+	end
+end
 
 # ╔═╡ 08ea2095-cdf3-4f3c-8dd7-792245ac6e56
 #=╠═╡ notebook_exclusive
@@ -627,70 +688,6 @@ pluto-cell:not(.code_differs)[hidden] {
 }
 """;
 
-# ╔═╡ 003a7fd4-da9c-4f72-861f-0778b98aa912
-begin
-	"""Generate Table of Contents using Markdown cells. Headers h1-h6 are used. 
-
-	Custom re-implementation of the PlutoUI TableOfContents using preact. This was mostly done to experiment with preact and with creating preact components directly in the notebook.
-	As my first ever attempt to use React or preact, this is still very alpha but I use it regularly and it mostly works
-
-	Compared to the TableOfContents from PlutoUI, it provides some additional functionalities:
-	- Hiding cells from notebook and TableOfContents
-	- All cells before the first heading are automatically hidden from the notebook
-	- Showing of hidden cells can be toggled by Alt-clicking on the side of the TableOfContents title
-	- Hidden status of specific headings in the notebook can be toggled by Alt-clicking on the related entry in the ToC (When a heading is marked as hidden and the show of hidden cells is false, all the cells between the hidden heading and the next non-hidden heading are also hidden)
-	- Collapsing headings in the Table of Contents, done by Ctrl+click on a heading
-	- Shrinking of the TableOfContents when not hovered upon
-	- This is toggled by doing a left click on the right of the TableOfContents title
-	- Doing so will collapse the ToC to take as little space as possible on the notebook and only expand on hover
-
-	# Keyword arguments:
-	`title` header to this element, defaults to "Table of Contents"
-
-	`indent` flag indicating whether to vertically align elements by hierarchy
-
-	`depth` value to limit the header elements, should be in range 1 to 6 (default = 3)
-
-	`aside` fix the element to right of page, defaults to true
-
-	# Examples:
-
-	```julia
-	ToC()
-
-	ToC(title="Experiments 🔬")
-
-	ToC(title="📚 Table of Contents", indent=true, depth=4, aside=true)
-	```
-	"""
-	Base.@kwdef struct ToC
-		title::AbstractString="Table of Contents"
-		indent::Bool=true
-		depth::Integer=3
-		aside::Bool=true
-	end
-	function Base.show(io::IO, mimetype::MIME"text/html", toc::ToC)
-		show(io,mimetype,@htl """
-			
-<script type="module" id="asdf">
-			$(js(toc_js(toc)))
-			</script>
-			
-			<style>
-			$toc_style
-			</style>
-			""")
-	end
-end
-
-# ╔═╡ 1ca8ba46-c816-488e-b728-061288a4d75f
-export ToC, toc_heading, hide_heading, collapse_heading
-
-# ╔═╡ 1a9e349a-8856-4c39-9bbf-f89001b2b8f2
-#=╠═╡ notebook_exclusive
-ToC(title="Table Of Contents")
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -733,7 +730,6 @@ version = "0.9.0"
 # ╟─9429e332-6543-4a1a-94d6-9c3733712b5c
 # ╠═25b4cb5d-504f-4922-9923-7668f83dcc2f
 # ╠═003a7fd4-da9c-4f72-861f-0778b98aa912
-# ╠═62f4b572-c28b-4f33-b1ac-355f147cbc24
 # ╟─08ea2095-cdf3-4f3c-8dd7-792245ac6e56
 # ╠═2aa06b9e-34cf-43de-8559-88ff9707216d
 # ╟─0b832124-aca0-4172-9121-8f41c3c34bc8
