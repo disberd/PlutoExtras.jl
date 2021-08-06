@@ -4,29 +4,69 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ c2b4c427-e0d0-465b-8195-66eb15d93a72
-using PlutoDevMacros
-
 # ╔═╡ 64a29f5e-3334-43bb-a23f-8bfda53af1a4
+#=╠═╡ notebook_exclusive
 using HypertextLiteral
-
-# ╔═╡ 1a9e349a-8856-4c39-9bbf-f89001b2b8f2
-@only_in_nb ToC(title="Table Of Contents")
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ edd55419-df8a-45a5-8342-950749ae8980
-@htl """
+md"""
+# Helper Functions
+""" |> collapse_heading |> hide_heading
+
+# ╔═╡ 21761862-acb6-4691-97f0-a756865ac1cc
+md"""
+### Collapse/Hide heading
+"""
+
+# ╔═╡ ea897dda-e0d2-43f4-8c79-f96ce3897ac9
+md"""
+The following two functions `collapse_heading` and `hide_heading` can be piped with markdown entries to add the `collapsed` and `hide-heading` attributes to the relevant pluto cell, that make the ToC entry of the cell collapsed or hidden.
+"""
+
+# ╔═╡ 9b27d817-1b57-4b43-948a-e0324082f520
+"""
+see also [`hide_heading`](@ref), [`toc_heading`](@ref)
+
+	collapse_heading(x)
+
+Take the input `x` and wraps it into an HTML element with HypertextLiteral's [`@htl`](@ref), attaching to it a JavaScript that sets the containing pluto-cell attribute `collapsed`, which is used by the custom PlutoUtils' [`ToC`](@ref) to collapse headings.
+
+# Examples use
+	md"# Heading" |> collapse_heading
+"""
+collapse_heading(x) = @htl """
+$x
 <script>
-const h = document.createElement('h1')
-h.innerText = 'Helper Functions'
-const cell = currentScript.parentElement.closest('pluto-cell')
-cell.toggleAttribute('hide-heading')
-return h
+	currentScript.closest('pluto-cell').setAttribute('collapsed','')
+</script>
+"""
+
+# ╔═╡ 77c1e5d1-305e-4a07-a565-d3fd75e31028
+"""
+see also [`collapse_heading`](@ref), [`toc_heading`](@ref)
+
+	hide_heading(x)
+
+Take the input `x` and wraps it into an HTML element with HypertextLiteral's [`@htl`](@ref), attaching to it a JavaScript that sets the containing pluto-cell attribute `hide-heading`, which is used by the custom PlutoUtils' [`ToC`](@ref) to hide all cells between the hidden heading and the next.
+
+# Examples use
+	md"# Heading" |> hide_heading
+"""
+hide_heading(x) = @htl """
+$x
+<script>
+	currentScript.closest('pluto-cell').setAttribute('hide-heading','')
 </script>
 """
 
 # ╔═╡ 5e2f2d6b-949e-4b91-af0a-0a6baf23d00e
 """
-Generate headings with optional classes to interface with the custom ToC defined in this notebook.
+see also [`collapse_heading`](@ref), [`hide_heading`](@ref)
+
+	toc_heading(text,level::Int;hide=true,collapse=false) 
+
+Generate headings with optional html attributes (`collapsed` and `hide-heading`) attached to the containing cell to interface with the custom ToC defined in this notebook.
 
 The fuction will also automatically close the input of the cell where it's executed, and will skip returning an output if included from outside the originating notebook.
 
@@ -40,7 +80,7 @@ All cells before the first Heading are hidden by default, as they usually contai
 
 # Keyword Arguments
 
-`hide::Bool` : Set to true to have a heading appear hidden in the ToC (and in the notebook if the ToC title is clicked while pressing alt), defaults to true
+`hide::Bool` : Set to true to have a heading appear hidden in the ToC (and all the cells between the hidden heading and next appear hidden in the notebook, if the ToC title is clicked while pressing alt), defaults to true
 
 `collapse::Bool`: Set to true to have a heading (and all its children) appear collapsed in the ToC
 """
@@ -111,14 +151,18 @@ The documentation of the function has to be updated
 js(x) = HypertextLiteral.JavaScript(x)
 
 # ╔═╡ 08ea2095-cdf3-4f3c-8dd7-792245ac6e56
+#=╠═╡ notebook_exclusive
 toc_heading("Javascript Code",2,hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 2aa06b9e-34cf-43de-8559-88ff9707216d
+#=╠═╡ notebook_exclusive
 md"""
 !!! note
 	The curent implementations creates a lot of re-renders.
 	Try improving it with better react-fu in the future
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0b832124-aca0-4172-9121-8f41c3c34bc8
 toc_heading("Main JS that includes the preact components",3,hide=true)
@@ -640,17 +684,20 @@ begin
 end
 
 # ╔═╡ 1ca8ba46-c816-488e-b728-061288a4d75f
-export ToC, toc_heading
+export ToC, toc_heading, hide_heading, collapse_heading
+
+# ╔═╡ 1a9e349a-8856-4c39-9bbf-f89001b2b8f2
+#=╠═╡ notebook_exclusive
+ToC(title="Table Of Contents")
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 
 [compat]
 HypertextLiteral = "~0.9.0"
-PlutoDevMacros = "~0.1.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -664,19 +711,17 @@ manifest_format = "2.0"
 git-tree-sha1 = "72053798e1be56026b81d4e2682dbe58922e5ec9"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 version = "0.9.0"
-
-[[deps.PlutoDevMacros]]
-git-tree-sha1 = "f565e937a4120628b05af38917802f9db8da66b6"
-uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.1.0"
 """
 
 # ╔═╡ Cell order:
-# ╠═c2b4c427-e0d0-465b-8195-66eb15d93a72
 # ╠═64a29f5e-3334-43bb-a23f-8bfda53af1a4
 # ╠═1ca8ba46-c816-488e-b728-061288a4d75f
 # ╠═1a9e349a-8856-4c39-9bbf-f89001b2b8f2
-# ╠═edd55419-df8a-45a5-8342-950749ae8980
+# ╟─edd55419-df8a-45a5-8342-950749ae8980
+# ╟─21761862-acb6-4691-97f0-a756865ac1cc
+# ╟─ea897dda-e0d2-43f4-8c79-f96ce3897ac9
+# ╠═9b27d817-1b57-4b43-948a-e0324082f520
+# ╠═77c1e5d1-305e-4a07-a565-d3fd75e31028
 # ╠═5e2f2d6b-949e-4b91-af0a-0a6baf23d00e
 # ╟─3ea419e5-f70c-404f-813d-be8cfad99b79
 # ╠═561c2bcf-d405-4e46-bd9d-c74500995a94
@@ -688,7 +733,7 @@ version = "0.1.0"
 # ╟─9429e332-6543-4a1a-94d6-9c3733712b5c
 # ╠═25b4cb5d-504f-4922-9923-7668f83dcc2f
 # ╠═003a7fd4-da9c-4f72-861f-0778b98aa912
-# ╟─62f4b572-c28b-4f33-b1ac-355f147cbc24
+# ╠═62f4b572-c28b-4f33-b1ac-355f147cbc24
 # ╟─08ea2095-cdf3-4f3c-8dd7-792245ac6e56
 # ╠═2aa06b9e-34cf-43de-8559-88ff9707216d
 # ╟─0b832124-aca0-4172-9121-8f41c3c34bc8
