@@ -1,6 +1,5 @@
 module PlutoUtils
 using Requires
-using PlutoDevMacros
 using Reexport
 @reexport using HypertextLiteral: @htl, @htl_str, JavaScript, Result
 @reexport using PlutoUI 
