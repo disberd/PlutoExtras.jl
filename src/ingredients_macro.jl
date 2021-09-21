@@ -1,8 +1,20 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.16.0
 
 using Markdown
 using InteractiveUtils
+
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        el
+    end
+end
+
+# ╔═╡ f5486f67-7bfc-44e2-91b9-9401d81666da
+using PlutoDevMacros
 
 # ╔═╡ fcbd82ae-c04d-4f87-bbb7-5f73bdbf8bd0
 html"""
@@ -25,7 +37,7 @@ To try out the <i>exclusive</i> parts of the notebook, press this <button>button
 You will then have to use <i>Ctrl-S</i> to execute all modified cells (where the block comments were removed)
 <br>
 <br>
-<b>You still need to use the #main branch of Pluto as the @ingredients macro only works properly with the macro analysis functionality that is not present in v0.15.1</b>
+<b>You still need to use at least version 0.16 of Pluto as the @ingredients macro only works properly with the macro analysis functionality that was added in that version</b>
 
 <script>
 /* Get the button */
@@ -77,8 +89,50 @@ but.addEventListener('click',onClick)
 </script>
 """
 
+# ╔═╡ 5089d8dd-6587-4172-9ffd-13cf43e8c341
+#=╠═╡ notebook_exclusive
+md"""
+## Main Functions
+"""
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ e3e5510d-d1aa-442f-8d51-e42fe942f295
+#=╠═╡ notebook_exclusive
+@__FILE__
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ 4a10255c-3a99-4939-ac29-65ef13b2c252
+#=╠═╡ notebook_exclusive
+md"""
+### called from notebook 
+"""
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ a6f31a58-18ad-44d2-a6a2-f46e970f195a
+#=╠═╡ notebook_exclusive
+Main.PlutoRunner.cell_results.keys
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ f41c1fa8-bd01-443c-bdeb-c49e5ff7127c
+"""
+	_called_from_notebook(filesrc::AbstractString)
+
+Given the result of `@__FILE__` (or `string(__source__.file)` from a macro), check whether the macro was called directly from a Pluto notebook.
+
+This works because the `@__FILE__` information contains the name of the Pluto notebook followed by the cell UUID in case this is called directly in a notebook (and not included from outside)
+"""
+function _called_from_notebook(filesrc)
+	if isdefined(Main,:PlutoRunner)
+		cell_id = tryparse(Base.UUID,last(filesrc,36))
+		println("cell_id = $cell_id")
+		println("currently_running = $(Main.PlutoRunner.currently_running_cell_id[])")
+		cell_id !== nothing && cell_id === Main.PlutoRunner.currently_running_cell_id[] && return true
+	end
+	return false
+end
+
 # ╔═╡ b87d12be-a37b-4202-9426-3eef14d8253c
-function ingredients(path::String)
+function ingredients(path::String,exprmap::Function=include_mapexpr())
 	# this is from the Julia source code (evalfile in base/loading.jl)
 	# but with the modification that it returns the module instead of the last object
 	name = Symbol(basename(path))
@@ -88,7 +142,7 @@ function ingredients(path::String)
              :(eval(x) = $(Expr(:core, :eval))($name, x)),
              :(include(x) = $(Expr(:top, :include))($name, x)),
              :(include(mapexpr::Function, x) = $(Expr(:top, :include))(mapexpr, $name, x)),
-             :(include($path))))
+             :(include($exprmap,$path))))
 	m
 end
 
@@ -182,7 +236,11 @@ This has the effect of avoid using the cached version of the macro and always re
 """
 macro ingredients(ex,kwargstrs...)
 	path,modname = _process_ingredients_ex(ex,__module__)
-	_ingredients(path,modname,kwargstrs...)
+	if _called_from_notebook(string(__source__.file))
+		_ingredients(path,modname,kwargstrs...)
+	else
+		esc(:(include($path)))
+	end
 end
 
 # ╔═╡ 63e2bd00-63b8-43f9-b8d3-b5d336744f3a
@@ -283,6 +341,11 @@ Finally, you can also assign the full imported module in a specific variable by 
 @ingredients notebook_path 
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 0d1f5079-a886-4a07-9e99-d73e0b8a2eec
+#=╠═╡ notebook_exclusive
+@macroexpand @ingredients notebook_path
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 4cec781b-c6d7-4fd7-bbe3-f7db0f973698
 #=╠═╡ notebook_exclusive
 a
@@ -311,6 +374,10 @@ TestStruct()
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
+
+[compat]
+PlutoDevMacros = "~0.2.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -320,11 +387,41 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 julia_version = "1.7.0-beta2"
 manifest_format = "2.0"
 
-[deps]
+[[deps.Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.MacroTools]]
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "5a5bc6bf062f0f95e62d0fe0a2d99699fed82dd9"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.5.8"
+
+[[deps.Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[deps.PlutoDevMacros]]
+deps = ["MacroTools"]
+git-tree-sha1 = "cfd40e6f7c23fc38a751e4ba4a5c25b8a68fd4b2"
+uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
+version = "0.2.0"
+
+[[deps.Random]]
+deps = ["Serialization"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[deps.Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 """
 
 # ╔═╡ Cell order:
+# ╠═f5486f67-7bfc-44e2-91b9-9401d81666da
 # ╟─fcbd82ae-c04d-4f87-bbb7-5f73bdbf8bd0
+# ╟─5089d8dd-6587-4172-9ffd-13cf43e8c341
+# ╠═e3e5510d-d1aa-442f-8d51-e42fe942f295
+# ╟─4a10255c-3a99-4939-ac29-65ef13b2c252
+# ╠═a6f31a58-18ad-44d2-a6a2-f46e970f195a
+# ╠═f41c1fa8-bd01-443c-bdeb-c49e5ff7127c
 # ╠═b87d12be-a37b-4202-9426-3eef14d8253c
 # ╠═ae599257-a0cd-425c-a0a7-311e52b931e5
 # ╠═23af305c-677b-4575-8591-582ce51e8587
@@ -338,6 +435,7 @@ manifest_format = "2.0"
 # ╠═bd3b021f-db44-4aa1-97b2-04002f76aeff
 # ╟─0e3eb73f-091a-4683-8ccb-592b8ccb1bee
 # ╠═d2ac4955-d2a0-48b5-afcb-32baa59ade21
+# ╠═0d1f5079-a886-4a07-9e99-d73e0b8a2eec
 # ╠═4cec781b-c6d7-4fd7-bbe3-f7db0f973698
 # ╠═a7e7123f-0e7a-4771-9b9b-d0da97fefcef
 # ╠═2c41234e-e1b8-4ad8-9134-85cd65a75a2d
