@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.0
+# v0.16.0
 
 using Markdown
 using InteractiveUtils
@@ -75,28 +75,81 @@ const eqrefClick = (e) => {
 	})
 }
 
-const checkCounter = (item, i) => {
-	return item.classList.contains('enclosing')	?
-	i											:
-	i + 1
+// We make a function to compute the vertical offset (from the top) of an object to the
+// closest parent containing the katex-html class. This is used to find the equation number
+// that is closest to the label
+const findOffsetTop = obj => {
+	let offset = 0
+	let keepGoing = true
+	while (keepGoing) {
+		offset += obj.offsetTop
+		// Check if the current offsetParent is the containing katex-html
+		if (obj.offsetParent.classList.contains('katex-html')) {
+			keepGoing = false
+		} else {
+			obj = obj.offsetParent
+		}
+	}
+	return offset
 }
 
+
+// The katex equation numbers are wrapped in spans containing the class 'eqn-num'. WHen you
+// assign a label, another class ('enclosing') is assigned to some parts of the rendered
+// html containing the equation line. This means that equation containing labels will have
+// both 'eqn-num' and 'enclosing'. The new approach is to go through all the katex math
+// equations one by one and analyze how many numbered lines they contain by counting the
+// 'eqn-num' instances. 
 const updateCallback = () => {
 a_vec.splice(0,a_vec.length) // Reset the array
-const eqs = document.querySelectorAll('span.enclosing, span.eqn-num')
+const katex_blocks = document.querySelectorAll('.katex-html') // This selects all the environments we created with texeq
 let i = 0;
-eqs.forEach(item => {
-	i = checkCounter(item,i)
-	if (item.classList.contains('enclosing')) {
+for (let blk of katex_blocks) {
+	// Find the number of numbered equation in each sub-block
+	let numeqs = blk.querySelectorAll('.eqn-num')
+	let eqlen = numeqs.length
+	if (eqlen == 0) {
+		continue // There is nothing to do here since no equation is numbered
+	}
+	let labeleqs = blk.querySelectorAll('.enclosing')
+	if (labeleqs.length == 0) {
+		// There is no label, so we just have to increase the counter
+		i += eqlen
+		continue
+	}
+	// Find the offset from the katex-html parent of each equation number, the assumption
+	// here is that the span containing the label tag has the same (or almost the same) offset as the related equation number
+	let eqoffsets = Array.from(numeqs,findOffsetTop)
+
+
+	for (let item of labeleqs) {
+		const labelOffset = findOffsetTop(item)
+		let prevDiff = -Infinity
+		let currentOffset = eqoffsets.shift()
+		let currentDiff = currentOffset - labelOffset
+		i += 1
+		while (eqoffsets.length > 0 && currentDiff < 0) { // if currentOffset >= 0, it means that the current equ-num is lower than the label (or at the same height)
+			prevDiff = currentDiff
+			currentOffset = eqoffsets.shift()
+			currentDiff = currentOffset - labelOffset
+			i += 1
+		}
+		// Now we have to check whether the previous number with offset < 0 or the first with offset > 0 is the closest to the label offset
+		if (Math.abs(currentDiff) > Math.abs(prevDiff)) {
+			// The previous entry was closer, so we reduce i by one and put back the last shifted element in the offset array
+			i -= 1
+			eqoffsets.unshift(currentOffset)
+		}
+		// We now update all the links that refer to this label
 		const id = item.id
 		const a_vals = document.querySelectorAll(`[eq_id=\${id}]`)
 		a_vals !== null && a_vals.forEach(a => {
 			a_vec.push(a) // Add this to the vector
-			a.innerText = `(\${i+1})`
+			a.innerText = `(\${i})`
 			a.addEventListener('click',eqrefClick)
 		})
 	}
-})
+}
 }
 
 const notebook = document.querySelector("pluto-notebook")
@@ -196,8 +249,14 @@ $(texeq("
 # ╔═╡ b9213424-f814-4bb8-a05f-33249f4f0a8f
 md"""
 $(texeq("
-	(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\\\
-	&= 10"
+	(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\label{test1} \\\\
+	&= 10 \\label{test2} \\\\
+	&= 10 \\\\
+	&= 10 \\label{test3} \\\\
+	&= 10 \\\\
+	&= 10 \\label{test4} \\\\
+	&= 10 \\\\
+	&= 10 \\label{test5}"
 ,"align"))
 """
 
@@ -249,6 +308,10 @@ The sum in $(eqref("interactive")) is interactive!
 md"""Multiple links to the same equation $(eqref("interactive")) also work! See also $(eqref("seven"))
 """
 
+# ╔═╡ 9e69e30e-506a-4bd7-b213-0b5c0b31a10d
+md"""Link to sub-parts of align environments are now fixed! $(eqref("test1")), $(eqref("test2")), $(eqref("test3")), $(eqref("test4")), $(eqref("test5"))
+"""
+
 # ╔═╡ cbf7a7b7-3dc9-488f-b891-26f1590dadc0
 export texeq, eqref, initialize_eqref
 
@@ -265,7 +328,7 @@ HypertextLiteral = "~0.8.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.6.2"
+julia_version = "1.7.0-rc1"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
@@ -285,6 +348,7 @@ version = "0.8.0"
 # ╠═de8473c1-dea1-4221-9562-30679ae58e34
 # ╠═b9213424-f814-4bb8-a05f-33249f4f0a8f
 # ╠═ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
+# ╠═9e69e30e-506a-4bd7-b213-0b5c0b31a10d
 # ╠═900f494b-690d-43cf-b1b7-61c5d3e68a6d
 # ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═7879d7e3-38ad-4a06-8057-ec30da534d76
@@ -292,7 +356,7 @@ version = "0.8.0"
 # ╠═6d750d01-b851-4614-b448-1a6e00fa5754
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472
 # ╟─b6b08bf0-7282-40b9-ae87-b776a64c519f
-# ╟─6584afb8-b085-4c56-93cb-a5b57e16520c
+# ╠═6584afb8-b085-4c56-93cb-a5b57e16520c
 # ╠═a78aa624-6504-4b3f-914a-833261b92f19
 # ╟─d14197d8-cab1-4d92-b81c-d826ea8183f3
 # ╠═2ad9500c-187b-4b69-8e7b-ef76af8fc39a
