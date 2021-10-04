@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -191,26 +191,60 @@ end;
 export Editable
 
 # ╔═╡ ecfdee44-3e6c-4e7e-a039-1f7d05a875f8
+#=╠═╡ notebook_exclusive
 md"""
 This is a number: $(@bind num Editable(3))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ d171e8f9-c939-4747-a748-5568ae4a4064
+#=╠═╡ notebook_exclusive
 num
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 9dfb5236-9475-4bf6-990a-19f8f5519003
+#=╠═╡ notebook_exclusive
 md"""
 This has also a unit $(@bind unitnum Editable(3.0;suffix=" dB"))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 245fad1a-2f1e-4776-b048-6873e8c33f3b
+#=╠═╡ notebook_exclusive
 unitnum
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 456a3579-3c33-496c-bbf2-6e6e0d0ff102
+#=╠═╡ notebook_exclusive
 bool_bond = @bind bool_val Editable(true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 3347054b-6d72-41f9-9ddf-39f8499ed5da
+#=╠═╡ notebook_exclusive
 bool_val
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ 00000000-0000-0000-0000-000000000001
+PLUTO_PROJECT_TOML_CONTENTS = """
+[deps]
+HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+
+[compat]
+HypertextLiteral = "~0.9.0"
+"""
+
+# ╔═╡ 00000000-0000-0000-0000-000000000002
+PLUTO_MANIFEST_TOML_CONTENTS = """
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.7.0-rc1"
+manifest_format = "2.0"
+
+[[deps.HypertextLiteral]]
+git-tree-sha1 = "72053798e1be56026b81d4e2682dbe58922e5ec9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.0"
+"""
 
 # ╔═╡ Cell order:
 # ╠═cfb4d354-e0b2-4a04-a559-4fb88df33954
@@ -225,3 +259,5 @@ bool_val
 # ╠═456a3579-3c33-496c-bbf2-6e6e0d0ff102
 # ╠═3347054b-6d72-41f9-9ddf-39f8499ed5da
 # ╠═a1be6790-c932-11eb-0b3a-23cc77d240e9
+# ╟─00000000-0000-0000-0000-000000000001
+# ╟─00000000-0000-0000-0000-000000000002
