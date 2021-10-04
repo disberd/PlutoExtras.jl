@@ -111,7 +111,7 @@ function show2(plt::PlotlyBase.Plot)
 	@htl("""
 			<div>
 			<script id=asdf>
-			const {plotly} = await import("https://cdn.plot.ly/plotly-2.3.1.min.js")
+			const {plotly} = await import("https://cdn.plot.ly/plotly-2.5.1.min.js")
 			const PLOT = this ?? document.createElement("div");
 		
 
