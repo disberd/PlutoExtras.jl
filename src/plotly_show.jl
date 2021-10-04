@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.0
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -306,6 +306,100 @@ end
 p02 =[p4_1   p9_3]
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 0f6a5618-c338-41ac-b6e3-cba211c070be
+#=╠═╡ notebook_exclusive
+md"""
+# Plot Types overload
+"""
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ c805105a-9444-49df-b06f-12e91aa9b26c
+const NNumber = Union{Nothing,<:Number}
+
+# ╔═╡ b956aa02-48fb-416e-aa39-c9fa291ed47a
+md"""
+## scatter
+"""
+
+# ╔═╡ b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
+begin
+	function PlotlyBase.scatter(xy::AbstractVector{Tuple{<:Any,<:Any}};kwargs...)
+		PlotlyBase.scatter(;x=first.(xy),y=last.(xy),kwargs...)
+	end
+	function PlotlyBase.scatter(xy::Tuple{<:AbstractVector,<:AbstractVector};kwargs...)
+		PlotlyBase.scatter(;x=xy[1],y=xy[2],kwargs...)
+	end
+end
+
+# ╔═╡ 31de5995-b2a2-48ce-9bf3-fd61059e8f61
+#=╠═╡ notebook_exclusive
+scatter([(rand(),rand()) for _ ∈ 1:100];mode="markers") |> Plot
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ 302e8097-be38-44e3-ba24-8f834115bb94
+#=╠═╡ notebook_exclusive
+scatter((rand(100),rand(100));mode="markers") |> Plot
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ f5a6204d-0346-4435-9e7a-48f005883995
+md"""
+## surface
+"""
+
+# ╔═╡ eb608938-7ede-464f-9c5f-0c19d7847fb5
+begin
+	function PlotlyBase.surface(xy::AbstractArray{<:Tuple{Any,Any,Any}};kwargs...)
+		PlotlyBase.surface(;x=getindex.(xy,1),y=getindex.(xy,2),z=getindex.(xy,3),kwargs...)
+	end
+	function PlotlyBase.surface(xy::Tuple{<:AbstractArray,<:AbstractArray, <: AbstractArray};kwargs...)
+		PlotlyBase.surface(;x=xy[1],y=xy[2],z=xy[3],kwargs...)
+	end
+end
+
+# ╔═╡ 3522fa4c-6b11-430e-995c-e0cb9de4ccef
+#=╠═╡ notebook_exclusive
+let
+	x = -5:5
+	y = -5:5
+	z = [x^2 + y^2 for x ∈ x, y ∈ y]
+	surface((x,y,z)) |> Plot
+end
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ a4404f41-84a5-48d0-92e4-bbc1705401bf
+#=╠═╡ notebook_exclusive
+let
+	x = -5:5
+	y = -5:5
+	z = [x^2 + y^2 for x ∈ x, y ∈ y]
+	xgrid = [x for x ∈ x, y ∈ y]
+	ygrid = [y for x ∈ x, y ∈ y]
+	surface(collect(zip(xgrid,ygrid,z))) |> Plot
+end
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ f1d07f52-f53a-40f0-a8ca-6bfc38cd033f
+md"""
+## Contour
+"""
+
+# ╔═╡ 2eae61ad-e45e-4581-92d8-6c0781e25de1
+begin
+	function PlotlyBase.contour(x::AbstractVector,y::AbstractVector, z:: AbstractMatrix;kwargs...)
+		PlotlyBase.contour(;x=x,y=y,z=z,kwargs...)
+	end
+end
+
+# ╔═╡ 0a3a8cfc-e0d4-4a4d-a029-6a70ee744dc8
+#=╠═╡ notebook_exclusive
+let
+	x = -5:5
+	y = -5:5
+	z = [x^2 + y^2 for x ∈ x, y ∈ y]
+	contour(x,y,z) |> Plot
+end
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -323,7 +417,7 @@ PlutoUtils = "~0.3.5"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-beta2"
+julia_version = "1.7.0-rc1"
 manifest_format = "2.0"
 
 [[deps.ArgTools]]
@@ -633,7 +727,7 @@ deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 
 [[deps.libblastrampoline_jll]]
-deps = ["Artifacts", "Libdl", "OpenBLAS_jll", "Pkg"]
+deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
 
 [[deps.nghttp2_jll]]
@@ -672,5 +766,18 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═b64c1114-b013-43f6-9226-12290160ecb6
 # ╟─deb417ed-977d-4a9e-b333-763326bec365
 # ╠═4c160e08-4f1c-4ec1-818b-475331f71435
+# ╟─0f6a5618-c338-41ac-b6e3-cba211c070be
+# ╠═c805105a-9444-49df-b06f-12e91aa9b26c
+# ╟─b956aa02-48fb-416e-aa39-c9fa291ed47a
+# ╠═b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
+# ╠═31de5995-b2a2-48ce-9bf3-fd61059e8f61
+# ╠═302e8097-be38-44e3-ba24-8f834115bb94
+# ╟─f5a6204d-0346-4435-9e7a-48f005883995
+# ╠═eb608938-7ede-464f-9c5f-0c19d7847fb5
+# ╠═3522fa4c-6b11-430e-995c-e0cb9de4ccef
+# ╠═a4404f41-84a5-48d0-92e4-bbc1705401bf
+# ╟─f1d07f52-f53a-40f0-a8ca-6bfc38cd033f
+# ╠═2eae61ad-e45e-4581-92d8-6c0781e25de1
+# ╠═0a3a8cfc-e0d4-4a4d-a029-6a70ee744dc8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
