@@ -14,6 +14,9 @@ using HypertextLiteral
 using PlotlyBase
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ d64feb66-4cd5-4818-b912-1efebcdb8432
+using UUIDs
+
 # ╔═╡ f0aae837-cf93-46df-b204-d4ed57836d12
 #=╠═╡ notebook_exclusive
 md"""
@@ -108,9 +111,10 @@ show1(plt::PlotlyBase.Plot) = @htl("""
 # ╔═╡ 740bcc3f-5304-4f8e-9324-af1f392b13a6
 function show2(plt::PlotlyBase.Plot) 
 	hasproperty(plt,:config) && plt.config.responsive && (plt.config.responsive = false)
+	script_id = "pluto-script-" * string(uuid4())
 	@htl("""
 			<div>
-			<script id=asdf>
+			<script id=$script_id>
 			const {plotly} = await import("https://cdn.plot.ly/plotly-2.5.1.min.js")
 			const PLOT = this ?? document.createElement("div");
 		
@@ -306,10 +310,18 @@ end
 p02 =[p4_1   p9_3]
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 0622aaae-5d43-4113-b770-eb937fec963f
+#=╠═╡ notebook_exclusive
+@htl """
+$p4_1
+$p9_3
+"""
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 0f6a5618-c338-41ac-b6e3-cba211c070be
 #=╠═╡ notebook_exclusive
 md"""
-# Plot Types overload
+# Plotly traces additional methods
 """
   ╠═╡ notebook_exclusive =#
 
@@ -406,6 +418,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 PlotlyBase = "a03496cd-edff-5a9b-9e67-9cda94a718b5"
 PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [compat]
 HypertextLiteral = "~0.8.0"
@@ -745,6 +758,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═d1bba282-0212-4149-a24a-7b036a7a9458
 # ╠═ab8c40b4-982c-4063-b209-177a9b72e527
 # ╠═caa6aad3-50ab-4041-ab27-525ec9ec56ee
+# ╠═d64feb66-4cd5-4818-b912-1efebcdb8432
 # ╟─3c3d991b-6970-495b-8d80-d3c42b7c9617
 # ╠═c5f520f4-c26c-4ec8-90b5-6e74375cf9d7
 # ╠═c27179fa-c2c0-45a2-afbf-8350d817ef08
@@ -764,8 +778,9 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─f4d9e48f-f9fe-4587-b855-f6e961c78277
 # ╠═c7bdf29e-21f5-4c45-9892-86efc16225b8
 # ╠═b64c1114-b013-43f6-9226-12290160ecb6
-# ╟─deb417ed-977d-4a9e-b333-763326bec365
+# ╠═deb417ed-977d-4a9e-b333-763326bec365
 # ╠═4c160e08-4f1c-4ec1-818b-475331f71435
+# ╠═0622aaae-5d43-4113-b770-eb937fec963f
 # ╟─0f6a5618-c338-41ac-b6e3-cba211c070be
 # ╠═c805105a-9444-49df-b06f-12e91aa9b26c
 # ╟─b956aa02-48fb-416e-aa39-c9fa291ed47a
