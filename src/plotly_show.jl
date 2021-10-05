@@ -335,7 +335,7 @@ md"""
 
 # ╔═╡ b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
 begin
-	function PlotlyBase.scatter(xy::AbstractVector{Tuple{<:Any,<:Any}};kwargs...)
+	function PlotlyBase.scatter(xy::AbstractVector{<:Tuple{Any,Any}};kwargs...)
 		PlotlyBase.scatter(;x=first.(xy),y=last.(xy),kwargs...)
 	end
 	function PlotlyBase.scatter(xy::Tuple{<:AbstractVector,<:AbstractVector};kwargs...)
