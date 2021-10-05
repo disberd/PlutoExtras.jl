@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.0
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -146,35 +146,6 @@ function ingredients(path::String,exprmap::Function=include_mapexpr())
 	m
 end
 
-# ╔═╡ ae599257-a0cd-425c-a0a7-311e52b931e5
-# Function that generates the actual expression for expanding the included symbols in the macro caller space
-function _ingredients(path::String,modname::Symbol,kwargstrs::String...)
-	m = ingredients(path)
-	kwargs = (Symbol(s) => true for s ∈ kwargstrs if s ∈ ("all","imported"))
-	varnames = names(m;kwargs...)
-	# Remove the symbols that start with a '#' (still to check what is the impact)
-	filter!(x -> first(String(x)) !== '#',varnames)
-	# Symbols to always exclude from imports
-	exclude_names = (
-			nameof(m),
-			:PLUTO_MANIFEST_TOML_CONTENTS,
-			:PLUTO_PROJECT_TOML_CONTENTS,
-			:eval,
-			:include,
-			Symbol("@bind"),
-		)
-	# Create the block that will contain the various assignment expressions
-	block = Expr(:block)
-	for v ∈ setdiff(varnames,exclude_names)
-		push!(block.args,:($v = $(m).$v))
-	end
-	# Assign the module to the intended name
-	modname !== :nothing && push!(block.args,:($modname = $m))
-	# Put the html element to modify Shift-Enter
-	push!(block.args,:($(html_toggle_whitespace())))
-	esc(block)
-end
-
 # ╔═╡ 23af305c-677b-4575-8591-582ce51e8587
 html_toggle_whitespace() = html"""
 <script>
@@ -203,6 +174,35 @@ html_toggle_whitespace() = html"""
 	// invalidation.then(async () => await cm.setOption('extraKeys',{...cm.options.extraKeys, 'Shift-Enter': on_submit}))
 </script>
 """
+
+# ╔═╡ ae599257-a0cd-425c-a0a7-311e52b931e5
+# Function that generates the actual expression for expanding the included symbols in the macro caller space
+function _ingredients(path::String,modname::Symbol,kwargstrs::String...)
+	m = ingredients(path)
+	kwargs = (Symbol(s) => true for s ∈ kwargstrs if s ∈ ("all","imported"))
+	varnames = names(m;kwargs...)
+	# Remove the symbols that start with a '#' (still to check what is the impact)
+	filter!(x -> first(String(x)) !== '#',varnames)
+	# Symbols to always exclude from imports
+	exclude_names = (
+			nameof(m),
+			:PLUTO_MANIFEST_TOML_CONTENTS,
+			:PLUTO_PROJECT_TOML_CONTENTS,
+			:eval,
+			:include,
+			Symbol("@bind"),
+		)
+	# Create the block that will contain the various assignment expressions
+	block = Expr(:block)
+	for v ∈ setdiff(varnames,exclude_names)
+		push!(block.args,:($v = $(m).$v))
+	end
+	# Assign the module to the intended name
+	modname !== :nothing && push!(block.args,:($modname = $m))
+	# Put the html element to modify Shift-Enter
+	push!(block.args,:($(html_toggle_whitespace())))
+	esc(block)
+end
 
 # ╔═╡ 30b27e5e-b73f-4ce3-bca9-3944251ea42c
 # Return the string of the path to include and eventually the name of the variable where to assigne the loaded module
@@ -384,7 +384,7 @@ PlutoDevMacros = "~0.2.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-beta2"
+julia_version = "1.7.0-rc1"
 manifest_format = "2.0"
 
 [[deps.Base64]]
