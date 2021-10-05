@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.0
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -206,9 +206,14 @@ const Toc = () => {
 		const range = Array.from({length: depth}, (x, i) => i+1) // [1, ..., depth]
 		
 		const selector = range.map(i => `pluto-notebook pluto-cell h\${i}`).join(",")
-		const initialArray = Array.from(document.querySelectorAll(selector), (item) => {
+		const initialArray = [] 
+		for (let item of document.querySelectorAll(selector)) {
+			const isdocs = item.closest('.pluto-docs-binding')
+			if (isdocs !== null) {
+				continue
+			}
 			const cell = item.closest('pluto-cell')
-			return {
+			initialArray.push({
 				id: cell.id,
 				title: item.innerText,
 				hidden: cell.hasAttribute('hide-heading') ? true : false,
@@ -216,8 +221,8 @@ const Toc = () => {
 				collapsed_parent: false,
 				depth: Number(item.tagName[1]),
 				children: [],
-			}
-		})
+			})
+		}
 		return collapseDependency(initialArray)
 	}
 
@@ -701,7 +706,7 @@ HypertextLiteral = "~0.9.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-beta2"
+julia_version = "1.7.0-rc1"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
@@ -736,7 +741,7 @@ version = "0.9.0"
 # ╠═759e0c40-cea7-4c62-8123-179a97becc40
 # ╟─e2307fb5-f3f8-482f-abae-5509bf48fe2d
 # ╠═8b20a786-7020-4252-8e42-ffbd33fb19e4
-# ╟─71a2347d-fb17-4c12-8298-9d07511ffb05
+# ╠═71a2347d-fb17-4c12-8298-9d07511ffb05
 # ╠═028c5069-fc3d-48a0-84e1-476689539f2c
 # ╟─9784edff-a6ac-4308-a1af-71fedd1f2096
 # ╠═844f74f6-d59a-4651-866b-fd1bd2dbfc3c
