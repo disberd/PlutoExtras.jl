@@ -243,11 +243,6 @@ macro ingredients(ex,kwargstrs...)
 	end
 end
 
-# ╔═╡ d2ac4955-d2a0-48b5-afcb-32baa59ade21
-#=╠═╡ notebook_exclusive
-@ingredients notebook_path 
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ 63e2bd00-63b8-43f9-b8d3-b5d336744f3a
 export @ingredients, ingredients
 
@@ -339,6 +334,11 @@ Finally, you can also assign the full imported module in a specific variable by 
 @ingredients varname = notebook_path
 ```
 """
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ d2ac4955-d2a0-48b5-afcb-32baa59ade21
+#=╠═╡ notebook_exclusive
+@ingredients notebook_path 
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0d1f5079-a886-4a07-9e99-d73e0b8a2eec
