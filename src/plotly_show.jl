@@ -111,7 +111,8 @@ show1(plt::PlotlyBase.Plot) = @htl("""
 # ╔═╡ 740bcc3f-5304-4f8e-9324-af1f392b13a6
 function show2(plt::PlotlyBase.Plot) 
 	hasproperty(plt,:config) && plt.config.responsive && (plt.config.responsive = false)
-	script_id = "pluto-script-" * string(uuid4())
+	# script_id = "pluto-script-" * string(uuid4())
+	script_id = "pluto-plotly-plot"
 	@htl("""
 			<div>
 			<script id=$script_id>
@@ -769,9 +770,9 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═740bcc3f-5304-4f8e-9324-af1f392b13a6
 # ╠═e389da42-7f04-4bad-acc5-334a4277e5ac
 # ╠═02583ec4-a758-47e6-aeea-f6d897b307bc
+# ╠═37374eb5-075f-4ecc-ae91-472b55c18c6f
 # ╠═0c835811-ec85-4f91-8a33-536256ac281d
 # ╠═943c3293-fba2-44f5-9e61-2f821bd5c65e
-# ╠═37374eb5-075f-4ecc-ae91-472b55c18c6f
 # ╠═55f63e7b-f81a-48ff-9857-a8cfd6b3c7dd
 # ╠═0123b5ce-5455-4227-b916-3d1e1c814911
 # ╠═c0ff610e-1370-456a-b955-d16b5032c199
