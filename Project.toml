@@ -1,7 +1,7 @@
 name = "PlutoUtils"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
-version = "0.3.11"
+version = "0.3.12"
 
 [deps]
 Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
