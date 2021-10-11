@@ -9,6 +9,16 @@ using InteractiveUtils
 using HypertextLiteral
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ ac068168-86c9-4543-8545-08202238447d
+@htl """
+<style>
+	main {
+		max-width:1200px;
+		margin-right:100px !important;
+	}
+</style>
+"""
+
 # ╔═╡ 21761862-acb6-4691-97f0-a756865ac1cc
 md"""
 ### Collapse/Hide heading
@@ -149,7 +159,7 @@ The documentation of the function has to be updated
 
 # ╔═╡ 08ea2095-cdf3-4f3c-8dd7-792245ac6e56
 #=╠═╡ notebook_exclusive
-toc_heading("Javascript Code",2,hide=true)
+toc_heading("JavaScript Code",2,hide=true)
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 2aa06b9e-34cf-43de-8559-88ff9707216d
@@ -327,6 +337,10 @@ const Toc = () => {
 	)
 
 	useEffect(() => {
+		recomputeWidth()
+},[collapseToc])
+
+	useEffect(() => {
 		set_toc_state(getHeaderState())
 	},[collapseAll]
 	)
@@ -360,7 +374,7 @@ const Toc = () => {
 	}
 
 	const headerClick = (e) => {
-		console.log(e)
+		//console.log(e)
 		if (e.altKey) {
 			e.preventDefault()
 			set_hide(!hide)
@@ -425,8 +439,14 @@ const node = this ?? document.createElement("div")
 
 const notebook = document.querySelector("pluto-notebook")
 
+const cell = currentScript.parentElement.closest('pluto-cell')
+const toc_id = cell.id
 
-const toc_id = currentScript.parentElement.closest('pluto-cell').id
+const recomputeWidth = () => {
+	const mainElement = document.querySelector('main')
+	const maxWidth = document.body.offsetWidth - mainElement.offsetWidth - mainElement.offsetLeft
+	document.documentElement.style.setProperty('--aside-toc-width', `calc(\${maxWidth}px - 5px - .8rem)`);
+}
 
 
 if(this == null){
@@ -444,6 +464,10 @@ render(html`<\${Toc}/>`, node);
 // console.log('if')
 
 }
+
+const resizeObserver = new ResizeObserver(entries => recomputeWidth()
+	)
+resizeObserver.observe(cell)
 
 const updateCallback = () => {
 	const test = node.getHeaderState()
@@ -480,6 +504,7 @@ bodyClassObserver.observe(document.body, {attributeFilter: ["class"]})
 invalidation.then(() => {
 	notebookObserver.disconnect()
 	bodyClassObserver.disconnect()
+	resizeObserver.disconnect()
 	observers.current.forEach((o) => o.disconnect())
 })
 
@@ -531,9 +556,9 @@ body.presentation .plutoui-toc.aside {
 @media screen and (min-width: 1081px) {
 	.plutoui-toc.aside {
 		position:fixed; 
-		right: 1rem;
+		right: .8rem;
 		top: 5rem; 
-		width:25%; 
+		width: min(max(var(--aside-toc-width),15%),25%); 
 		padding: 10px;
 		border: 3px solid rgba(0, 0, 0, 0.15);
 		border-radius: 10px;
@@ -719,6 +744,7 @@ version = "0.9.0"
 # ╠═64a29f5e-3334-43bb-a23f-8bfda53af1a4
 # ╠═1ca8ba46-c816-488e-b728-061288a4d75f
 # ╠═1a9e349a-8856-4c39-9bbf-f89001b2b8f2
+# ╠═ac068168-86c9-4543-8545-08202238447d
 # ╟─edd55419-df8a-45a5-8342-950749ae8980
 # ╟─21761862-acb6-4691-97f0-a756865ac1cc
 # ╟─ea897dda-e0d2-43f4-8c79-f96ce3897ac9
