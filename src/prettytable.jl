@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.16.1
 
 using Markdown
 using InteractiveUtils
@@ -70,6 +70,31 @@ pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
 end
 	
 
+# ╔═╡ 73d1a71c-78a3-4533-9792-526e45c868ff
+function prepend_selector(css,custom_selector)
+	pre = @chain css begin
+		split(_,'}') # Separate different style groups
+		map(x -> lstrip(x,['\n','\t',' ']),_) # Remove trailing newlines
+		filter(!isempty,_)
+		map(x -> split(x,'{'),_)
+	end
+	out = ""
+	for i ∈ eachindex(pre)
+		out *= @chain pre[i][1] begin
+			split(',') # Find the differents combined CSS selectors as they have to be prepended with the class together
+			map(_) do selector # Here we go to prepend the custom element
+				"$custom_selector $(strip(selector))"# Preprend the custom id to each selector
+			# 	end
+			end
+			join(",\n")
+			# map(x -> x * "\n}",_)
+			# join(_,"\n\n") # Join back into a single string
+		end
+		out *= "{$(pre[i][2])\n}\n\n"
+	end
+	out
+end
+
 # ╔═╡ e880d449-0e72-45ad-bea9-bbadcdcd523d
 """
 `prettytable(data;kwargs...)`
@@ -99,6 +124,11 @@ The css provided in this keyword argument is appended after the one specified in
 
 Defaults to `""`
 
+### `caption`
+Add an optional table caption if provided
+
+Defaults to `nothing`
+
 ### `id`
 To allow specifying different tables with different styles within the same pluto-notebook, each table should be provided with a unique identifier to limit the eventually provided CSS styling to the table in question.
 
@@ -111,12 +141,17 @@ This is then used to limit the css styling by prepending each entry in the `css`
 #### Note
 The data-uuid custom attribute is used instead of id in the stylesheet because uuidv4 returns identifier that may start with numbers and thus can't be used as CSS selectors.
 """
-function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), standalone=false, id=uuid4(), css=tf.css, append_css="",kwargs...)
+function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), standalone=false, id=uuid4(), css=tf.css, append_css="", caption = nothing ,kwargs...)
 	@assert backend === :html "Only the :html backend is supported"
 	@assert standalone === false "standalone = true is not supported"
 	
 	# First we create the string of the table output using the standard pretty_table
 	tab_str = pretty_table(String,data;kwargs...,backend=:html,tf=tf,standalone=false)
+
+	# Check if we need to add the caption
+	if caption !== nothing
+		tab_str = replace(tab_str,"<table>\n" => "<table>\n<caption>$caption</caption>\n")
+	end
 	# Put this tabular data in a custom div with a unique identifier (data-UUID is also used on top of id because CSS selectors can not start with a number)
 	out = @htl """
 	<div id=$id data-uuid=$id class="prettytable_container">
@@ -129,21 +164,7 @@ function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), 
 	# Deal with the custom CSS Style
 	if !isempty(css)
 		# Pre-pend the div[data-UUID=$id] to all css selectors so that this applies only to the current table
-		css = @chain css begin
-			split(_,'}') # Separate different style groups
-			map(x -> lstrip(x,['\n','\t',' ']),_) # Remove trailing newlines
-			@aside println(_)
-			filter(!isempty,_)
-			map(x -> split(x,','),_) # Find the differents combined CSS selectors as they have to be prepended with the class together
-			map(_) do style # Here we go to prepend the custom element
-				map!(style,style) do selector
-					"div[data-uuid='$id'] " * strip(selector) # Preprend the custom id to each selector 
-				end
-				join(style,",\n")
-			end
-			map(x -> x * "\n}",_)
-			join(_,"\n\n") # Join back into a single string
-		end
+		css = prepend_selector(css,"div[data-uuid='$id']")
 		out = @htl """
 		$out
 		<style>
@@ -155,6 +176,19 @@ function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), 
 	return out
 end
 
+# ╔═╡ fec22aa8-ffee-4b6c-a46e-a82ed3f75a9d
+#=╠═╡ notebook_exclusive
+prepend_selector("""
+	caption, magic {
+		font-family: "asd", lol;
+	}
+
+	h1, h2 {
+		color: red;
+	}
+""", "GESU")
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ e11a10bd-8d8c-4e7f-ba3a-873a3e8d349f
 export prettytable
 
@@ -162,14 +196,21 @@ export prettytable
 a = rand(10,4)
 
 # ╔═╡ 81d55931-6c5e-4211-86c7-d67681183cb7
-prettytable(a)
+prettytable(a;caption = "GESU",append_css = """
+	caption {
+		font-family: "Times New Roman", Times, serif;
+	}
+""")
 
 # ╔═╡ ca56394b-b4a9-4c8f-a8cc-1592dc1b6bd5
-prettytable(a;tf=tf_html_minimalist,append_css="
+prettytable(a;tf=tf_html_minimalist,append_css="""
 tr:nth-child(5) {
 	font-weight: 800;
 }
-	")
+	table {
+		font-family: "Times New Roman", Times, serif;
+	}
+	""")
 
 # ╔═╡ b9953787-fd44-432a-b2c1-5f9de7cfccbe
 prettytable(a;tf=tf_html_dark)
@@ -195,6 +236,9 @@ PrettyTables = "~1.1.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
+[[Artifacts]]
+uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
@@ -202,6 +246,10 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 git-tree-sha1 = "c72673739e02d65990e5e068264df5afaa0b3273"
 uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
 version = "0.4.7"
+
+[[CompilerSupportLibraries_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 
 [[Crayons]]
 git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
@@ -242,7 +290,7 @@ version = "1.0.0"
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[LinearAlgebra]]
-deps = ["Libdl"]
+deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[Logging]]
@@ -251,6 +299,10 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 [[Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[OpenBLAS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
+uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 
 [[PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
@@ -299,6 +351,10 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[libblastrampoline_jll]]
+deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
+uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
 """
 
 # ╔═╡ Cell order:
@@ -309,6 +365,8 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 # ╠═22386594-49c7-4c3b-948e-fd13d326d360
 # ╠═b18e8c7f-467e-427c-8487-e021bd8c283a
 # ╠═e880d449-0e72-45ad-bea9-bbadcdcd523d
+# ╠═73d1a71c-78a3-4533-9792-526e45c868ff
+# ╠═fec22aa8-ffee-4b6c-a46e-a82ed3f75a9d
 # ╠═e11a10bd-8d8c-4e7f-ba3a-873a3e8d349f
 # ╠═98765fad-7349-4791-a2c9-b60d6a33b1f3
 # ╠═81d55931-6c5e-4211-86c7-d67681183cb7
