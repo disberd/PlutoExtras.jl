@@ -38,6 +38,9 @@ You will then have to use <i>Ctrl-S</i> to execute all modified cells (where the
 <br>
 <br>
 <b>You still need to use at least version 0.16 of Pluto as the @ingredients macro only works properly with the macro analysis functionality that was added in that version</b>
+<br>
+<br>
+<b>The automatic reload of the macro when re-executing the cell is broken with CM6 so the whole cell should add/delete empty spaces after the macro before re-executing</b>
 
 <script>
 /* Get the button */
@@ -225,7 +228,7 @@ end
 
 This macro is used to include external julia files inside a pluto notebook and is inspired by the discussion on [this Pluto issue](https://github.com/fonsp/Pluto.jl/issues/1101).
 
-It requires Pluto > v0.15.1 (requires macro analysis functionality) and includes and external file, taking care of putting in the caller namespace all varnames that are tagged with `export varname` inside the included file.
+It requires Pluto >= v0.16.0 (requires macro analysis functionality) and includes and external file, taking care of putting in the caller namespace all varnames that are tagged with `export varname` inside the included file.
 
 The macro relies on the use of [`names`](@ref) to get the variable names to be exported, and support providing the names of the keyword arguments of `names` to be set to true as additional strings 
 
@@ -426,7 +429,7 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 # ╠═ae599257-a0cd-425c-a0a7-311e52b931e5
 # ╠═23af305c-677b-4575-8591-582ce51e8587
 # ╠═30b27e5e-b73f-4ce3-bca9-3944251ea42c
-# ╠═872bd88e-dded-4789-85ef-145f16003351
+# ╟─872bd88e-dded-4789-85ef-145f16003351
 # ╠═63e2bd00-63b8-43f9-b8d3-b5d336744f3a
 # ╟─3182a751-8c03-43e5-acb9-df07bd7c86dd
 # ╟─23167ca1-58b3-4c54-8810-d41e437992cb
