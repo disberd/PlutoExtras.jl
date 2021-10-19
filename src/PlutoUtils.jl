@@ -18,6 +18,7 @@ include(pluto_mapexpr,"./latex_equations.jl")
 include(pluto_mapexpr,"./prettytable.jl")
 include(pluto_mapexpr,"./kbd_shortcuts.jl")
 include(pluto_mapexpr,"./ingredients_macro.jl")
+include(pluto_mapexpr,"./html2canvas_savediv.jl")
 
 function __init__()
 	@require PlotlyBase="a03496cd-edff-5a9b-9e67-9cda94a718b5" include("plotly_show.jl")
