@@ -566,7 +566,7 @@ body.presentation .plutoui-toc.aside {
 		/* That is, viewport minus top minus Live Docs */
 		max-height: calc(100vh - 5rem - 56px);
 		overflow: hidden;
-		z-index: 50;
+		z-index: 10;
 		background: white;
 		display: flex;
 		flex-direction: column;
