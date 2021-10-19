@@ -160,7 +160,7 @@ function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), 
 	"""
 	# Append the additional css
 	css *= append_css
-	println(css)
+	# println(css)
 	# Deal with the custom CSS Style
 	if !isempty(css)
 		# Pre-pend the div[data-UUID=$id] to all css selectors so that this applies only to the current table
