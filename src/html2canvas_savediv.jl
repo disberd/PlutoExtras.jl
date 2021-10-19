@@ -14,6 +14,7 @@ end
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ bab9140d-054a-4bb6-99cd-1a972679f730
+#=╠═╡ notebook_exclusive
 md"""
 This notebook implements a function that saves html tables generated with `prettytable` (or in general any table that has a parent element with a specific id).
 Before using, the `initialize_hml2canvas_savediv()` function must be called in a cell of its own.
@@ -22,6 +23,7 @@ The table will be saved as `table_id.png` inside the folder identified by `figur
 
 Check the code of savediv for understanding the other parameters
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 080093c3-39ca-43ea-ba38-c80cf800e547
 function try_moveimage(srcname,dstpath)
