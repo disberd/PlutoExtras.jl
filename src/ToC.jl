@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.0
 
 using Markdown
 using InteractiveUtils
@@ -309,7 +309,7 @@ const Toc = () => {
 			}
 
 			const cell = document.getElementById(id)
-			const cm = cell.querySelector('.CodeMirror').CodeMirror
+			const cm = cell.querySelector('.cm-editor').CodeMirror ?? cell.querySelector('.CodeMirror').CodeMirror // Second version is for older pluto
 			if (hide_this && id != toc_id && cm.getValue() !== "") {
 				cell.setAttribute('hidden',"")
 			} else {
@@ -756,7 +756,7 @@ version = "0.9.0"
 # ╠═759e0c40-cea7-4c62-8123-179a97becc40
 # ╟─e2307fb5-f3f8-482f-abae-5509bf48fe2d
 # ╠═8b20a786-7020-4252-8e42-ffbd33fb19e4
-# ╠═71a2347d-fb17-4c12-8298-9d07511ffb05
+# ╟─71a2347d-fb17-4c12-8298-9d07511ffb05
 # ╠═028c5069-fc3d-48a0-84e1-476689539f2c
 # ╟─9784edff-a6ac-4308-a1af-71fedd1f2096
 # ╠═844f74f6-d59a-4651-866b-fd1bd2dbfc3c
