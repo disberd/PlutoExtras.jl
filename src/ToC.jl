@@ -9,16 +9,6 @@ using InteractiveUtils
 using HypertextLiteral
   ╠═╡ notebook_exclusive =#
 
-# ╔═╡ ac068168-86c9-4543-8545-08202238447d
-@htl """
-<style>
-	main {
-		max-width:1200px;
-		margin-right:100px !important;
-	}
-</style>
-"""
-
 # ╔═╡ 21761862-acb6-4691-97f0-a756865ac1cc
 md"""
 ### Collapse/Hide heading
@@ -744,7 +734,6 @@ version = "0.9.0"
 # ╠═64a29f5e-3334-43bb-a23f-8bfda53af1a4
 # ╠═1ca8ba46-c816-488e-b728-061288a4d75f
 # ╠═1a9e349a-8856-4c39-9bbf-f89001b2b8f2
-# ╠═ac068168-86c9-4543-8545-08202238447d
 # ╟─edd55419-df8a-45a5-8342-950749ae8980
 # ╟─21761862-acb6-4691-97f0-a756865ac1cc
 # ╟─ea897dda-e0d2-43f4-8c79-f96ce3897ac9
