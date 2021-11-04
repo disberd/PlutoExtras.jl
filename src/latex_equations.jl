@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.1
 
 using Markdown
 using InteractiveUtils
@@ -283,6 +283,18 @@ $(texeq("
 ))
 """
 
+# ╔═╡ 375641e3-f0c0-4473-9ff6-022ed06f9646
+macro texeq_str(code)
+	# The tring literal macro automatically translates single backslash into double backslash, so we just have to output that
+	println(code)
+	:(texeq($(esc(code))))
+end
+
+# ╔═╡ 2078d2c8-1f38-42fe-9945-b2235e267b38
+texeq"
+\frac{q \sqrt{2}}{15}
+"
+
 # ╔═╡ 2c82ab99-8e86-41c6-b938-3635d2d3ccde
 md"""
 The antenna pattern of a DRA antenna can at first approximation be expressed as:
@@ -313,7 +325,7 @@ md"""Link to sub-parts of align environments are now fixed! $(eqref("test1")), $
 """
 
 # ╔═╡ cbf7a7b7-3dc9-488f-b891-26f1590dadc0
-export texeq, eqref, initialize_eqref
+export texeq, eqref, initialize_eqref, @texeq_str
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -362,6 +374,8 @@ version = "0.8.0"
 # ╠═2ad9500c-187b-4b69-8e7b-ef76af8fc39a
 # ╠═cbf7a7b7-3dc9-488f-b891-26f1590dadc0
 # ╠═f58427a7-f540-4667-93eb-57f1f53905f4
+# ╠═375641e3-f0c0-4473-9ff6-022ed06f9646
+# ╠═2078d2c8-1f38-42fe-9945-b2235e267b38
 # ╠═2c82ab99-8e86-41c6-b938-3635d2d3ccde
 # ╠═cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 # ╟─00000000-0000-0000-0000-000000000001
