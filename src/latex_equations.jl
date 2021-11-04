@@ -283,17 +283,8 @@ $(texeq("
 ))
 """
 
-# ╔═╡ 375641e3-f0c0-4473-9ff6-022ed06f9646
-macro texeq_str(code)
-	# The tring literal macro automatically translates single backslash into double backslash, so we just have to output that
-	println(code)
-	:(texeq($(esc(code))))
-end
-
-# ╔═╡ 2078d2c8-1f38-42fe-9945-b2235e267b38
-texeq"
-\frac{q \sqrt{2}}{15}
-"
+# ╔═╡ 943e5ef8-9187-4bfd-aefa-8f405b50e6aa
+asdasd = 3
 
 # ╔═╡ 2c82ab99-8e86-41c6-b938-3635d2d3ccde
 md"""
@@ -324,8 +315,78 @@ md"""Multiple links to the same equation $(eqref("interactive")) also work! See 
 md"""Link to sub-parts of align environments are now fixed! $(eqref("test1")), $(eqref("test2")), $(eqref("test3")), $(eqref("test4")), $(eqref("test5"))
 """
 
+# ╔═╡ 172c02b4-5ee1-42bb-ac6d-598eeb090463
+# Function to create interpolation inside string literal
+function _str_interpolate(s::String)
+	str = Expr(:string)
+	last_idx = 1
+	inside_interp = false
+	parens_found = 0
+	inside_parens = false
+	simple_interp = true
+	@inbounds for (i,c) ∈ enumerate(s)
+		if !inside_interp 
+			if c !== '$'
+				continue
+			end
+			# Add the previous part of the string to the expr
+			push!(str.args,s[last_idx:i-1])
+			last_idx = i+1
+			inside_interp = true
+			if s[i+1] === '('
+				simple_interp = false
+			else
+				simple_interp = true
+			end
+		else
+			if simple_interp
+				if c ∈ (' ','.','\n','\t')
+					# We found the end of the expression, translate this into an expr
+					push!(str.args,Meta.parse(s[last_idx:i-1]))
+					println(Meta.parse(s[last_idx:i-1]))
+					last_idx = i
+					inside_interp = false
+				end
+			else
+				if c === '('
+					parens_found += 1
+					inside_parens = true
+				elseif c === ')'
+					parens_found -= 1
+					if parens_found == 0
+						inside_parens = false
+						# We found the end of the expression, translate this into an expr
+						push!(str.args,Meta.parse(s[last_idx:i]))
+						last_idx = i+1
+						inside_interp = false
+					end
+				end
+			end
+		end
+	end
+	if inside_interp
+		push!(str.args,esc(Meta.parse(s[last_idx:end])))
+	else
+		push!(str.args,s[last_idx:end])
+	end
+	str
+end
+
+# ╔═╡ 375641e3-f0c0-4473-9ff6-022ed06f9646
+macro texeq_str(code)
+	# The tring literal macro automatically translates single backslash into double backslash, so we just have to output that
+	expr = :(texeq())
+	push!(expr.args,_str_interpolate(code))
+	expr
+end
+
 # ╔═╡ cbf7a7b7-3dc9-488f-b891-26f1590dadc0
 export texeq, eqref, initialize_eqref, @texeq_str
+
+# ╔═╡ 2078d2c8-1f38-42fe-9945-b2235e267b38
+texeq"
+\frac{q \sqrt{2}}{15} + $(3 + 2 + (5 + 32)) - $asdasd
+"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -376,7 +437,9 @@ version = "0.8.0"
 # ╠═f58427a7-f540-4667-93eb-57f1f53905f4
 # ╠═375641e3-f0c0-4473-9ff6-022ed06f9646
 # ╠═2078d2c8-1f38-42fe-9945-b2235e267b38
+# ╠═943e5ef8-9187-4bfd-aefa-8f405b50e6aa
 # ╠═2c82ab99-8e86-41c6-b938-3635d2d3ccde
 # ╠═cddc93d2-1b24-4bda-8113-4a1ec781b2b6
+# ╠═172c02b4-5ee1-42bb-ac6d-598eeb090463
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
