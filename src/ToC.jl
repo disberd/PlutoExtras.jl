@@ -309,7 +309,7 @@ const Toc = () => {
 			}
 
 			const cell = document.getElementById(id)
-			const cm = cell.querySelector('.cm-editor').CodeMirror ?? cell.querySelector('.CodeMirror').CodeMirror // Second version is for older pluto
+			const cm = cell.querySelector('.cm-editor')?.CodeMirror ?? cell.querySelector('.CodeMirror')?.CodeMirror // Second version is for older pluto
 			if (hide_this && id != toc_id && cm.getValue() !== "") {
 				cell.setAttribute('hidden',"")
 			} else {
