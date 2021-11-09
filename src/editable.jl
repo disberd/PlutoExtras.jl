@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.1
 
 using Markdown
 using InteractiveUtils
@@ -7,8 +7,9 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
 end
@@ -52,6 +53,9 @@ begin
 		show(io,m,@htl """
         
 		<script>
+
+			const docu = document.document ?? document
+			const windw = window.window ?? window
 
 			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
 
@@ -104,7 +108,9 @@ begin
 		show(io,m,@htl """
         
 		<script>
-
+		
+			const docu = document.document ?? document
+			const windw = window.window ?? window
 			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
 
 			const elp = html`
@@ -152,20 +158,20 @@ begin
 
 			function selectText(el){
 				var sel, range;
-				if (window.getSelection && document.createRange) { //Browser compatibility
-				sel = window.getSelection();
+				if (windw.getSelection && docu.createRange) { //Browser compatibility
+				sel = windw.getSelection();
 				if(sel.toString() == ''){ //no text selection
-					window.setTimeout(function(){
-						range = document.createRange(); //range object
+					windw.setTimeout(function(){
+						range = docu.createRange(); //range object
 						range.selectNodeContents(el); //sets Range
 						sel.removeAllRanges(); //remove all ranges from selection
 						sel.addRange(range);//add Range to a Selection.
 					},1);
 				}
-				}else if (document.selection) { //older ie
-					sel = document.selection.createRange();
+				}else if (docu.selection) { //older ie
+					sel = docu.selection.createRange();
 					if(sel.text == ''){ //no text selection
-						range = document.body.createTextRange();//Creates TextRange object
+						range = docu.body.createTextRange();//Creates TextRange object
 						range.moveToElementText(el);//sets Range
 						range.select(); //make selection.
 					}
@@ -230,20 +236,20 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 
 [compat]
-HypertextLiteral = "~0.9.0"
+HypertextLiteral = "~0.9.3"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
-git-tree-sha1 = "72053798e1be56026b81d4e2682dbe58922e5ec9"
+git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.0"
+version = "0.9.3"
 """
 
 # ╔═╡ Cell order:
