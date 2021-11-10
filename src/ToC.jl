@@ -92,6 +92,7 @@ function toc_heading(text,level::Int;hide=true,collapse=false)
 	attributes = join(attribute_names," ")
 	@htl """
 	<script>
+		const docu = document.document ?? document
 		const cell = currentScript.parentElement.closest('pluto-cell')
 		const h = docu.createElement($tag)
 		h.innerText = $text
@@ -719,7 +720,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 
 [compat]
-HypertextLiteral = "~0.9.0"
+HypertextLiteral = "~0.9.3"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -730,9 +731,9 @@ julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
-git-tree-sha1 = "72053798e1be56026b81d4e2682dbe58922e5ec9"
+git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.0"
+version = "0.9.3"
 """
 
 # ╔═╡ Cell order:
