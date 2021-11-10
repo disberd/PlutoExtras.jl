@@ -61,6 +61,8 @@ a.eq_href {
 
 <script id="katex-eqnum-script">
 
+const docu = document.document ?? document
+
 const a_vec = [] // This will hold the list of a tags with custom click, used for cleaning listeners up upon invalidation
 
 const eqrefClick = (e) => {
@@ -68,7 +70,7 @@ const eqrefClick = (e) => {
 	const a = e.target
 	const eq_id = a.getAttribute('eq_id')
 	window.location.hash = 'eqref-' + eq_id // This is to be able to use the back function to resume previous view, 'eqref-' is added in front to avoid the viewport actually going to the equation without having control of the scroll
-	const eq = document.getElementById(eq_id)
+	const eq = docu.getElementById(eq_id)
 	eq.scrollIntoView({
 		behavior: 'smooth',
 		block: 'center',
@@ -102,7 +104,7 @@ const findOffsetTop = obj => {
 // 'eqn-num' instances. 
 const updateCallback = () => {
 a_vec.splice(0,a_vec.length) // Reset the array
-const katex_blocks = document.querySelectorAll('.katex-html') // This selects all the environments we created with texeq
+const katex_blocks = docu.querySelectorAll('.katex-html') // This selects all the environments we created with texeq
 let i = 0;
 for (let blk of katex_blocks) {
 	// Find the number of numbered equation in each sub-block
@@ -142,7 +144,7 @@ for (let blk of katex_blocks) {
 		}
 		// We now update all the links that refer to this label
 		const id = item.id
-		const a_vals = document.querySelectorAll(`[eq_id=\${id}]`)
+		const a_vals = docu.querySelectorAll(`[eq_id=\${id}]`)
 		a_vals !== null && a_vals.forEach(a => {
 			a_vec.push(a) // Add this to the vector
 			a.innerText = `(\${i})`
@@ -152,7 +154,7 @@ for (let blk of katex_blocks) {
 }
 }
 
-const notebook = document.querySelector("pluto-notebook")
+const notebook = docu.querySelector("pluto-notebook")
 
 // We have a mutationobserver for each cell:
 const observers = {
@@ -394,20 +396,20 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 
 [compat]
-HypertextLiteral = "~0.8.0"
+HypertextLiteral = "~0.9.3"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
-git-tree-sha1 = "1e3ccdc7a6f7b577623028e0095479f4727d8ec1"
+git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.8.0"
+version = "0.9.3"
 """
 
 # ╔═╡ Cell order:
@@ -423,8 +425,8 @@ version = "0.8.0"
 # ╠═9e69e30e-506a-4bd7-b213-0b5c0b31a10d
 # ╠═ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
 # ╠═900f494b-690d-43cf-b1b7-61c5d3e68a6d
-# ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═7879d7e3-38ad-4a06-8057-ec30da534d76
+# ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═9446acfc-a310-4de6-8876-e30ede527e9c
 # ╠═6d750d01-b851-4614-b448-1a6e00fa5754
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.1
 
 using Markdown
 using InteractiveUtils
@@ -116,8 +116,9 @@ function show2(plt::PlotlyBase.Plot)
 	@htl("""
 			<div>
 			<script id=$script_id>
+			const docu = document.document ?? document
 			const {plotly} = await import("https://cdn.plot.ly/plotly-2.5.1.min.js")
-			const PLOT = this ?? document.createElement("div");
+			const PLOT = this ?? docu.createElement("div");
 		
 
 		
@@ -244,6 +245,31 @@ begin
 end
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 0f6a5618-c338-41ac-b6e3-cba211c070be
+#=╠═╡ notebook_exclusive
+md"""
+# Plotly traces additional methods
+"""
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ c805105a-9444-49df-b06f-12e91aa9b26c
+const NNumber = Union{Nothing,<:Number}
+
+# ╔═╡ b956aa02-48fb-416e-aa39-c9fa291ed47a
+md"""
+## scatter
+"""
+
+# ╔═╡ b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
+begin
+	function PlotlyBase.scatter(xy::AbstractVector{<:Tuple{Any,Any}};kwargs...)
+		PlotlyBase.scatter(;x=first.(xy),y=last.(xy),kwargs...)
+	end
+	function PlotlyBase.scatter(xy::Tuple{<:AbstractVector,<:AbstractVector};kwargs...)
+		PlotlyBase.scatter(;x=xy[1],y=xy[2],kwargs...)
+	end
+end
+
 # ╔═╡ b64c1114-b013-43f6-9226-12290160ecb6
 #=╠═╡ notebook_exclusive
 begin
@@ -318,31 +344,6 @@ $p4_1
 $p9_3
 """
   ╠═╡ notebook_exclusive =#
-
-# ╔═╡ 0f6a5618-c338-41ac-b6e3-cba211c070be
-#=╠═╡ notebook_exclusive
-md"""
-# Plotly traces additional methods
-"""
-  ╠═╡ notebook_exclusive =#
-
-# ╔═╡ c805105a-9444-49df-b06f-12e91aa9b26c
-const NNumber = Union{Nothing,<:Number}
-
-# ╔═╡ b956aa02-48fb-416e-aa39-c9fa291ed47a
-md"""
-## scatter
-"""
-
-# ╔═╡ b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
-begin
-	function PlotlyBase.scatter(xy::AbstractVector{<:Tuple{Any,Any}};kwargs...)
-		PlotlyBase.scatter(;x=first.(xy),y=last.(xy),kwargs...)
-	end
-	function PlotlyBase.scatter(xy::Tuple{<:AbstractVector,<:AbstractVector};kwargs...)
-		PlotlyBase.scatter(;x=xy[1],y=xy[2],kwargs...)
-	end
-end
 
 # ╔═╡ 31de5995-b2a2-48ce-9bf3-fd61059e8f61
 #=╠═╡ notebook_exclusive
@@ -422,17 +423,23 @@ PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [compat]
-HypertextLiteral = "~0.8.0"
+HypertextLiteral = "~0.9.3"
 PlotlyBase = "~0.8.18"
-PlutoUtils = "~0.3.5"
+PlutoUtils = "~0.4.5"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "0bc60e3006ad95b4bb7497698dd7c6d649b9bc06"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.1"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -450,9 +457,9 @@ version = "0.4.8"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
-git-tree-sha1 = "9995eb3977fbf67b86d0a0a0508e83017ded03f2"
+git-tree-sha1 = "a851fec56cb73cfdf43762999ec72eff5b86882a"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.14.0"
+version = "3.15.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -495,9 +502,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
-git-tree-sha1 = "a32185f5428d3986f47c2ab78b1f216d5e6cc96f"
+git-tree-sha1 = "b19534d1895d702889b219c382a6e18010797f0b"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-version = "0.8.5"
+version = "0.8.6"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "LibCURL", "NetworkOptions"]
@@ -520,10 +527,22 @@ git-tree-sha1 = "4df9f7e06108728ebf00a0a11edee4b29a482bb2"
 uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
 version = "1.3.0"
 
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.4"
+
 [[deps.HypertextLiteral]]
-git-tree-sha1 = "1e3ccdc7a6f7b577623028e0095479f4727d8ec1"
+git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.8.0"
+version = "0.9.3"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.2"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -541,9 +560,9 @@ uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.2"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "c7f1c695e06c01b95a67f0cd1d34994f3e7db104"
+git-tree-sha1 = "f2355693d6778a178ade15952b7ac47a4ff97996"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.2.1"
+version = "1.3.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -573,9 +592,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
-git-tree-sha1 = "5a5bc6bf062f0f95e62d0fe0a2d99699fed82dd9"
+git-tree-sha1 = "3d3e902b31198a27340d0bf00d6ac452866021cf"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.8"
+version = "0.5.9"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -611,9 +630,9 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "438d35d2d95ae2c5e8780b330592b6de8494e779"
+git-tree-sha1 = "ae4bbcadb2906ccc085cf52ac286dc1377dceccc"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.0.3"
+version = "2.1.2"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -633,27 +652,27 @@ version = "0.2.0"
 
 [[deps.PlutoTest]]
 deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
-git-tree-sha1 = "ada2eae88798ed6c93d9acb5e41e1671794bb8c8"
+git-tree-sha1 = "92b8ae1eee37c1b8f70d3a8fb6c3f2d81809a1c5"
 uuid = "cb4044da-4d16-4ffa-a6a3-8cad7f73ebdc"
-version = "0.1.1"
+version = "0.2.0"
 
 [[deps.PlutoUI]]
-deps = ["Base64", "Dates", "HypertextLiteral", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "Suppressor"]
-git-tree-sha1 = "26b4d16873562469a0a1e6ae41d90dec9e51286d"
+deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "e071adf21e165ea0d904b595544a8e514c8bb42c"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.10"
+version = "0.7.19"
 
 [[deps.PlutoUtils]]
 deps = ["Chain", "Glob", "HypertextLiteral", "InteractiveUtils", "Markdown", "PlutoDevMacros", "PlutoTest", "PlutoUI", "PrettyTables", "Reexport", "Requires", "UUIDs"]
-git-tree-sha1 = "fc93945a0d195518bf4d98c9a385f81f92262378"
+git-tree-sha1 = "ae74b417ca618a4a24fea3240433f969efa2f9b3"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
-version = "0.3.5"
+version = "0.4.5"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
-git-tree-sha1 = "0d1245a357cc61c8cd61934c07447aa569ff22e6"
+git-tree-sha1 = "d940010be611ee9d67064fe559edbb305f8cc0eb"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "1.1.0"
+version = "1.2.3"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -664,7 +683,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.Reexport]]
@@ -695,11 +714,6 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
-[[deps.Suppressor]]
-git-tree-sha1 = "a819d77f31f83e5792a76081eee1ea6342ab8787"
-uuid = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
-version = "0.2.0"
-
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
@@ -712,9 +726,9 @@ version = "1.0.1"
 
 [[deps.Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "1162ce4a6c4b7e31e0e6b14486a6986951c73be9"
+git-tree-sha1 = "fed34d0e71b91734bf0a7e10eb1bb05296ddbcd0"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.5.2"
+version = "1.6.0"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
