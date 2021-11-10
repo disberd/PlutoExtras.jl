@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.0
+# v0.17.1
 
 using Markdown
 using InteractiveUtils
@@ -93,7 +93,7 @@ function toc_heading(text,level::Int;hide=true,collapse=false)
 	@htl """
 	<script>
 		const cell = currentScript.parentElement.closest('pluto-cell')
-		const h = document.createElement($tag)
+		const h = docu.createElement($tag)
 		h.innerText = $text
 		cell.toggleAttribute('hide-heading',$hide)
 		cell.toggleAttribute('collapsed',$collapse)
@@ -118,7 +118,7 @@ toc_heading("Test1",1;hide=false,collapse=true)
 # ╔═╡ d1784dd2-9a25-4add-90a8-121f1e2620e6
 @htl """
 <script>
-const h = document.createElement('h2')
+const h = docu.createElement('h2')
 h.innerText = 'Test2'
 const cell = currentScript.parentElement.closest('pluto-cell')
 cell.removeAttribute('collapsed')
@@ -207,7 +207,7 @@ const Toc = () => {
 		
 		const selector = range.map(i => `pluto-notebook pluto-cell h\${i}`).join(",")
 		const initialArray = [] 
-		for (let item of document.querySelectorAll(selector)) {
+		for (let item of docu.querySelectorAll(selector)) {
 			const isdocs = item.closest('.pluto-docs-binding')
 			if (isdocs !== null) {
 				continue
@@ -286,7 +286,7 @@ const Toc = () => {
 
 		if (!hide) {
 			cell_order.forEach(id => {
-				const cell = document.getElementById(id)
+				const cell = docu.getElementById(id)
 				cell.removeAttribute('hidden')
 			})
 			return
@@ -308,7 +308,7 @@ const Toc = () => {
 				next_id = next_hindex >= hlength ? '' : state[next_hindex].id
 			}
 
-			const cell = document.getElementById(id)
+			const cell = docu.getElementById(id)
 			const cm = cell.querySelector('.cm-editor')?.CodeMirror ?? cell.querySelector('.CodeMirror')?.CodeMirror // Second version is for older pluto
 			if (hide_this && id != toc_id && cm.getValue() !== "") {
 				cell.setAttribute('hidden',"")
@@ -336,7 +336,7 @@ const Toc = () => {
 	)
 
 	const customClick = (e,id) => {
-		const cell = document.getElementById(id)
+		const cell = docu.getElementById(id)
 		e.preventDefault()
 		if (e.altKey) {
 			cell.toggleAttribute('hide-heading')
@@ -355,7 +355,7 @@ const Toc = () => {
 			set_collapseAll(0)
 			return
 		}
-		const h = document.getElementById(id)
+		const h = docu.getElementById(id)
 		// console.log(h)
 		h.scrollIntoView({
 			behavior: 'smooth', 
@@ -425,17 +425,22 @@ const Toc = () => {
 toc_js = toc -> """
 const { html, render, Component, useEffect, useLayoutEffect, useState, useRef, useMemo, createContext, useContext, } = await import( "https://cdn.jsdelivr.net/npm/htm@3.0.4/preact/standalone.mjs")
 
-const node = this ?? document.createElement("div")
+// A new way to execute scripts was added in
+// https://github.com/fonsp/Pluto.jl/commit/f9eae892c03fadd6c9c5455b93bbb998882db072, so if
+// we have that commit the actual document is in document.document
+const docu = document.document ?? document
 
-const notebook = document.querySelector("pluto-notebook")
+const node = this ?? docu.createElement("div")
+
+const notebook = docu.querySelector("pluto-notebook")
 
 const cell = currentScript.parentElement.closest('pluto-cell')
 const toc_id = cell.id
 
 const recomputeWidth = () => {
-	const mainElement = document.querySelector('main')
-	const maxWidth = document.body.offsetWidth - mainElement.offsetWidth - mainElement.offsetLeft
-	document.documentElement.style.setProperty('--aside-toc-width', `calc(\${maxWidth}px - 5px - .8rem)`);
+	const mainElement = docu.querySelector('main')
+	const maxWidth = docu.body.offsetWidth - mainElement.offsetWidth - mainElement.offsetLeft
+	docu.documentElement.style.setProperty('--aside-toc-width', `calc(\${maxWidth}px - 5px - .8rem)`);
 }
 
 
@@ -487,9 +492,9 @@ const notebookObserver = new MutationObserver(() => {
 })
 notebookObserver.observe(notebook, {childList: true})
 
-// And finally, an observer for the document.body classList, to make sure that the toc also works when if is loaded during notebook initialization
+// And finally, an observer for the docu.body classList, to make sure that the toc also works when if is loaded during notebook initialization
 const bodyClassObserver = new MutationObserver(updateCallback)
-bodyClassObserver.observe(document.body, {attributeFilter: ["class"]})
+bodyClassObserver.observe(docu.body, {attributeFilter: ["class"]})
 
 invalidation.then(() => {
 	notebookObserver.disconnect()
@@ -689,7 +694,7 @@ begin
 	function Base.show(io::IO, mimetype::MIME"text/html", toc::ToC)
 		show(io,mimetype,@htl """
 			
-<script type="module" id="asdf">
+<script id="asdf">
 			$(HypertextLiteral.JavaScript(toc_js(toc)))
 			</script>
 			
@@ -721,7 +726,7 @@ HypertextLiteral = "~0.9.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
