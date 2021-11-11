@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.1
 
 using Markdown
 using InteractiveUtils
@@ -7,14 +7,18 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
 end
 
 # ╔═╡ f5486f67-7bfc-44e2-91b9-9401d81666da
-using PlutoDevMacros
+begin
+	using PlutoDevMacros
+	using PlutoHooks
+end
 
 # ╔═╡ fcbd82ae-c04d-4f87-bbb7-5f73bdbf8bd0
 html"""
@@ -37,7 +41,7 @@ To try out the <i>exclusive</i> parts of the notebook, press this <button>button
 You will then have to use <i>Ctrl-S</i> to execute all modified cells (where the block comments were removed)
 <br>
 <br>
-<b>You still need to use at least version 0.16 of Pluto as the @ingredients macro only works properly with the macro analysis functionality that was added in that version</b>
+<b>You still need to use at least version 0.17 of Pluto as the @ingredients macro only works properly with the macro analysis functionality that was added in that version (PlutoHooks)</b>
 <br>
 <br>
 <b>The automatic reload of the macro when re-executing the cell is broken with CM6 so the whole cell should add/delete empty spaces after the macro before re-executing</b>
@@ -149,34 +153,29 @@ function ingredients(path::String,exprmap::Function=include_mapexpr())
 	m
 end
 
-# ╔═╡ 23af305c-677b-4575-8591-582ce51e8587
-html_toggle_whitespace() = html"""
-<script>
-	const cm = currentScript.closest('pluto-cell').querySelector('.CodeMirror').CodeMirror
-	if (cm.on_submit) {
-// 		Function already exist, do nothing
-	} else {
-// 		We save the default on_submit on the codemirror
-		cm.on_submit = cm.options.extraKeys['Shift-Enter']
-		console.log('First run, attached original on_submit on the CodeMirror element')
-	}
-// 	Do the processing of the cell input, toggline a whitespace at the end of the cell to trigger symbols recomputation on the macro
-	const toggle_whitespace = () => {
-		const text = cm.getValue()
-		const last = text.slice(-1)
-		const new_val = last === " " ? text.slice(0,-1) : text + " "
-		cm.setValue(new_val)
-	}
-	const new_event = () => {
-		toggle_whitespace()
-		cm.on_submit()
-	}
-	
-	cm.setOption('extraKeys',{...cm.options.extraKeys, 'Shift-Enter': new_event})
-	
-	// invalidation.then(async () => await cm.setOption('extraKeys',{...cm.options.extraKeys, 'Shift-Enter': on_submit}))
-</script>
-"""
+# ╔═╡ 98b1fa0d-fad1-4c4f-88a0-9452d492c4cb
+function include_expr(m::Module,kwargstrs::String...)
+	ex = Expr(:block)
+	kwargs = (Symbol(s) => true for s ∈ kwargstrs if s ∈ ("all","imported"))
+	varnames = names(m;kwargs...)
+	# Remove the symbols that start with a '#' (still to check what is the impact)
+	filter!(x -> first(String(x)) !== '#',varnames)
+	# Symbols to always exclude from imports
+	exclude_names = (
+			nameof(m),
+			:eval,
+			:include,
+			Symbol("@bind"),
+		)
+	name = repr(m) |> Symbol
+	# push!(ex.args,:($m))
+	for s ∈ varnames
+		if s ∉ exclude_names
+			push!(ex.args,:($(esc(s)) = $(getfield(m,s))))
+		end
+	end
+	ex
+end
 
 # ╔═╡ ae599257-a0cd-425c-a0a7-311e52b931e5
 # Function that generates the actual expression for expanding the included symbols in the macro caller space
@@ -202,24 +201,10 @@ function _ingredients(path::String,modname::Symbol,kwargstrs::String...)
 	end
 	# Assign the module to the intended name
 	modname !== :nothing && push!(block.args,:($modname = $m))
-	# Put the html element to modify Shift-Enter
-	push!(block.args,:($(html_toggle_whitespace())))
+	# # Put the html element to modify Shift-Enter
+	# push!(block.args,:($(html_toggle_whitespace())))
 	esc(block)
 end
-
-# ╔═╡ 30b27e5e-b73f-4ce3-bca9-3944251ea42c
-# Return the string of the path to include and eventually the name of the variable where to assigne the loaded module
-function _process_ingredients_ex(ex,caller_module::Module,modname::Symbol=:nothing)
-	ex isa String && return (ex,modname)
-	if ex isa Expr && ex.head === :(=)
-		return _process_ingredients_ex(ex.args[2],caller_module,ex.args[1])
-	else
-		path = Core.eval(caller_module,ex)
-	end
-	path isa String && return (path,modname)
-	path isa Expression && return _process_ingredients_ex(path,caller_module,modname)
-	error("The input to the @ingredients macro can only be a string or an expression whose right-hand side evaluates to a string") 
-end	
 
 # ╔═╡ 872bd88e-dded-4789-85ef-145f16003351
 """
@@ -238,70 +223,15 @@ This simply toggles adding and removing a whitespace at the end of the cell inpu
 This has the effect of avoid using the cached version of the macro and always re-evaluating the symbols that are assigned in the cell.
 """
 macro ingredients(ex,kwargstrs...)
-	path,modname = _process_ingredients_ex(ex,__module__)
-	if _called_from_notebook(string(__source__.file))
-		_ingredients(path,modname,kwargstrs...)
-	else
-		esc(:(include($path)))
+	path = ex isa String ? ex : Base.eval(__module__,ex)
+	@skip_as_script begin
+		m = ingredients(path)
+		include_expr(m,kwargstrs...)
 	end
 end
 
 # ╔═╡ 63e2bd00-63b8-43f9-b8d3-b5d336744f3a
 export @ingredients, ingredients
-
-# ╔═╡ 3182a751-8c03-43e5-acb9-df07bd7c86dd
-#=╠═╡ notebook_exclusive
-md"""
-## HTML Highlighting in the cell
-When dealing with cells mostly having html/javascript, it is more convenient to use the synthax highlighting from the *htmlmixed* mode of CodeMirror rather than the *julia* one.\
-Until [issue #1152](https://github.com/fonsp/Pluto.jl/issues/1152) is not resolved, we can do some hack to get limited functionality.
-
-The cell below this one executes a js script that enable toggling between *julia* and *htmlmixed* mode with *Ctrl-Shift-M*.
-
-Try it out by clicking inside the input of the cell below and pressing the shortcut (only tested on Chrome on Windows).
-"""
-  ╠═╡ notebook_exclusive =#
-
-# ╔═╡ 23167ca1-58b3-4c54-8810-d41e437992cb
-#=╠═╡ notebook_exclusive
-html"""
-Loaded the script to change CodeMirror mode to <i>htmlmixed</i>, press <i>Ctrl-Shift-M</i> while inside a cell to toggle between <i>julia</i> and <i>htmlmixed</i> modes
-
-<!-- Load the htmlmixed necessary scripts -->
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.60.0/mode/xml/xml.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.60.0/mode/javascript/javascript.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.60.0/mode/css/css.js"></script>
-											   
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.60.0/mode/htmlmixed/htmlmixed.js"></script>
-
-<!-- Script to make the shortcut -->
-<script>
-	const toggle_htmlmixed = cell => {
-		const cm = cell.querySelector('pluto-input .CodeMirror').CodeMirror
-		const new_mode = cm.options.mode == "julia" ? "htmlmixed" : "julia"
-		console.log(new_mode)
-		cm.setOption("mode",new_mode)
-	}
-
-	const listenerFunc = e => {
-		if (e.key == "M" && e.ctrlKey && e.shiftKey) {
-			const cell = e.target.closest('pluto-cell')
-			if (cell) {
-				e.preventDefault()
-				e.stopImmediatePropagation()
-				toggle_htmlmixed(cell)
-			}
-		}
-	}
-	
-	document.addEventListener("keydown",listenerFunc)
-
-	invalidation.then(() => document.removeEventListener("keydown",listenerFunc))
-</script>
-"""
-  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 1f291bd2-9ab1-4fd2-bf50-49253726058f
 #=╠═╡ notebook_exclusive
@@ -341,7 +271,7 @@ Finally, you can also assign the full imported module in a specific variable by 
 
 # ╔═╡ d2ac4955-d2a0-48b5-afcb-32baa59ade21
 #=╠═╡ notebook_exclusive
-@ingredients notebook_path 
+@ingredients notebook_path "all"
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0d1f5079-a886-4a07-9e99-d73e0b8a2eec
@@ -378,20 +308,29 @@ TestStruct()
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
+PlutoHooks = "0ff47ea0-7a50-410d-8455-4348d5de0774"
 
 [compat]
 PlutoDevMacros = "~0.2.0"
+PlutoHooks = "~0.0.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+
+[[deps.InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -409,12 +348,25 @@ git-tree-sha1 = "cfd40e6f7c23fc38a751e4ba4a5c25b8a68fd4b2"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
 version = "0.2.0"
 
+[[deps.PlutoHooks]]
+deps = ["FileWatching", "InteractiveUtils", "Markdown", "UUIDs"]
+git-tree-sha1 = "d551bccd095218255fae60ab3305ca4f3e4d2968"
+uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
+version = "0.0.2"
+
 [[deps.Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[deps.SHA]]
+uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.UUIDs]]
+deps = ["Random", "SHA"]
+uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 """
 
 # ╔═╡ Cell order:
@@ -426,13 +378,10 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 # ╠═a6f31a58-18ad-44d2-a6a2-f46e970f195a
 # ╠═f41c1fa8-bd01-443c-bdeb-c49e5ff7127c
 # ╠═b87d12be-a37b-4202-9426-3eef14d8253c
+# ╠═98b1fa0d-fad1-4c4f-88a0-9452d492c4cb
 # ╠═ae599257-a0cd-425c-a0a7-311e52b931e5
-# ╠═23af305c-677b-4575-8591-582ce51e8587
-# ╠═30b27e5e-b73f-4ce3-bca9-3944251ea42c
-# ╟─872bd88e-dded-4789-85ef-145f16003351
+# ╠═872bd88e-dded-4789-85ef-145f16003351
 # ╠═63e2bd00-63b8-43f9-b8d3-b5d336744f3a
-# ╟─3182a751-8c03-43e5-acb9-df07bd7c86dd
-# ╟─23167ca1-58b3-4c54-8810-d41e437992cb
 # ╟─1f291bd2-9ab1-4fd2-bf50-49253726058f
 # ╟─cf0d13ea-7562-4b8c-b7e6-fb2f1de119a7
 # ╠═bd3b021f-db44-4aa1-97b2-04002f76aeff

@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.0-rc2"
 manifest_format = "2.0"
 
 [[deps.Artifacts]]
@@ -36,6 +36,9 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.Formatting]]
 deps = ["Printf"]
@@ -113,6 +116,12 @@ git-tree-sha1 = "cfd40e6f7c23fc38a751e4ba4a5c25b8a68fd4b2"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
 version = "0.2.0"
 
+[[deps.PlutoHooks]]
+deps = ["FileWatching", "InteractiveUtils", "Markdown", "UUIDs"]
+git-tree-sha1 = "d551bccd095218255fae60ab3305ca4f3e4d2968"
+uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
+version = "0.0.2"
+
 [[deps.PlutoTest]]
 deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
 git-tree-sha1 = "b7da10d62c1ffebd37d4af8d93ee0003e9248452"
@@ -136,7 +145,7 @@ deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[deps.Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.Reexport]]
