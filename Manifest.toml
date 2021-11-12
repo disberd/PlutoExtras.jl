@@ -160,10 +160,10 @@ deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markd
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.PlutoDevMacros]]
-deps = ["MacroTools"]
-git-tree-sha1 = "cfd40e6f7c23fc38a751e4ba4a5c25b8a68fd4b2"
+deps = ["MacroTools", "PlutoHooks"]
+git-tree-sha1 = "6d395f6113cd3bfbbcaae2e874d8938ba6b6e196"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.2.0"
+version = "0.3.1"
 
 [[deps.PlutoHooks]]
 deps = ["FileWatching", "InteractiveUtils", "Markdown", "UUIDs"]

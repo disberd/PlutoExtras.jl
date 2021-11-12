@@ -17,7 +17,6 @@ include(pluto_mapexpr,"ToC.jl")
 include(pluto_mapexpr,"./latex_equations.jl")
 include(pluto_mapexpr,"./prettytable.jl")
 include(pluto_mapexpr,"./kbd_shortcuts.jl")
-include(pluto_mapexpr,"./ingredients_macro.jl")
 include(pluto_mapexpr,"./html2canvas_savediv.jl")
 
 function __init__()
