@@ -161,15 +161,15 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.PlutoDevMacros]]
 deps = ["MacroTools", "PlutoHooks"]
-git-tree-sha1 = "6d395f6113cd3bfbbcaae2e874d8938ba6b6e196"
+git-tree-sha1 = "36c4e8183351565ae7190d8a0d2f76683f2a1ac4"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.3.1"
+version = "0.3.2"
 
 [[deps.PlutoHooks]]
 deps = ["FileWatching", "InteractiveUtils", "Markdown", "UUIDs"]
-git-tree-sha1 = "d551bccd095218255fae60ab3305ca4f3e4d2968"
+git-tree-sha1 = "f297787f7d7507dada25f6769fe3f08f6b9b8b12"
 uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
-version = "0.0.2"
+version = "0.0.3"
 
 [[deps.PlutoTest]]
 deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
