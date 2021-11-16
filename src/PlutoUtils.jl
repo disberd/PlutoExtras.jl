@@ -5,7 +5,7 @@ using Reexport
 @reexport using PlutoUI 
 @reexport using Chain
 @reexport using PrettyTables
-@reexport using PlutoDevMacros
+using PlutoDevMacros
 
 # Create the filtering functions for include calls from PlutoDevMacros
 pluto_mapexpr = include_mapexpr()
