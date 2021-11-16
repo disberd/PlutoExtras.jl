@@ -31,25 +31,9 @@ This functionality is implemented in the [ToC.jl](./src/ToC.jl) notebook
 
 ![ToC_example](https://user-images.githubusercontent.com/12846528/128350961-c4ccbcea-ba75-48dc-bd92-7c6551cc68f9.gif)
 
-## @ingredients macro
+## @plutoinclude macro
 
-	@ingredients path nameskwargs...
-	@ingredients modname=path namekwargs...
+The former `@ingredients` macro has been renamed to `@plutoinclude` and moved to [PlutoDevMacros](https://github.com/disberd/PlutoDevMacros). 
 
-This macro is used to include external julia files inside a pluto notebook and is inspired by the discussion on [this Pluto issue](https://github.com/fonsp/Pluto.jl/issues/1101).
-
-It requires Pluto > v0.15.1 (requires macro analysis functionality) and includes and external file, taking care of putting in the caller namespace all varnames that are tagged with `export varname` inside the included file.
-
-The macro relies on the use of `Base.names` to get the variable names to be exported, and support providing the names of the keyword arguments of `names` to be set to true as additional strings (as example, calling `@ingredients "file_path" "all"` will bring into the caller namespace all the variables that are defined in the included file, regardless of whether they are `exported` or not.)
-
-Finally, to allow to correctly reflect variations (in Pluto) in defined and exported variables inside of the included file, a custom `HTML` element is placed as last output of the macro block, so that it is sent to the cell output and executed on the browser.
-This overwrites shortcut for *Shift-Enter* inside the cell that contains the `@ingredients` macro.
-It simply adds a function call to toggle adding and removing a whitespace at the end of the cell input before *running* the cell when pressing the keyboard shortcut *Shift-Enter*.
-
-This has the effect of re-expand the macro and recompute the symbols that are assigned in the cell, rather than using the cached version as it's done when the cell input didn't change.
-
-This functionality is implemented in the [ingredients_macro.jl](./src/ingredients_macro.jl) notebook 
-
-### Example usage
-
-![ingredients_macro_example](https://user-images.githubusercontent.com/12846528/128351051-487a3e79-10a5-4413-8934-1c0e0714a794.gif)
+`@plutoinclude` is now aimed at being used to develop packages from multiple notebooks. Notebooks should be `plutoincluded` serially in the same order you would include corresponding source files from the Package main source file.
+The functionality of the original `@ingredients` macro is available with nice improvements (ability to have reactive load) as part of [PlutoHooks](https://github.com/JuliaPluto/PlutoHooks.jl), developed by the main Pluto devs. 
