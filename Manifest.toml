@@ -161,9 +161,9 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.PlutoDevMacros]]
 deps = ["MacroTools", "PlutoHooks"]
-git-tree-sha1 = "36c4e8183351565ae7190d8a0d2f76683f2a1ac4"
+git-tree-sha1 = "7ecbd7661d89c7d608a4fa672e1f62b314d16083"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.3.2"
+version = "0.3.3"
 
 [[deps.PlutoHooks]]
 deps = ["FileWatching", "InteractiveUtils", "Markdown", "UUIDs"]
