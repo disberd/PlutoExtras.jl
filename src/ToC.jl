@@ -1,8 +1,8 @@
 ### A Pluto.jl notebook ###
-# v0.17.1
+# v0.17.2
 
-using Markdown
-using InteractiveUtils
+# using Markdown
+# using InteractiveUtils
 
 # ╔═╡ 64a29f5e-3334-43bb-a23f-8bfda53af1a4
 #=╠═╡ notebook_exclusive
@@ -10,14 +10,18 @@ using HypertextLiteral
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 21761862-acb6-4691-97f0-a756865ac1cc
+#=╠═╡ notebook_exclusive
 md"""
 ### Collapse/Hide heading
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ ea897dda-e0d2-43f4-8c79-f96ce3897ac9
+#=╠═╡ notebook_exclusive
 md"""
 The following two functions `collapse_heading` and `hide_heading` can be piped with markdown entries to add the `collapsed` and `hide-heading` attributes to the relevant pluto cell, that make the ToC entry of the cell collapsed or hidden.
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 9b27d817-1b57-4b43-948a-e0324082f520
 """
@@ -56,9 +60,11 @@ $x
 """
 
 # ╔═╡ edd55419-df8a-45a5-8342-950749ae8980
+#=╠═╡ notebook_exclusive
 md"""
 # Helper Functions
 """ |> collapse_heading |> hide_heading
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 5e2f2d6b-949e-4b91-af0a-0a6baf23d00e
 """
@@ -92,9 +98,8 @@ function toc_heading(text,level::Int;hide=true,collapse=false)
 	attributes = join(attribute_names," ")
 	@htl """
 	<script>
-		const docu = document.document ?? document
 		const cell = currentScript.parentElement.closest('pluto-cell')
-		const h = docu.createElement($tag)
+		const h = document.createElement($tag)
 		h.innerText = $text
 		cell.toggleAttribute('hide-heading',$hide)
 		cell.toggleAttribute('collapsed',$collapse)
@@ -106,47 +111,65 @@ function toc_heading(text,level::Int;hide=true,collapse=false)
 end
 
 # ╔═╡ 3ea419e5-f70c-404f-813d-be8cfad99b79
+#=╠═╡ notebook_exclusive
 toc_heading("Asd",2,hide=true,collapse=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 561c2bcf-d405-4e46-bd9d-c74500995a94
+#=╠═╡ notebook_exclusive
 md"""
 ### TESTT
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ d5eccf35-9aa6-48b4-9140-7ccb5d311820
+#=╠═╡ notebook_exclusive
 toc_heading("Test1",1;hide=false,collapse=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ d1784dd2-9a25-4add-90a8-121f1e2620e6
+#=╠═╡ notebook_exclusive
 @htl """
 <script>
-const h = docu.createElement('h2')
+const h = document.createElement('h2')
 h.innerText = 'Test2'
 const cell = currentScript.parentElement.closest('pluto-cell')
 cell.removeAttribute('collapsed')
 return h
 </script>
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 1228ed04-b62f-4703-9e5d-e1f5cb0bf640
+#=╠═╡ notebook_exclusive
 md"""
 ### Test3
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 358d4034-20c6-4746-8c37-f91e79a369eb
+#=╠═╡ notebook_exclusive
 md"""
 ## Test22
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ fa4699bb-78b0-43e9-9889-536af90af45b
+#=╠═╡ notebook_exclusive
 toc_heading("ToC Definition",1,hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 9429e332-6543-4a1a-94d6-9c3733712b5c
+#=╠═╡ notebook_exclusive
 toc_heading("Julia Strcut",2;hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 25b4cb5d-504f-4922-9923-7668f83dcc2f
+#=╠═╡ notebook_exclusive
 md"""
 The documentation of the function has to be updated
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 08ea2095-cdf3-4f3c-8dd7-792245ac6e56
 #=╠═╡ notebook_exclusive
@@ -163,10 +186,14 @@ md"""
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0b832124-aca0-4172-9121-8f41c3c34bc8
+#=╠═╡ notebook_exclusive
 toc_heading("Main JS that includes the preact components",3,hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ e2307fb5-f3f8-482f-abae-5509bf48fe2d
+#=╠═╡ notebook_exclusive
 toc_heading("ToC Element Component Definition",3;hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 8b20a786-7020-4252-8e42-ffbd33fb19e4
 ItemDef = """
@@ -192,9 +219,11 @@ let a_attrs = {
 """;
 
 # ╔═╡ 71a2347d-fb17-4c12-8298-9d07511ffb05
+#=╠═╡ notebook_exclusive
 toc_heading("""
 Main ToC Preact class
 """,3,hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 028c5069-fc3d-48a0-84e1-476689539f2c
 TocDef = toc -> """
@@ -208,7 +237,7 @@ const Toc = () => {
 		
 		const selector = range.map(i => `pluto-notebook pluto-cell h\${i}`).join(",")
 		const initialArray = [] 
-		for (let item of docu.querySelectorAll(selector)) {
+		for (let item of document.querySelectorAll(selector)) {
 			const isdocs = item.closest('.pluto-docs-binding')
 			if (isdocs !== null) {
 				continue
@@ -287,7 +316,7 @@ const Toc = () => {
 
 		if (!hide) {
 			cell_order.forEach(id => {
-				const cell = docu.getElementById(id)
+				const cell = document.getElementById(id)
 				cell.removeAttribute('hidden')
 			})
 			return
@@ -309,7 +338,7 @@ const Toc = () => {
 				next_id = next_hindex >= hlength ? '' : state[next_hindex].id
 			}
 
-			const cell = docu.getElementById(id)
+			const cell = document.getElementById(id)
 			const cm = cell.querySelector('.cm-editor')?.CodeMirror ?? cell.querySelector('.CodeMirror')?.CodeMirror // Second version is for older pluto
 			if (hide_this && id != toc_id && cm.getValue() !== "") {
 				cell.setAttribute('hidden',"")
@@ -337,7 +366,7 @@ const Toc = () => {
 	)
 
 	const customClick = (e,id) => {
-		const cell = docu.getElementById(id)
+		const cell = document.getElementById(id)
 		e.preventDefault()
 		if (e.altKey) {
 			cell.toggleAttribute('hide-heading')
@@ -356,7 +385,7 @@ const Toc = () => {
 			set_collapseAll(0)
 			return
 		}
-		const h = docu.getElementById(id)
+		const h = document.getElementById(id)
 		// console.log(h)
 		h.scrollIntoView({
 			behavior: 'smooth', 
@@ -429,19 +458,18 @@ const { html, render, Component, useEffect, useLayoutEffect, useState, useRef, u
 // A new way to execute scripts was added in
 // https://github.com/fonsp/Pluto.jl/commit/f9eae892c03fadd6c9c5455b93bbb998882db072, so if
 // we have that commit the actual document is in document.document
-const docu = document.document ?? document
 
-const node = this ?? docu.createElement("div")
+const node = this ?? document.createElement("div")
 
-const notebook = docu.querySelector("pluto-notebook")
+const notebook = document.querySelector("pluto-notebook")
 
 const cell = currentScript.parentElement.closest('pluto-cell')
 const toc_id = cell.id
 
 const recomputeWidth = () => {
-	const mainElement = docu.querySelector('main')
-	const maxWidth = docu.body.offsetWidth - mainElement.offsetWidth - mainElement.offsetLeft
-	docu.documentElement.style.setProperty('--aside-toc-width', `calc(\${maxWidth}px - 5px - .8rem)`);
+	const mainElement = document.querySelector('main')
+	const maxWidth = document.body.offsetWidth - mainElement.offsetWidth - mainElement.offsetLeft
+	document.documentElement.style.setProperty('--aside-toc-width', `calc(\${maxWidth}px - 5px - .8rem)`);
 }
 
 
@@ -493,9 +521,9 @@ const notebookObserver = new MutationObserver(() => {
 })
 notebookObserver.observe(notebook, {childList: true})
 
-// And finally, an observer for the docu.body classList, to make sure that the toc also works when if is loaded during notebook initialization
+// And finally, an observer for the document.body classList, to make sure that the toc also works when if is loaded during notebook initialization
 const bodyClassObserver = new MutationObserver(updateCallback)
-bodyClassObserver.observe(docu.body, {attributeFilter: ["class"]})
+bodyClassObserver.observe(document.body, {attributeFilter: ["class"]})
 
 invalidation.then(() => {
 	notebookObserver.disconnect()
@@ -508,7 +536,9 @@ return node
 """
 
 # ╔═╡ 9784edff-a6ac-4308-a1af-71fedd1f2096
+#=╠═╡ notebook_exclusive
 toc_heading("CSS",3,hide=true)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 844f74f6-d59a-4651-866b-fd1bd2dbfc3c
 toc_style = """

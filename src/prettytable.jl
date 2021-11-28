@@ -1,24 +1,30 @@
 ### A Pluto.jl notebook ###
-# v0.16.1
+# v0.17.2
 
-using Markdown
-using InteractiveUtils
+# using Markdown
+# using InteractiveUtils
 
 # ╔═╡ 104611e0-e53f-11eb-1bb5-61dd3dd0acf2
 using PrettyTables, HypertextLiteral, Chain, UUIDs
 
 # ╔═╡ afebdbb9-42a5-4640-ae38-12a105a70e05
+#=╠═╡ notebook_exclusive
 md"""
 PrettyTables does not provide yet a way to directly output a _showable_ HTML object so the function has to be customized to have nice printing on Pluto.
 
 We will create a custom function that always prints directly an html output (with the :html backend) and that won't allow for the `standalone` kwargs to be set to true as that always provide a full html page with header, that needs to be rendered in an `iframe` inside the pluto frontend
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ b80ac7b8-11a4-45ef-8072-97a5ef0ab4e2
+#=╠═╡ notebook_exclusive
 pretty_table(String,rand(10,4);backend=:html) |> Text
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 5db046c0-48a2-478b-a8cd-a72c29c14444
+#=╠═╡ notebook_exclusive
 pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 22386594-49c7-4c3b-948e-fd13d326d360
     css = """
@@ -53,6 +59,7 @@ pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
     """
 
 # ╔═╡ b18e8c7f-467e-427c-8487-e021bd8c283a
+#=╠═╡ notebook_exclusive
 @chain css begin
 	split(_,'}') # Separate different style groups
 	map(x -> lstrip(x,'\n'),_) # Remove trailing newlines		
@@ -69,31 +76,7 @@ pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
 	Text
 end
 	
-
-# ╔═╡ 73d1a71c-78a3-4533-9792-526e45c868ff
-function prepend_selector(css,custom_selector)
-	pre = @chain css begin
-		split(_,'}') # Separate different style groups
-		map(x -> lstrip(x,['\n','\t',' ']),_) # Remove trailing newlines
-		filter(!isempty,_)
-		map(x -> split(x,'{'),_)
-	end
-	out = ""
-	for i ∈ eachindex(pre)
-		out *= @chain pre[i][1] begin
-			split(',') # Find the differents combined CSS selectors as they have to be prepended with the class together
-			map(_) do selector # Here we go to prepend the custom element
-				"$custom_selector $(strip(selector))"# Preprend the custom id to each selector
-			# 	end
-			end
-			join(",\n")
-			# map(x -> x * "\n}",_)
-			# join(_,"\n\n") # Join back into a single string
-		end
-		out *= "{$(pre[i][2])\n}\n\n"
-	end
-	out
-end
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ e880d449-0e72-45ad-bea9-bbadcdcd523d
 """
@@ -176,6 +159,31 @@ function prettytable(data;backend=:html, tf::HTMLTableFormat=HTMLTableFormat(), 
 	return out
 end
 
+# ╔═╡ 73d1a71c-78a3-4533-9792-526e45c868ff
+function prepend_selector(css,custom_selector)
+	pre = @chain css begin
+		split(_,'}') # Separate different style groups
+		map(x -> lstrip(x,['\n','\t',' ']),_) # Remove trailing newlines
+		filter(!isempty,_)
+		map(x -> split(x,'{'),_)
+	end
+	out = ""
+	for i ∈ eachindex(pre)
+		out *= @chain pre[i][1] begin
+			split(',') # Find the differents combined CSS selectors as they have to be prepended with the class together
+			map(_) do selector # Here we go to prepend the custom element
+				"$custom_selector $(strip(selector))"# Preprend the custom id to each selector
+			# 	end
+			end
+			join(",\n")
+			# map(x -> x * "\n}",_)
+			# join(_,"\n\n") # Join back into a single string
+		end
+		out *= "{$(pre[i][2])\n}\n\n"
+	end
+	out
+end
+
 # ╔═╡ fec22aa8-ffee-4b6c-a46e-a82ed3f75a9d
 #=╠═╡ notebook_exclusive
 prepend_selector("""
@@ -193,16 +201,21 @@ prepend_selector("""
 export prettytable
 
 # ╔═╡ 98765fad-7349-4791-a2c9-b60d6a33b1f3
+#=╠═╡ notebook_exclusive
 a = rand(10,4)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 81d55931-6c5e-4211-86c7-d67681183cb7
+#=╠═╡ notebook_exclusive
 prettytable(a;caption = "GESU",append_css = """
 	caption {
 		font-family: "Times New Roman", Times, serif;
 	}
 """)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ ca56394b-b4a9-4c8f-a8cc-1592dc1b6bd5
+#=╠═╡ notebook_exclusive
 prettytable(a;tf=tf_html_minimalist,append_css="""
 tr:nth-child(5) {
 	font-weight: 800;
@@ -211,12 +224,17 @@ tr:nth-child(5) {
 		font-family: "Times New Roman", Times, serif;
 	}
 	""")
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ b9953787-fd44-432a-b2c1-5f9de7cfccbe
+#=╠═╡ notebook_exclusive
 prettytable(a;tf=tf_html_dark)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 2e5c16de-957e-4f19-9a7e-2edc3ae2707c
+#=╠═╡ notebook_exclusive
 prettytable(a)
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -243,9 +261,9 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[Chain]]
-git-tree-sha1 = "c72673739e02d65990e5e068264df5afaa0b3273"
+git-tree-sha1 = "cac464e71767e8a04ceee82a889ca56502795705"
 uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-version = "0.4.7"
+version = "0.4.8"
 
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -257,9 +275,9 @@ uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 version = "4.0.4"
 
 [[DataAPI]]
-git-tree-sha1 = "ee400abb2298bd13bfc3df1c412ed228061a2385"
+git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.7.0"
+version = "1.9.0"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -315,13 +333,13 @@ deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[Reexport]]
-git-tree-sha1 = "5f6c21241f0f655da3952fd60aa18477cf96c220"
+git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
-version = "1.1.0"
+version = "1.2.2"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -337,9 +355,9 @@ version = "1.0.1"
 
 [[Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "8ed4a3ea724dac32670b062be3ef1c1de6773ae8"
+git-tree-sha1 = "fed34d0e71b91734bf0a7e10eb1bb05296ddbcd0"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.4.4"
+version = "1.6.0"
 
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]

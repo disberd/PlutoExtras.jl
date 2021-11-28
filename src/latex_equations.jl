@@ -1,37 +1,50 @@
 ### A Pluto.jl notebook ###
-# v0.17.1
+# v0.17.2
 
-using Markdown
-using InteractiveUtils
+# using Markdown
+# using InteractiveUtils
 
 # ╔═╡ 945ee770-e082-11eb-0c8b-25e53f4d718c
 using HypertextLiteral
 
 # ╔═╡ b35233a0-6d2f-4eac-8cb0-e317eef4c835
+#=╠═╡ notebook_exclusive
 md"""
 ## TeX Equation environment
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ b8782294-d6b9-43ac-b745-b2cbb6ed06b1
+#=╠═╡ notebook_exclusive
 a = 1:10
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ de8473c1-dea1-4221-9562-30679ae58e34
+#=╠═╡ notebook_exclusive
 md"""
 $$3+2$$
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 900f494b-690d-43cf-b1b7-61c5d3e68a6d
+#=╠═╡ notebook_exclusive
 "\n"
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 9446acfc-a310-4de6-8876-e30ede527e9c
+#=╠═╡ notebook_exclusive
 md"""
 $$Y = \overline {A} - m \phi (\overline {r} - \gamma \pi)$$
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 1471265c-4934-45e3-a4b2-37da94ff7472
+#=╠═╡ notebook_exclusive
 md"## Update eqref hyperlinks"
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ b6b08bf0-7282-40b9-ae87-b776a64c519f
+#=╠═╡ notebook_exclusive
 md"""
 KaTeX [supports](https://katex.org/docs/supported.html) automatic numbering of *equation* environments.
 While it does not support equation reference and labelling, [this](https://github.com/KaTeX/KaTeX/issues/2003) hack on github shows how to achieve the label functionality.
@@ -41,6 +54,7 @@ We then create a function that loops through all possible katex equation and cou
 
 The code for the mutationobservers to trigger re-computation of the numbers are taken from the **TableOfContents** in **PlutoUI**
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 6584afb8-b085-4c56-93cb-a5b57e16520c
 """
@@ -61,7 +75,6 @@ a.eq_href {
 
 <script id="katex-eqnum-script">
 
-const docu = document.document ?? document
 
 const a_vec = [] // This will hold the list of a tags with custom click, used for cleaning listeners up upon invalidation
 
@@ -70,7 +83,7 @@ const eqrefClick = (e) => {
 	const a = e.target
 	const eq_id = a.getAttribute('eq_id')
 	window.location.hash = 'eqref-' + eq_id // This is to be able to use the back function to resume previous view, 'eqref-' is added in front to avoid the viewport actually going to the equation without having control of the scroll
-	const eq = docu.getElementById(eq_id)
+	const eq = document.getElementById(eq_id)
 	eq.scrollIntoView({
 		behavior: 'smooth',
 		block: 'center',
@@ -104,7 +117,7 @@ const findOffsetTop = obj => {
 // 'eqn-num' instances. 
 const updateCallback = () => {
 a_vec.splice(0,a_vec.length) // Reset the array
-const katex_blocks = docu.querySelectorAll('.katex-html') // This selects all the environments we created with texeq
+const katex_blocks = document.querySelectorAll('.katex-html') // This selects all the environments we created with texeq
 let i = 0;
 for (let blk of katex_blocks) {
 	// Find the number of numbered equation in each sub-block
@@ -144,7 +157,7 @@ for (let blk of katex_blocks) {
 		}
 		// We now update all the links that refer to this label
 		const id = item.id
-		const a_vals = docu.querySelectorAll(`[eq_id=\${id}]`)
+		const a_vals = document.querySelectorAll(`[eq_id=\${id}]`)
 		a_vals !== null && a_vals.forEach(a => {
 			a_vec.push(a) // Add this to the vector
 			a.innerText = `(\${i})`
@@ -154,7 +167,7 @@ for (let blk of katex_blocks) {
 }
 }
 
-const notebook = docu.querySelector("pluto-notebook")
+const notebook = document.querySelector("pluto-notebook")
 
 // We have a mutationobserver for each cell:
 const observers = {
@@ -187,15 +200,19 @@ invalidation.then(() => {
 """
 
 # ╔═╡ a78aa624-6504-4b3f-914a-833261b92f19
+#=╠═╡ notebook_exclusive
 initialize_eqref()
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ d14197d8-cab1-4d92-b81c-d826ea8183f3
+#=╠═╡ notebook_exclusive
 md"""
 ## TeX equations
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 2ad9500c-187b-4b69-8e7b-ef76af8fc39a
-js(x) = HypertextLiteral.JavaScript(x)
+const js = HypertextLiteral.JavaScript
 
 # ╔═╡ f58427a7-f540-4667-93eb-57f1f53905f4
 """
@@ -206,8 +223,7 @@ Take an input string and renders it inside an equation environemnt (numbered) us
 Equations can be given labels by adding `"\\\\label{name}"` inside the `code` string and subsequently referenced in other cells using `eqref("name")`
 
 # Note
-Unfortunately backward slashes have to be doubled when creating the TeX code to be put inside the equation
-When Pluto will support interpretation of string literal macros, this could be made into a macro
+To avoid the need of doubling backslashes, use the new [`@texeq_str`](@ref) macro if you are on Pluto ≥ v0.17
 """
 function texeq(code,env="equation")
 	code_escaped = code 			|>
@@ -237,9 +253,12 @@ function texeq(code,env="equation")
 end
 
 # ╔═╡ 0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
+#=╠═╡ notebook_exclusive
 texeq("3+2=5")
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0bd44757-90b8-452f-999f-6109239ac826
+#=╠═╡ notebook_exclusive
 md"""
 $(texeq("
 3
@@ -247,8 +266,10 @@ $(texeq("
 2
 "))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ b9213424-f814-4bb8-a05f-33249f4f0a8f
+#=╠═╡ notebook_exclusive
 md"""
 $(texeq("
 	(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\label{test1} \\\\
@@ -261,38 +282,51 @@ $(texeq("
 	&= 10 \\label{test5}"
 ,"align"))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
+#=╠═╡ notebook_exclusive
 texeq("
 	\\begin{align*}
 		(2 \\cdot 3) + (1 \\cdot 4) &= 6 + 4 \\
 									&= 10
 	\\end{align*}
 	")
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ 7879d7e3-38ad-4a06-8057-ec30da534d76
+#=╠═╡ notebook_exclusive
+texeq("y=2x^2")
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
+#=╠═╡ notebook_exclusive
 texeq("
 	\\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \\label{interactive}
 	")
-
-# ╔═╡ 7879d7e3-38ad-4a06-8057-ec30da534d76
-texeq("y=2x^2")
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 6d750d01-b851-4614-b448-1a6e00fa5754
+#=╠═╡ notebook_exclusive
 md"""
 $(texeq("
 	\\pi =  \\pi^e + \\gamma (P - Y^P) + \\rho \\label{seven}"
 ))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 943e5ef8-9187-4bfd-aefa-8f405b50e6aa
+#=╠═╡ notebook_exclusive
 asdasd = 3
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 2c82ab99-8e86-41c6-b938-3635d2d3ccde
+#=╠═╡ notebook_exclusive
 md"""
 The antenna pattern of a DRA antenna can at first approximation be expressed as:
 $(texeq("3+2"))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ cddc93d2-1b24-4bda-8113-4a1ec781b2b6
 """
@@ -305,17 +339,23 @@ eqref(label) = @htl """
 """
 
 # ╔═╡ 1482e175-cf32-42f3-b8fb-64f1f14c1501
+#=╠═╡ notebook_exclusive
 md"""
 The sum in $(eqref("interactive")) is interactive!
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0df86e0e-6813-4f9f-9f36-7badf2f85597
+#=╠═╡ notebook_exclusive
 md"""Multiple links to the same equation $(eqref("interactive")) also work! See also $(eqref("seven"))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 9e69e30e-506a-4bd7-b213-0b5c0b31a10d
+#=╠═╡ notebook_exclusive
 md"""Link to sub-parts of align environments are now fixed! $(eqref("test1")), $(eqref("test2")), $(eqref("test3")), $(eqref("test4")), $(eqref("test5"))
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 172c02b4-5ee1-42bb-ac6d-598eeb090463
 # Function to create interpolation inside string literal
@@ -375,6 +415,19 @@ function _str_interpolate(s::String)
 end
 
 # ╔═╡ 375641e3-f0c0-4473-9ff6-022ed06f9646
+"""
+	@texeq_str -> katex_html_code
+Use to generate an HTML output that when rendered in Pluto shows latex equation using KaTeX.
+
+Relies on [`PlutoUtils.texeq`](@ref) but avoids the need of double escaping backslashes.
+
+# Examples
+```julia
+texeq"
+\\frac{q \\sqrt{2}}{15} + $(3 + 2 + (5 + 32))
+"
+```
+"""
 macro texeq_str(code)
 	# The tring literal macro automatically translates single backslash into double backslash, so we just have to output that
 	expr = :(texeq())
@@ -386,9 +439,11 @@ end
 export texeq, eqref, initialize_eqref, @texeq_str
 
 # ╔═╡ 2078d2c8-1f38-42fe-9945-b2235e267b38
+#=╠═╡ notebook_exclusive
 texeq"
 \frac{q \sqrt{2}}{15} + $(3 + 2 + (5 + 32)) - $asdasd
 "
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """

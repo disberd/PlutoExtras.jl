@@ -1,8 +1,8 @@
 ### A Pluto.jl notebook ###
-# v0.17.1
+# v0.17.2
 
-using Markdown
-using InteractiveUtils
+# using Markdown
+# using InteractiveUtils
 
 # ╔═╡ 8c4e16f0-7e73-4f5a-b0e3-c565a0b92f47
 #=╠═╡ notebook_exclusive
@@ -116,9 +116,8 @@ function show2(plt::PlotlyBase.Plot)
 	@htl("""
 			<div>
 			<script id=$script_id>
-			const docu = document.document ?? document
 			const {plotly} = await import("https://cdn.plot.ly/plotly-2.5.1.min.js")
-			const PLOT = this ?? docu.createElement("div");
+			const PLOT = this ?? document.createElement("div");
 		
 
 		
@@ -190,12 +189,77 @@ let
 end
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 01aef0a4-e96d-403d-be40-b118e6db614a
+#=╠═╡ notebook_exclusive
+function scattersatellite()
+  # Markers for the satellites
+  # Create the tracks for the past of each satellite
+  # tracks = [
+  #   scattergeo(
+  #     lat = getfield.(pos_history[s,max(begin,t_index-20):t_index],:lat),
+  #       lon = getfield.(pos_history[s,max(begin,t_index-20):t_index],:lon),
+  #     mode = "lines",
+  #     line_color = "red",
+  #     showlegend = false,
+  #     ) for s ∈ axes(pos_history,1)]
+
+  # Create Amerca Box
+  box = [
+    scattergeo(
+      # lat = [-35, 35, 35, -35,-35],
+      lat = [-35:35;ones(size(collect(-120:-35)))*35;35:-1:-35;-35*ones(size(collect(-35:-1:-120)))],
+        # lon = [-120,-120,-35,-35,-120],
+        lon = [-120*ones(size(collect(-35:35)));-120:-35;-35*ones(size(collect(35:-1:-35)));-35:-1:-120],
+      mode = "lines",
+      line_color = "red",
+      fill = "toself",
+      fillcolor = "rgba(255,0,0,.9)",
+      showlegend = false,
+      )]
+  
+  # Create the geo layout
+  layout = Layout(
+    geo =  attr(
+      projection =  attr(
+        type =  "robinson",
+      ),
+      showocean =  true,
+      # oceancolor =  "rgb(0, 255, 255)",
+      oceancolor =  "rgb(255, 255, 255)",
+      showland =  true,
+      # landcolor =  "rgb(230, 145, 56)",
+      landcolor =  "rgb(217, 217, 217)",
+      showlakes =  true,
+      # lakecolor =  "rgb(0, 255, 255)",
+      lakecolor =  "rgb(255, 255, 255)",
+      showcountries =  true,
+      lonaxis =  attr(
+        showgrid =  true,
+        gridcolor =  "rgb(102, 102, 102)"
+      ),
+      lataxis =  attr(
+        showgrid =  true,
+        gridcolor =  "rgb(102, 102, 102)"
+      )
+    )
+  )
+  # Plot([mar,tracks...],layout)
+  Plot([box...],layout)
+end;
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ 6d85da33-f8f4-4435-b572-991a0b6e5511
+#=╠═╡ notebook_exclusive
+scattersatellite()
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 55f63e7b-f81a-48ff-9857-a8cfd6b3c7dd
 #=╠═╡ notebook_exclusive
 html"""
 <style>
 main {
-	max-width: 800px;
+	max-width: min(1200px, calc(95% - 300px));
+	margin-right: 300px !important;
 }
 </style>
 """
@@ -787,6 +851,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═37374eb5-075f-4ecc-ae91-472b55c18c6f
 # ╠═0c835811-ec85-4f91-8a33-536256ac281d
 # ╠═943c3293-fba2-44f5-9e61-2f821bd5c65e
+# ╠═6d85da33-f8f4-4435-b572-991a0b6e5511
+# ╠═01aef0a4-e96d-403d-be40-b118e6db614a
 # ╠═55f63e7b-f81a-48ff-9857-a8cfd6b3c7dd
 # ╠═0123b5ce-5455-4227-b916-3d1e1c814911
 # ╠═c0ff610e-1370-456a-b955-d16b5032c199

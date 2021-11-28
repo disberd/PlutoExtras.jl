@@ -50,9 +50,6 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 deps = ["ArgTools", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
-[[deps.FileWatching]]
-uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
-
 [[deps.Formatting]]
 deps = ["Printf"]
 git-tree-sha1 = "8339d61043228fdd3eb658d86c926cb282ae72a8"
@@ -164,18 +161,6 @@ deps = ["MacroTools", "Requires"]
 git-tree-sha1 = "6de86a524ef330ad1d0da1c597a76220dccb382a"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
 version = "0.4.2"
-
-[[deps.PlutoHooks]]
-deps = ["FileWatching", "InteractiveUtils", "Markdown", "UUIDs"]
-git-tree-sha1 = "f297787f7d7507dada25f6769fe3f08f6b9b8b12"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
-version = "0.0.3"
-
-[[deps.PlutoTest]]
-deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
-git-tree-sha1 = "92b8ae1eee37c1b8f70d3a8fb6c3f2d81809a1c5"
-uuid = "cb4044da-4d16-4ffa-a6a3-8cad7f73ebdc"
-version = "0.2.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]

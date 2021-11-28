@@ -1,8 +1,8 @@
 ### A Pluto.jl notebook ###
-# v0.17.1
+# v0.17.2
 
-using Markdown
-using InteractiveUtils
+# using Markdown
+# using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
@@ -15,25 +15,28 @@ macro bind(def, element)
 end
 
 # ╔═╡ cfb4d354-e0b2-4a04-a559-4fb88df33954
-begin
-	using HypertextLiteral
-	using HypertextLiteral: JavaScript
-end
+using HypertextLiteral
 
 # ╔═╡ 57c51c71-fd8d-440d-8262-9cccd1617c08
+#=╠═╡ notebook_exclusive
 md"""
 # Editable Object
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ d9762fc1-fa2c-4315-a360-cc1cd9d70055
+#=╠═╡ notebook_exclusive
 md"""
 Create an element inspired by (and almost equivalent to) the Scrubbable from PlutoUI but with the possibility of changing the value by clicking on the number and editing the value
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 30f5eecc-f9bc-48e9-adb0-628e856bc085
+#=╠═╡ notebook_exclusive
 md"""
 ### Examples
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ a1be6790-c932-11eb-0b3a-23cc77d240e9
 begin
@@ -53,10 +56,6 @@ begin
 		show(io,m,@htl """
         
 		<script>
-
-			const docu = document.document ?? document
-			const windw = window.window ?? window
-
 			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
 
 			const el = html`
@@ -108,9 +107,6 @@ begin
 		show(io,m,@htl """
         
 		<script>
-		
-			const docu = document.document ?? document
-			const windw = window.window ?? window
 			const d3format = await import("https://cdn.jsdelivr.net/npm/d3-format@2/+esm")
 
 			const elp = html`
@@ -119,7 +115,7 @@ begin
 			background: rgb(175, 222, 253);
 			padding: 0em .2em;
 			border-radius: .3em;
-			font-weight: bold;">$(JavaScript(s.prefix))<span contentEditable=true>$(s.default)</span>$(JavaScript(s.suffix))</span>
+			font-weight: bold;">$(HypertextLiteral.JavaScript(s.prefix))<span contentEditable=true>$(s.default)</span>$(HypertextLiteral.JavaScript(s.suffix))</span>
 			`
 
 			const formatter = s => d3format.format($(format))(s)
@@ -158,20 +154,20 @@ begin
 
 			function selectText(el){
 				var sel, range;
-				if (windw.getSelection && docu.createRange) { //Browser compatibility
-				sel = windw.getSelection();
+				if (window.getSelection && document.createRange) { //Browser compatibility
+				sel = window.getSelection();
 				if(sel.toString() == ''){ //no text selection
-					windw.setTimeout(function(){
-						range = docu.createRange(); //range object
+					window.setTimeout(function(){
+						range = document.createRange(); //range object
 						range.selectNodeContents(el); //sets Range
 						sel.removeAllRanges(); //remove all ranges from selection
 						sel.addRange(range);//add Range to a Selection.
 					},1);
 				}
-				}else if (docu.selection) { //older ie
-					sel = docu.selection.createRange();
+				}else if (document.selection) { //older ie
+					sel = document.selection.createRange();
 					if(sel.text == ''){ //no text selection
-						range = docu.body.createTextRange();//Creates TextRange object
+						range = document.body.createTextRange();//Creates TextRange object
 						range.moveToElementText(el);//sets Range
 						range.select(); //make selection.
 					}
