@@ -320,9 +320,11 @@ md"""
 const NNumber = Union{Nothing,<:Number}
 
 # ╔═╡ b956aa02-48fb-416e-aa39-c9fa291ed47a
+#=╠═╡ notebook_exclusive
 md"""
 ## scatter
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
 begin
@@ -420,9 +422,11 @@ scatter((rand(100),rand(100));mode="markers") |> Plot
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ f5a6204d-0346-4435-9e7a-48f005883995
+#=╠═╡ notebook_exclusive
 md"""
 ## surface
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ eb608938-7ede-464f-9c5f-0c19d7847fb5
 begin
@@ -457,9 +461,11 @@ end
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ f1d07f52-f53a-40f0-a8ca-6bfc38cd033f
+#=╠═╡ notebook_exclusive
 md"""
 ## Contour
 """
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 2eae61ad-e45e-4581-92d8-6c0781e25de1
 begin
