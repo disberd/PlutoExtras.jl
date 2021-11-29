@@ -61,12 +61,12 @@ const onClick = () => {
 		arr.shift()
 // 		Remove the last line
 		arr.pop()
-// 		Rejoin the array and change the editor text
 	} else {
 // 		The comments must be inserted
 		arr.unshift(exclusive_pre)
 		arr.push(exclusive_post)
 	}
+// 	Rejoin the array and change the editor text
 	cm.setValue(arr.join('\n'))
 })}
 
