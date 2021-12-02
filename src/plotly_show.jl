@@ -136,6 +136,21 @@ function show2(plt::PlotlyBase.Plot)
 
 			resizeObserver.observe(pluto_output)
 
+			function dragover_handler(ev) {
+				// Only allow dropping when our custom data is available.
+				if (event.dataTransfer.types.includes('plotly-config')) {
+					event.preventDefault();
+				}
+			}
+			function drop_handler(ev) {
+				 ev.preventDefault();
+				 // Get the id of the target and add the moved element to the target's DOM
+				 const data = JSON.parse(ev.dataTransfer.getData("plotly-config"));
+				 Plotly.downloadImage(PLOT,)
+			}
+			PLOT.addEventListener('dragover',dragover_handler)
+			PLOT.addEventListener('drop',drop_handler)
+
 			invalidation.then(() => {
 				resizeObserver.disconnect()
 			})
@@ -145,6 +160,9 @@ function show2(plt::PlotlyBase.Plot)
 			</div>
 """)
 end
+
+# ╔═╡ 36a18657-9f9f-485a-90aa-8e98d6c2e7d0
+
 
 # ╔═╡ e389da42-7f04-4bad-acc5-334a4277e5ac
 function Base.show(io::IO, mimetype::MIME"text/html", plt::PlotlyBase.Plot)
@@ -799,6 +817,12 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 deps = ["LinearAlgebra", "Random"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
+[[deps.StaticArrays]]
+deps = ["LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "3c76dde64d03699e074ac02eb2e8ba8254d428da"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.2.13"
+
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
@@ -863,6 +887,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═ab8c40b4-982c-4063-b209-177a9b72e527
 # ╠═caa6aad3-50ab-4041-ab27-525ec9ec56ee
 # ╠═d64feb66-4cd5-4818-b912-1efebcdb8432
+# ╠═7799649c-d265-4042-a4cb-16e376d4ea45
 # ╟─3c3d991b-6970-495b-8d80-d3c42b7c9617
 # ╠═c5f520f4-c26c-4ec8-90b5-6e74375cf9d7
 # ╠═c27179fa-c2c0-45a2-afbf-8350d817ef08
@@ -871,6 +896,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═84560ed3-1ea7-4eb8-8db1-99eaa5219dd2
 # ╠═f7dfb8b4-bcbd-4aed-8af0-c2ea37c1ac90
 # ╠═740bcc3f-5304-4f8e-9324-af1f392b13a6
+# ╠═36a18657-9f9f-485a-90aa-8e98d6c2e7d0
 # ╠═e389da42-7f04-4bad-acc5-334a4277e5ac
 # ╠═02583ec4-a758-47e6-aeea-f6d897b307bc
 # ╠═37374eb5-075f-4ecc-ae91-472b55c18c6f
@@ -889,9 +915,13 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═0622aaae-5d43-4113-b770-eb937fec963f
 # ╟─0f6a5618-c338-41ac-b6e3-cba211c070be
 # ╠═c805105a-9444-49df-b06f-12e91aa9b26c
+# ╠═9c57f29a-e143-41d0-af16-6bc5ec7b5a4f
+# ╠═93f04d55-9ed8-43b1-ace6-1084e95bba67
+# ╠═79a9dcad-4b5f-4206-8ab4-50b712ebf07b
 # ╟─b956aa02-48fb-416e-aa39-c9fa291ed47a
 # ╠═b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
 # ╠═31de5995-b2a2-48ce-9bf3-fd61059e8f61
+# ╠═6edb683a-b544-4b51-9824-d8ddb19de525
 # ╠═302e8097-be38-44e3-ba24-8f834115bb94
 # ╟─f5a6204d-0346-4435-9e7a-48f005883995
 # ╠═eb608938-7ede-464f-9c5f-0c19d7847fb5
