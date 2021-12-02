@@ -44,11 +44,6 @@ md"""
 """
   ╠═╡ notebook_exclusive =#
 
-# ╔═╡ c5f520f4-c26c-4ec8-90b5-6e74375cf9d7
-#=╠═╡ notebook_exclusive
-PlutoUtils.toggle_htmlmixed_shortcut()
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ c27179fa-c2c0-45a2-afbf-8350d817ef08
 #=╠═╡ notebook_exclusive
 PlutoUtils.hide_cell_shortcut()
@@ -146,7 +141,7 @@ function show2(plt::PlotlyBase.Plot)
 				 ev.preventDefault();
 				 // Get the id of the target and add the moved element to the target's DOM
 				 const data = JSON.parse(ev.dataTransfer.getData("plotly-config"));
-				 Plotly.downloadImage(PLOT,)
+				 Plotly.downloadImage(PLOT,data)
 			}
 			PLOT.addEventListener('dragover',dragover_handler)
 			PLOT.addEventListener('drop',drop_handler)
@@ -209,6 +204,9 @@ let
 	Plot([data],layout)
 end
   ╠═╡ notebook_exclusive =#
+
+# ╔═╡ d11ba689-eab1-4d08-91ab-8ec275bd68a8
+PlutoUtils.plotly_save_button(;top = "50px")
 
 # ╔═╡ 01aef0a4-e96d-403d-be40-b118e6db614a
 #=╠═╡ notebook_exclusive
@@ -330,6 +328,14 @@ begin
 end
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 0622aaae-5d43-4113-b770-eb937fec963f
+#=╠═╡ notebook_exclusive
+@htl """
+$p4_1
+$p9_3
+"""
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 0f6a5618-c338-41ac-b6e3-cba211c070be
 #=╠═╡ notebook_exclusive
 md"""
@@ -433,14 +439,6 @@ end
 p02 =[p4_1   p9_3]
   ╠═╡ notebook_exclusive =#
 
-# ╔═╡ 0622aaae-5d43-4113-b770-eb937fec963f
-#=╠═╡ notebook_exclusive
-@htl """
-$p4_1
-$p9_3
-"""
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ 31de5995-b2a2-48ce-9bf3-fd61059e8f61
 #=╠═╡ notebook_exclusive
 scatter([(rand(),rand()) for _ ∈ 1:100];mode="markers") |> Plot
@@ -531,7 +529,6 @@ UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 [compat]
 HypertextLiteral = "~0.9.3"
 PlotlyBase = "~0.8.18"
-PlutoUtils = "~0.4.5"
 StaticArrays = "~1.2.13"
 """
 
@@ -544,9 +541,9 @@ manifest_format = "2.0"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
-git-tree-sha1 = "0bc60e3006ad95b4bb7497698dd7c6d649b9bc06"
+git-tree-sha1 = "abb72771fd8895a7ebd83d5632dc4b989b022b5b"
 uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.1.1"
+version = "1.1.2"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -752,28 +749,22 @@ uuid = "a03496cd-edff-5a9b-9e67-9cda94a718b5"
 version = "0.8.18"
 
 [[deps.PlutoDevMacros]]
-deps = ["MacroTools"]
-git-tree-sha1 = "cfd40e6f7c23fc38a751e4ba4a5c25b8a68fd4b2"
+deps = ["MacroTools", "Requires"]
+git-tree-sha1 = "f5cbbcaa26fe68fd63bc25f5a9e626b7f0e515b0"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.2.0"
-
-[[deps.PlutoTest]]
-deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
-git-tree-sha1 = "92b8ae1eee37c1b8f70d3a8fb6c3f2d81809a1c5"
-uuid = "cb4044da-4d16-4ffa-a6a3-8cad7f73ebdc"
-version = "0.2.0"
+version = "0.4.4"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "e071adf21e165ea0d904b595544a8e514c8bb42c"
+git-tree-sha1 = "b68904528fd538f1cb6a3fbc44d2abdc498f9e8e"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.19"
+version = "0.7.21"
 
 [[deps.PlutoUtils]]
-deps = ["Chain", "Glob", "HypertextLiteral", "InteractiveUtils", "Markdown", "PlutoDevMacros", "PlutoTest", "PlutoUI", "PrettyTables", "Reexport", "Requires", "UUIDs"]
-git-tree-sha1 = "ae74b417ca618a4a24fea3240433f969efa2f9b3"
+deps = ["Chain", "Glob", "HypertextLiteral", "OrderedCollections", "PlutoDevMacros", "PlutoUI", "PrettyTables", "Reexport", "Requires", "StaticArrays", "UUIDs"]
+git-tree-sha1 = "c44cc3fe250c4339264f1b09a0c843d3885172b2"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
-version = "0.4.5"
+version = "0.5.2"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
@@ -889,7 +880,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═d64feb66-4cd5-4818-b912-1efebcdb8432
 # ╠═7799649c-d265-4042-a4cb-16e376d4ea45
 # ╟─3c3d991b-6970-495b-8d80-d3c42b7c9617
-# ╠═c5f520f4-c26c-4ec8-90b5-6e74375cf9d7
 # ╠═c27179fa-c2c0-45a2-afbf-8350d817ef08
 # ╟─2dfdbd07-15fc-4a43-8849-d0154bf2192e
 # ╠═e093832c-d490-4468-97ee-e902b24a3e44
@@ -903,6 +893,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═0c835811-ec85-4f91-8a33-536256ac281d
 # ╠═943c3293-fba2-44f5-9e61-2f821bd5c65e
 # ╠═6d85da33-f8f4-4435-b572-991a0b6e5511
+# ╠═d11ba689-eab1-4d08-91ab-8ec275bd68a8
 # ╠═01aef0a4-e96d-403d-be40-b118e6db614a
 # ╠═55f63e7b-f81a-48ff-9857-a8cfd6b3c7dd
 # ╠═0123b5ce-5455-4227-b916-3d1e1c814911
