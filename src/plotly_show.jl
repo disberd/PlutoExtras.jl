@@ -34,7 +34,7 @@ import PlutoUtils
 
 # ╔═╡ caa6aad3-50ab-4041-ab27-525ec9ec56ee
 #=╠═╡ notebook_exclusive
-PlutoUtils.TableOfContents()
+PlutoUtils.ToC()
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 3c3d991b-6970-495b-8d80-d3c42b7c9617

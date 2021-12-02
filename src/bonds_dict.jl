@@ -21,11 +21,6 @@ begin
 	using PlutoUI
 end
 
-# ╔═╡ 695dfef3-f0d3-43d7-9d83-38c1a94cec89
-#=╠═╡ notebook_exclusive
-using PlutoUtils
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ ecd45d5d-40c7-4ebe-b541-4bffa3b7abd5
 #=╠═╡ notebook_exclusive
 md"""
@@ -33,9 +28,14 @@ md"""
 """
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 695dfef3-f0d3-43d7-9d83-38c1a94cec89
+#=╠═╡ notebook_exclusive
+import PlutoUtils
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 7719b308-c856-4419-b700-be6feb4d3115
 #=╠═╡ notebook_exclusive
-ToC()
+PlutoUtils.ToC()
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 54a91ec9-de06-43e8-b4ef-8f436292f749
@@ -81,16 +81,16 @@ md"""
 
 # ╔═╡ 48414943-3a16-4826-8098-19089ed00646
 #=╠═╡ notebook_exclusive
-html"""
-<style>
-	.bondtable .bondtable_link {
-		display: none;
-	}
-	.bondtable .bondtable_bond {
-		text-align: center;
-	}
-</style>
-"""
+# # html"""
+# <style>
+# 	.bondtable .bondtable_link {
+# 		display: none;
+# 	}
+# 	.bondtable .bondtable_bond {
+# 		text-align: center;
+# 	}
+# </style>
+# """
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 0b14e883-7548-4f65-a789-3cde165cc240
@@ -450,7 +450,7 @@ position_fixed(@showbonds params; top = "20px", left = "20px", width = "25%")
 
 # ╔═╡ 2ec714d2-6f4f-476a-8935-52902ad013ad
 #=╠═╡ notebook_exclusive
-@addbond params["Editable"] Editable(15)
+@addbond params["Editable"] PlutoUtils.Editable(15)
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ cae2cfac-91d0-4f1a-8831-d91c37c5df05
@@ -469,11 +469,6 @@ let
 end
   ╠═╡ notebook_exclusive =#
 
-# ╔═╡ c156323c-f147-4040-a6e9-03cfb34c8769
-#=╠═╡ notebook_exclusive
-@getbond_reactive params["Magic"]
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -486,7 +481,7 @@ PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 HypertextLiteral = "~0.9.3"
 OrderedCollections = "~1.4.1"
 PlutoUI = "~0.7.21"
-PlutoUtils = "~0.5.1"
+PlutoUtils = "~0.5.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -667,10 +662,10 @@ uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 version = "0.7.21"
 
 [[deps.PlutoUtils]]
-deps = ["Chain", "Glob", "HypertextLiteral", "PlutoDevMacros", "PlutoUI", "PrettyTables", "Reexport", "Requires", "UUIDs"]
-git-tree-sha1 = "684676b3edc1698e540669a766f74d2c23e0bc11"
+deps = ["Chain", "Glob", "HypertextLiteral", "OrderedCollections", "PlutoDevMacros", "PlutoUI", "PrettyTables", "Reexport", "Requires", "StaticArrays", "UUIDs"]
+git-tree-sha1 = "c44cc3fe250c4339264f1b09a0c843d3885172b2"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
-version = "0.5.1"
+version = "0.5.2"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
@@ -709,6 +704,20 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[deps.SparseArrays]]
+deps = ["LinearAlgebra", "Random"]
+uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[[deps.StaticArrays]]
+deps = ["LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "3c76dde64d03699e074ac02eb2e8ba8254d428da"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.2.13"
+
+[[deps.Statistics]]
+deps = ["LinearAlgebra", "SparseArrays"]
+uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -805,6 +814,5 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═2ec714d2-6f4f-476a-8935-52902ad013ad
 # ╠═cae2cfac-91d0-4f1a-8831-d91c37c5df05
 # ╠═d336773d-e139-427a-a868-ad8887522cd5
-# ╠═c156323c-f147-4040-a6e9-03cfb34c8769
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
