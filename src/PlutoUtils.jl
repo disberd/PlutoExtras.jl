@@ -15,6 +15,7 @@ include("./latex_equations.jl")
 include("./prettytable.jl")
 include("./kbd_shortcuts.jl")
 include("./html2canvas_savediv.jl")
+include("bonds_dict.jl")
 
 function __init__()
 	@require PlotlyBase="a03496cd-edff-5a9b-9e67-9cda94a718b5" begin
