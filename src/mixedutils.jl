@@ -50,7 +50,7 @@ details(x, summary="Show more") = @htl("""
 	""")
 
 # ╔═╡ 554371ac-e171-4e8d-9bce-992423e390f5
-export details
+export details, position_fixed
 
 # ╔═╡ 5c8232fd-d381-4996-a295-a45241f3953e
 #=╠═╡ notebook_exclusive
@@ -68,7 +68,7 @@ This can be used to have some cell output fixed on the viewport (for example for
 All the values that are passed as kwargs are copied in the css style of the div as `name: value;`.
 """
 function position_fixed(x;zindex = 500, kwargs...)
-id = "fixed_div_$(uuid4())"
+id = "fixed_div_$(rand(UInt))"
 
 io = IOBuffer()
 for (n,v) ∈ kwargs
