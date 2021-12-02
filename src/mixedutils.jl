@@ -67,7 +67,7 @@ This can be used to have some cell output fixed on the viewport (for example for
 
 All the values that are passed as kwargs are copied in the css style of the div as `name: value;`.
 """
-function position_fixed(x;zindex = 500, kwargs...)
+function position_fixed(x;zindex = 350, kwargs...)
 id = "fixed_div_$(rand(UInt))"
 
 io = IOBuffer()
