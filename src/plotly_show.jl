@@ -17,6 +17,9 @@ using PlotlyBase
 # ╔═╡ d64feb66-4cd5-4818-b912-1efebcdb8432
 using UUIDs
 
+# ╔═╡ 7799649c-d265-4042-a4cb-16e376d4ea45
+using StaticArrays
+
 # ╔═╡ f0aae837-cf93-46df-b204-d4ed57836d12
 #=╠═╡ notebook_exclusive
 md"""
@@ -31,7 +34,7 @@ import PlutoUtils
 
 # ╔═╡ caa6aad3-50ab-4041-ab27-525ec9ec56ee
 #=╠═╡ notebook_exclusive
-PlutoUtils.ToC()
+PlutoUtils.TableOfContents()
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 3c3d991b-6970-495b-8d80-d3c42b7c9617
@@ -319,6 +322,15 @@ md"""
 # ╔═╡ c805105a-9444-49df-b06f-12e91aa9b26c
 const NNumber = Union{Nothing,<:Number}
 
+# ╔═╡ 9c57f29a-e143-41d0-af16-6bc5ec7b5a4f
+const Point{N} = Union{Tuple{Vararg{<:Number, N}}, StaticVector{N,<:Number}}
+
+# ╔═╡ 93f04d55-9ed8-43b1-ace6-1084e95bba67
+const Point2D = Point{2}
+
+# ╔═╡ 79a9dcad-4b5f-4206-8ab4-50b712ebf07b
+const Point3D = Point{3}
+
 # ╔═╡ b956aa02-48fb-416e-aa39-c9fa291ed47a
 #=╠═╡ notebook_exclusive
 md"""
@@ -328,7 +340,7 @@ md"""
 
 # ╔═╡ b16f5014-a4dd-48e0-b8c8-6c839b5f52c3
 begin
-	function PlotlyBase.scatter(xy::AbstractVector{<:Tuple{Any,Any}};kwargs...)
+	function PlotlyBase.scatter(xy::AbstractVector{<:Point2D};kwargs...)
 		PlotlyBase.scatter(;x=first.(xy),y=last.(xy),kwargs...)
 	end
 	function PlotlyBase.scatter(xy::Tuple{<:AbstractVector,<:AbstractVector};kwargs...)
@@ -416,6 +428,11 @@ $p9_3
 scatter([(rand(),rand()) for _ ∈ 1:100];mode="markers") |> Plot
   ╠═╡ notebook_exclusive =#
 
+# ╔═╡ 6edb683a-b544-4b51-9824-d8ddb19de525
+#=╠═╡ notebook_exclusive
+scatter(rand(SVector{2,Float64},100);mode="markers") |> Plot
+  ╠═╡ notebook_exclusive =#
+
 # ╔═╡ 302e8097-be38-44e3-ba24-8f834115bb94
 #=╠═╡ notebook_exclusive
 scatter((rand(100),rand(100));mode="markers") |> Plot
@@ -430,7 +447,7 @@ md"""
 
 # ╔═╡ eb608938-7ede-464f-9c5f-0c19d7847fb5
 begin
-	function PlotlyBase.surface(xy::AbstractArray{<:Tuple{Any,Any,Any}};kwargs...)
+	function PlotlyBase.surface(xy::AbstractArray{<:Point3D};kwargs...)
 		PlotlyBase.surface(;x=getindex.(xy,1),y=getindex.(xy,2),z=getindex.(xy,3),kwargs...)
 	end
 	function PlotlyBase.surface(xy::Tuple{<:AbstractArray,<:AbstractArray, <: AbstractArray};kwargs...)
@@ -490,12 +507,14 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 PlotlyBase = "a03496cd-edff-5a9b-9e67-9cda94a718b5"
 PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [compat]
 HypertextLiteral = "~0.9.3"
 PlotlyBase = "~0.8.18"
 PlutoUtils = "~0.4.5"
+StaticArrays = "~1.2.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
