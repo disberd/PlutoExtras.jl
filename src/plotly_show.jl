@@ -114,7 +114,7 @@ function show2(plt::PlotlyBase.Plot)
 	@htl("""
 			<div>
 			<script id=$script_id>
-			const {plotly} = await import("https://cdn.plot.ly/plotly-2.5.1.min.js")
+			const {plotly} = await import("https://cdn.plot.ly/plotly-2.6.4.min.js")
 			const PLOT = this ?? document.createElement("div");
 		
 
@@ -139,7 +139,7 @@ function show2(plt::PlotlyBase.Plot)
 			}
 			function drop_handler(ev) {
 				 ev.preventDefault();
-				 // Get the id of the target and add the moved element to the target's DOM
+				 // Get the plotly config data (See the notebook plotly_save for the button implementation)
 				 const data = JSON.parse(ev.dataTransfer.getData("plotly-config"));
 				 Plotly.downloadImage(PLOT,data)
 			}
@@ -155,9 +155,6 @@ function show2(plt::PlotlyBase.Plot)
 			</div>
 """)
 end
-
-# ╔═╡ 36a18657-9f9f-485a-90aa-8e98d6c2e7d0
-
 
 # ╔═╡ e389da42-7f04-4bad-acc5-334a4277e5ac
 function Base.show(io::IO, mimetype::MIME"text/html", plt::PlotlyBase.Plot)
@@ -206,7 +203,7 @@ end
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ d11ba689-eab1-4d08-91ab-8ec275bd68a8
-PlutoUtils.plotly_save_button(;top = "50px")
+# PlutoUtils.plotly_save_button(;top = "50px")
 
 # ╔═╡ 01aef0a4-e96d-403d-be40-b118e6db614a
 #=╠═╡ notebook_exclusive
@@ -328,14 +325,6 @@ begin
 end
   ╠═╡ notebook_exclusive =#
 
-# ╔═╡ 0622aaae-5d43-4113-b770-eb937fec963f
-#=╠═╡ notebook_exclusive
-@htl """
-$p4_1
-$p9_3
-"""
-  ╠═╡ notebook_exclusive =#
-
 # ╔═╡ 0f6a5618-c338-41ac-b6e3-cba211c070be
 #=╠═╡ notebook_exclusive
 md"""
@@ -437,6 +426,14 @@ end
 # ╔═╡ 4c160e08-4f1c-4ec1-818b-475331f71435
 #=╠═╡ notebook_exclusive
 p02 =[p4_1   p9_3]
+  ╠═╡ notebook_exclusive =#
+
+# ╔═╡ 0622aaae-5d43-4113-b770-eb937fec963f
+#=╠═╡ notebook_exclusive
+@htl """
+$p4_1
+$p9_3
+"""
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 31de5995-b2a2-48ce-9bf3-fd61059e8f61
@@ -886,7 +883,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═84560ed3-1ea7-4eb8-8db1-99eaa5219dd2
 # ╠═f7dfb8b4-bcbd-4aed-8af0-c2ea37c1ac90
 # ╠═740bcc3f-5304-4f8e-9324-af1f392b13a6
-# ╠═36a18657-9f9f-485a-90aa-8e98d6c2e7d0
 # ╠═e389da42-7f04-4bad-acc5-334a4277e5ac
 # ╠═02583ec4-a758-47e6-aeea-f6d897b307bc
 # ╠═37374eb5-075f-4ecc-ae91-472b55c18c6f
