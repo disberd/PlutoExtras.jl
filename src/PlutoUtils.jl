@@ -20,6 +20,7 @@ include("bonds_dict.jl")
 function __init__()
 	@require PlotlyBase="a03496cd-edff-5a9b-9e67-9cda94a718b5" begin
 		println("PlutoUtils: Loading plotly convenience methods")
+		include("plotly_colors.jl")
 		include("plotly_show.jl")
 		include("plotly_save.jl")
 	end
