@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.2
+# v0.17.3
 
 # using Markdown
 # using InteractiveUtils
@@ -82,8 +82,8 @@ const eqrefClick = (e) => {
 	e.preventDefault() // This prevent normal scrolling to link
 	const a = e.target
 	const eq_id = a.getAttribute('eq_id')
-	window.location.hash = 'eqref-' + eq_id // This is to be able to use the back function to resume previous view, 'eqref-' is added in front to avoid the viewport actually going to the equation without having control of the scroll
 	const eq = document.getElementById(eq_id)
+	history.pushState({},'') // This is to allow going back to the previous position in the page after scroll with History Back
 	eq.scrollIntoView({
 		behavior: 'smooth',
 		block: 'center',

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.2
+# v0.17.3
 
 # using Markdown
 # using InteractiveUtils
@@ -387,6 +387,7 @@ const Toc = () => {
 		}
 		const h = document.getElementById(id)
 		// console.log(h)
+		history.pushState({},'') // This is to allow going back to the previous position in the page after scroll with History Back
 		h.scrollIntoView({
 			behavior: 'smooth', 
 			block: 'center'
@@ -410,6 +411,7 @@ const Toc = () => {
 		
 		const t = e.target
 		if (t.classList.contains('full')) {
+			history.pushState({},'') // This is to allow going back to the previous position in the page after scroll with History Back
 			t.closest('pluto-cell').scrollIntoView({
 			behavior: 'smooth', 
 			block: 'center'
