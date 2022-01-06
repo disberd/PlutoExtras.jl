@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.2
+# v0.17.3
 
 # using Markdown
 # using InteractiveUtils
@@ -40,9 +40,12 @@ function try_moveimage(srcname,dstpath)
 end
 
 # ╔═╡ 4df9f351-3cda-40b3-a78d-de3097d03e2b
-function savediv(table_id,figures_path; interval = 5, trials = 40)
+function savediv(table_id,figures_path; interval = 5, trials = 40, kwargs...)
 	random_id = uuid4() |> x -> string(x) * ".png"
 	dstpath = joinpath(figures_path,"$(table_id).png")
+
+	# We used the additional kwargs as config values for the savediv function
+	config = kwargs
 	
 	@async begin
 		i = 0
@@ -55,11 +58,13 @@ function savediv(table_id,figures_path; interval = 5, trials = 40)
 		end
 		println(saved ? "picture $random_id moved as $table_id" : "$trials attempts reached for $table_id")
 	end
+	# Put the object to send via javascript in a namedtuple
+	nt = (;table_id, random_name = random_id, config)
 	@htl """
 	saving HTML element using html2canvas
 <script>
 	const myDiv = document.getElementById("html2canvas_savediv_container")
-	myDiv.addToQueue({table_id: $table_id, random_name : $random_id})
+	myDiv.addToQueue($nt)
 
 </script>
 """
@@ -108,9 +113,9 @@ function initialize_html2canvas_savediv()
 			let isQueueRunning = false
 			let queueSlots = 3
 
-			const addToQueue = ({table_id, random_name}) => {
+			const addToQueue = (obj) => {
 				// Add the save pointers to the queue array
-				queue.push({table_id, random_name})
+				queue.push(obj)
 				if (!isQueueRunning) {
 					// Start the queue processing function
 					isQueueRunning = true
@@ -140,9 +145,9 @@ function initialize_html2canvas_savediv()
 
 			mydiv.addToQueue = addToQueue
 
-			const saveTable = async ({table_id, random_name}) => {
+			const saveTable = async ({table_id, random_name, config}) => {
 				const table = document.getElementById(table_id).querySelector('table')
-				const canvas = await html2canvas(table,{scale:2})
+				const canvas = await html2canvas(table,{scale:2, ...config})
 				saveAs(canvas.toDataURL(), random_name)
 				queueSlots += 1
 				if (isQueueRunning) {
@@ -206,7 +211,7 @@ figures_path = joinpath(homedir())
 # ╔═╡ 24cd661f-cf72-4c0f-9cc6-a4a800354993
 #=╠═╡ notebook_exclusive
 if save_figures
-	savediv("gesure",figures_path)
+	savediv("gesure",figures_path; width = 450)
 end
   ╠═╡ notebook_exclusive =#
 
@@ -253,16 +258,25 @@ PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [compat]
-HypertextLiteral = "~0.9.1"
-PlutoUtils = "~0.3.13"
+HypertextLiteral = "~0.9.3"
+PlutoUtils = "~0.5.6"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc1"
+julia_version = "1.7.1"
 manifest_format = "2.0"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.4"
+
+[[deps.ArgTools]]
+uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -271,18 +285,30 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[deps.Chain]]
-git-tree-sha1 = "cac464e71767e8a04ceee82a889ca56502795705"
+git-tree-sha1 = "339237319ef4712e6e5df7758d0bccddf5c237d9"
 uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-version = "0.4.8"
+version = "0.4.10"
+
+[[deps.ColorTypes]]
+deps = ["FixedPointNumbers", "Random"]
+git-tree-sha1 = "024fe24d83e4a5bf5fc80501a314ce0d1aa35597"
+uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
+version = "0.11.0"
+
+[[deps.Colors]]
+deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
+git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
+uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
+version = "0.12.8"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 
 [[deps.Crayons]]
-git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
+git-tree-sha1 = "b618084b49e78985ffa8422f32b9838e397b9fc2"
 uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.0.4"
+version = "4.1.0"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
@@ -297,6 +323,22 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.DocStringExtensions]]
+deps = ["LibGit2"]
+git-tree-sha1 = "b19534d1895d702889b219c382a6e18010797f0b"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.8.6"
+
+[[deps.Downloads]]
+deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+
+[[deps.FixedPointNumbers]]
+deps = ["Statistics"]
+git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
+uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+version = "0.8.4"
 
 [[deps.Formatting]]
 deps = ["Printf"]
@@ -316,9 +358,9 @@ uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
 version = "0.0.4"
 
 [[deps.HypertextLiteral]]
-git-tree-sha1 = "f6532909bf3d40b308a0f360b6a0e626c0e263a8"
+git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.1"
+version = "0.9.3"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
@@ -341,6 +383,22 @@ git-tree-sha1 = "8076680b162ada2a031f707ac7b4953e30667a37"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.2"
 
+[[deps.LibCURL]]
+deps = ["LibCURL_jll", "MozillaCACerts_jll"]
+uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+
+[[deps.LibCURL_jll]]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
+uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+
+[[deps.LibGit2]]
+deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
+uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+
+[[deps.LibSSH2_jll]]
+deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
+uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
@@ -353,63 +411,80 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
-git-tree-sha1 = "5a5bc6bf062f0f95e62d0fe0a2d99699fed82dd9"
+git-tree-sha1 = "3d3e902b31198a27340d0bf00d6ac452866021cf"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.8"
+version = "0.5.9"
 
 [[deps.Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
+[[deps.MbedTLS_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[deps.MozillaCACerts_jll]]
+uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+
+[[deps.NetworkOptions]]
+uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 
+[[deps.OrderedCollections]]
+git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
+uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+version = "1.4.1"
+
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "98f59ff3639b3d9485a03a72f3ab35bab9465720"
+git-tree-sha1 = "d7fa6237da8004be601e19bd6666083056649918"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.0.6"
+version = "2.1.3"
+
+[[deps.Pkg]]
+deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.PlutoDevMacros]]
-deps = ["MacroTools"]
-git-tree-sha1 = "cfd40e6f7c23fc38a751e4ba4a5c25b8a68fd4b2"
+deps = ["MacroTools", "Requires"]
+git-tree-sha1 = "f5cbbcaa26fe68fd63bc25f5a9e626b7f0e515b0"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.2.0"
-
-[[deps.PlutoTest]]
-deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
-git-tree-sha1 = "b7da10d62c1ffebd37d4af8d93ee0003e9248452"
-uuid = "cb4044da-4d16-4ffa-a6a3-8cad7f73ebdc"
-version = "0.1.2"
+version = "0.4.4"
 
 [[deps.PlutoUI]]
-deps = ["Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "4c8a7d080daca18545c56f1cac28710c362478f3"
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "fed057115644d04fba7f4d768faeeeff6ad11a60"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.16"
+version = "0.7.27"
 
 [[deps.PlutoUtils]]
-deps = ["Chain", "Glob", "HypertextLiteral", "InteractiveUtils", "Markdown", "PlutoDevMacros", "PlutoTest", "PlutoUI", "PrettyTables", "Reexport", "Requires", "UUIDs"]
-git-tree-sha1 = "26ba8b1c0fd702007c0c8c7bb2496d65256beaf1"
+deps = ["Chain", "Colors", "DocStringExtensions", "Glob", "HypertextLiteral", "OrderedCollections", "PlutoDevMacros", "PlutoUI", "PrettyTables", "Reexport", "Requires", "StaticArrays", "UUIDs"]
+git-tree-sha1 = "039d81704740d73333cfa969854f38f28877d48b"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
-version = "0.3.13"
+version = "0.5.6"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
-git-tree-sha1 = "d940010be611ee9d67064fe559edbb305f8cc0eb"
+git-tree-sha1 = "dfb54c4e414caa595a1f2ed759b160f5a3ddcba5"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "1.2.3"
+version = "1.3.1"
 
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[deps.REPL]]
+deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
+uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+
 [[deps.Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.Reexport]]
@@ -419,15 +494,36 @@ version = "1.2.2"
 
 [[deps.Requires]]
 deps = ["UUIDs"]
-git-tree-sha1 = "4036a3bd08ac7e968e27c203d45f5fff15020621"
+git-tree-sha1 = "8f82019e525f4d5c669692772a6f4b0a58b06a6a"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
-version = "1.1.3"
+version = "1.2.0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[deps.SparseArrays]]
+deps = ["LinearAlgebra", "Random"]
+uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[[deps.StaticArrays]]
+deps = ["LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "de9e88179b584ba9cf3cc5edbb7a41f26ce42cda"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.3.0"
+
+[[deps.Statistics]]
+deps = ["LinearAlgebra", "SparseArrays"]
+uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[[deps.TOML]]
+deps = ["Dates"]
+uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [[deps.TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -437,9 +533,13 @@ version = "1.0.1"
 
 [[deps.Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "fed34d0e71b91734bf0a7e10eb1bb05296ddbcd0"
+git-tree-sha1 = "bb1064c9a84c52e277f1096cf41434b675cd368b"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.6.0"
+version = "1.6.1"
+
+[[deps.Tar]]
+deps = ["ArgTools", "SHA"]
+uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
@@ -452,9 +552,21 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
+[[deps.Zlib_jll]]
+deps = ["Libdl"]
+uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+
+[[deps.nghttp2_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+
+[[deps.p7zip_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 """
 
 # ╔═╡ Cell order:
