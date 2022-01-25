@@ -256,7 +256,9 @@ bool_bond = @bind bool_val Editable(true)
   ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 8f7d7dac-d5e6-43f4-88e6-21179c78c3ef
+#=╠═╡ notebook_exclusive
 bool_val
+  ╠═╡ notebook_exclusive =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
