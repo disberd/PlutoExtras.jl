@@ -7,7 +7,7 @@ This is mostly meant for personal use I will try to see if something can be adap
 The most relevant exported functionalities are detailed in the rest of the README
 
 # IMPORTANT!
-The code in this notebook is made to be viewed with my personal fork of Pluto (the branch I currently use and update is [`CM6-exclusive-old`](https://github.com/disberd/Pluto.jl/tree/CM6-exclusive-old)) that provides functionality to make cells exclusive to the notebook (meaning that they are commented out in the .jl file).\
+The code in this notebook is made to be viewed with my [personal fork](https://github.com/disberd/Pluto.jl) of Pluto that provides functionality to make cells exclusive to the notebook (meaning that they are commented out in the .jl file).\
 This is a custom feature I use to clean up notebooks and only execute the relevant cells of a notebook when this is included from normal julia (I use notebooks as building blocks for packages)
 
 This is heavily inspired by the cell disabling that exists in Pluto and the source code to save notebook exclusivity on the file is copied/adapted from Pluto pull request [#1209](https://github.com/fonsp/Pluto.jl/pull/1209).
@@ -19,7 +19,15 @@ using BenchmarkTools
   ╠═╡ notebook_exclusive =#
 ```
 
-Paste the following html snippet in a Pluto cell and execute it to show a button that will automatically strip all the exclusive comments from cells to try the notebook out: 
+To correctly see the notebook, you can either:
+1. Temporarily add my Pluto fork in a temp env to view the notebook in a parallel Pluto instance by running in a new julia CLI:
+```julia
+]activate --temp
+add https://github.com/disberd/Pluto.jl
+```
+and then run pluto normally
+
+2. Paste the following html snippet in a Pluto cell and execute it to show a button that will automatically strip all the exclusive comments from cells to try the notebook out: 
 ```html
 html"""
 To try out the <i>exclusive</i> parts of the notebook, press this <button>button</button> toggle between commenting in or out the cells by removing (or adding) the leading and trailing block comments from the cells that are marked as <i>notebook_exclusive</i>.
