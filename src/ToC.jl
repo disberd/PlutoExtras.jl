@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.3
+# v0.17.7
 
 # using Markdown
 # using InteractiveUtils
@@ -545,8 +545,20 @@ toc_heading("CSS",3,hide=true)
 # ╔═╡ 844f74f6-d59a-4651-866b-fd1bd2dbfc3c
 toc_style = """
 
+@media (prefers-color-scheme: light) {
+	:root {
+		--plutoutils-toc-hidden-bg: rgba(0, 0, 0, 0.1)
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--plutoutils-toc-hidden-bg: rgba(255, 255, 255, 0.1)
+	}
+}
+
 .plutoui-toc div.hidden a {
-	background-color: rgba(0, 0, 0, 0.1);
+	background-color: var(--plutoutils-toc-hidden-bg);
 }
 
 
@@ -561,8 +573,7 @@ toc_style = """
 	border-bottom: 2px solid rgba(0, 0, 0, 0.15);
 }
 .plutoui-toc header.show-hidden span.text {
-	color: rgba(0, 0, 0, 0.4);
-	background-color: rgba(0,0,0,0.1)
+	background-color: var(--plutoutils-toc-hidden-bg);
 }
 .plutoui-toc header span.filler {
 	flex: 1 1 0;
@@ -595,7 +606,7 @@ body.presentation .plutoui-toc.aside {
 		max-height: calc(100vh - 5rem - 56px);
 		overflow: hidden;
 		z-index: 10;
-		background: white;
+		background-color: var(--main-bg-color);
 		display: flex;
 		flex-direction: column;
 	}
@@ -759,7 +770,7 @@ HypertextLiteral = "~0.9.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0-rc2"
+julia_version = "1.7.1"
 manifest_format = "2.0"
 
 [[deps.HypertextLiteral]]
