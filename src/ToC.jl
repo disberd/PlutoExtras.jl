@@ -547,13 +547,19 @@ toc_style = """
 
 @media (prefers-color-scheme: light) {
 	:root {
-		--plutoutils-toc-hidden-bg: rgba(0, 0, 0, 0.1)
+		--plutoutils-toc-hidden-bg: rgba(0, 0, 0, 0.1);
+		--plutoutils-toc-bg: white;
+		--plutoutils-tocentry-standard: gray;
+		--plutoutils-tocentry-hover: black;
 	}
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--plutoutils-toc-hidden-bg: rgba(255, 255, 255, 0.1)
+		--plutoutils-toc-hidden-bg: rgba(255, 255, 255, 0.2);
+		--plutoutils-toc-bg: #2C3E36;
+		--plutoutils-tocentry-standard: white;
+		--plutoutils-tocentry-hover: #cecece;
 	}
 }
 
@@ -571,6 +577,7 @@ toc_style = """
 	margin-right: 0;
 	font-weight: bold;
 	border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+	color: var(--plutoutils-tocentry-standard);
 }
 .plutoui-toc header.show-hidden span.text {
 	background-color: var(--plutoutils-toc-hidden-bg);
@@ -606,7 +613,7 @@ body.presentation .plutoui-toc.aside {
 		max-height: calc(100vh - 5rem - 56px);
 		overflow: hidden;
 		z-index: 10;
-		background-color: var(--main-bg-color);
+		background-color: var(--plutoutils-toc-bg);
 		display: flex;
 		flex-direction: column;
 	}
@@ -662,7 +669,7 @@ pluto-cell:not(.code_differs)[hidden] {
 .plutoui-toc a {
 	text-decoration: none;
 	font-weight: bold;
-	color: gray;
+	color: var(--plutoutils-tocentry-standard);
 }
 
 .plutoui-toc div[collapsed] a {
@@ -670,7 +677,7 @@ pluto-cell:not(.code_differs)[hidden] {
 }
 
 .plutoui-toc div:hover a {
-	color: black;
+	color: var(--plutoutils-tocentry-hover);
 }
 
 .plutoui-toc.indent a.H1 {
