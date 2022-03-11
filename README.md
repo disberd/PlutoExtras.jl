@@ -108,10 +108,3 @@ This functionality is implemented in the [ToC.jl](./src/ToC.jl) notebook
 ### Example usage
 
 ![ToC_example](https://user-images.githubusercontent.com/12846528/128350961-c4ccbcea-ba75-48dc-bd92-7c6551cc68f9.gif)
-
-## @plutoinclude macro
-
-The former `@ingredients` macro has been renamed to `@plutoinclude` and moved to [PlutoDevMacros](https://github.com/disberd/PlutoDevMacros). 
-
-`@plutoinclude` is now aimed at being used to develop packages from multiple notebooks. Notebooks should be `plutoincluded` serially in the same order you would include corresponding source files from the Package main source file.
-The functionality of the original `@ingredients` macro is available with nice improvements (ability to have reactive load) as part of [PlutoHooks](https://github.com/JuliaPluto/PlutoHooks.jl), developed by the main Pluto devs. 
