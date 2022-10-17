@@ -4,7 +4,7 @@ using Reexport
 @reexport using HypertextLiteral
 @reexport using PlutoUI 
 @reexport using Chain
-@reexport using PrettyTables
+# @reexport using PrettyTables
 using PlutoDevMacros
 
 include("imagepaste.jl")
@@ -12,7 +12,7 @@ include("editable.jl")
 include("mixedutils.jl")
 include("ToC.jl")
 include("./latex_equations.jl")
-include("./prettytable.jl")
+# include("./prettytable.jl")
 include("./kbd_shortcuts.jl")
 include("./html2canvas_savediv.jl")
 include("bonds_dict.jl")
