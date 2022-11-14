@@ -18,7 +18,7 @@ end
 begin
 	using AbstractPlutoDingetjes
 	using HypertextLiteral
-	using PlutoDevMacros
+	using PlutoDevMacros.Script
 end
 
 # ╔═╡ 870bd8b3-812b-4570-b2eb-4be19584f45e
@@ -234,7 +234,7 @@ md"""
 """
 
 # ╔═╡ 93658b61-3d8c-4d9d-b8cc-4c86cc716ff9
-_innermost_child = HTLScript(@htl """
+_innermost_child = HTLScriptPart(@htl """
 <script>
 	function getInnermostBond(el) {
 		let bond = el.querySelector('bond')
@@ -282,7 +282,7 @@ _set_get = (@htl """
 		private_updated(out.online)
 	})
 </script>
-""") |> HTLScript;
+""") |> HTLScriptPart;
 
 # ╔═╡ 32a12484-79ad-4179-a0ef-3dbbe259cdf3
 md"""
@@ -298,7 +298,7 @@ _preamble = (@htl """
 	let set_input_value = setBoundElementValueLikePluto
 	let eventof = getBoundElementEventNameLikePluto
 </script>
-""") |> HTLScript;
+""") |> HTLScriptPart;
 
 # ╔═╡ 53f4d1ed-5d94-4905-9bb6-fa7b5c061a29
 function _show(f::StaticBond)
@@ -492,7 +492,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 [compat]
 AbstractPlutoDingetjes = "~1.1.4"
 HypertextLiteral = "~0.9.4"
-PlutoDevMacros = "~0.4.6"
+PlutoDevMacros = "~0.4.8"
 PlutoUI = "~0.7.48"
 """
 
@@ -502,7 +502,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "9b80737480e446472535cbbbf5140ca2521df64a"
+project_hash = "f4d870e97814c459000b597b650f9edd00acf5d9"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -643,10 +643,10 @@ uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.20+0"
 
 [[deps.Parsers]]
-deps = ["Dates"]
-git-tree-sha1 = "6c01a9b494f6d2a9fc180a08b182fcb06f0958a0"
+deps = ["Dates", "SnoopPrecompile"]
+git-tree-sha1 = "cceb0257b662528ecdf0b4b4302eb00e767b38e7"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.4.2"
+version = "2.5.0"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -654,10 +654,10 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.8.0"
 
 [[deps.PlutoDevMacros]]
-deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Requires"]
-git-tree-sha1 = "5079641e2a3a7f94b05429a4a9f9a49a35d064ad"
+deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Random", "Requires"]
+git-tree-sha1 = "b4b23b981704ac3e2c771a389c2899e69306c091"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.4.6"
+version = "0.4.8"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -694,6 +694,11 @@ version = "0.7.0"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.SnoopPrecompile]]
+git-tree-sha1 = "f604441450a3c0569830946e5b33b78c928e1a85"
+uuid = "66db9d55-30c0-4569-8b51-7e840670fc0c"
+version = "1.0.1"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -804,4 +809,3 @@ version = "17.4.0+0"
 # ╠═2a41ac09-d2e9-4bdc-87e6-ad020b013595
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
-

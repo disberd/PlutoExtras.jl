@@ -9,7 +9,7 @@ begin
 	using OrderedCollections
 	using HypertextLiteral
 	using PlutoUI
-	using PlutoDevMacros
+	using PlutoDevMacros.Script
 	using AbstractPlutoDingetjes
 end
 
@@ -109,7 +109,7 @@ md"""
 """
 
 # ╔═╡ c7585964-0f80-48bf-b2c5-66f3077422ab
-_script_basic = HTLScript(@htl """
+_script_basic = HTLScriptPart(@htl """
 <script>
 	let out = html`<span class='script-output'></span>`
 	let tb = currentScript.parentElement
@@ -143,7 +143,7 @@ md"""
 """
 
 # ╔═╡ dbea9296-2d91-49ea-bf7d-67d965e9a56a
-_drag_handler = HTLScript(@htl """
+_drag_handler = HTLScriptPart(@htl """
 <script>
 // taken from https://www.w3schools.com/howto/howto_js_draggable.asp
 function dragElement(elmnt) {
@@ -346,7 +346,7 @@ md"""
 """
 
 # ╔═╡ b245f253-f7ec-452c-84ae-e7e6c05842a4
-_popup_style_script = HTLScript(@htl """
+_popup_style_script = HTLScriptPart(@htl """
 <script>
 	let popup_style = document.querySelector('style.pluto-popup-style') ?? (() => {
 		console.log('adding the popup style to the body')
@@ -418,7 +418,7 @@ md"""
 """
 
 # ╔═╡ 66944c66-ead7-4d62-9d09-7083cb79f7c2
-_script_preamble = HTLScript(@htl """
+_script_preamble = HTLScriptPart(@htl """
 <script>
 	let { htmlpreact, events } = window.bondsdict
 	let parent = currentScript.parentElement
@@ -443,7 +443,7 @@ md"""
 function _popup_events(bypass, popup_id::String=FlexiBind.randstr(6), style="pluto-popup {
 			font-size: 14px;
 }")
-	HTLScript(@htl """
+	HTLScriptPart(@htl """
 <script>
 	let mouse_over_parent = false
 	let mouse_over_popup = false
@@ -1062,7 +1062,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 AbstractPlutoDingetjes = "~1.1.4"
 HypertextLiteral = "~0.9.3"
 OrderedCollections = "~1.4.1"
-PlutoDevMacros = "~0.4.7"
+PlutoDevMacros = "~0.4.8"
 PlutoPlotly = "~0.3.6"
 PlutoUI = "~0.7.21"
 """
@@ -1073,7 +1073,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "b8b45a450567eb24edb0585a7a1989a7a735d820"
+project_hash = "a79e64fd914c88b792ba0fae7eaefb21fcdbd4fa"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1327,10 +1327,10 @@ uuid = "a03496cd-edff-5a9b-9e67-9cda94a718b5"
 version = "0.8.19"
 
 [[deps.PlutoDevMacros]]
-deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Requires"]
-git-tree-sha1 = "8d0065864a8a47c08403506fc319191cf234911a"
+deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Random", "Requires"]
+git-tree-sha1 = "b4b23b981704ac3e2c771a389c2899e69306c091"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.4.7"
+version = "0.4.8"
 
 [[deps.PlutoPlotly]]
 deps = ["AbstractPlutoDingetjes", "Colors", "Dates", "HypertextLiteral", "InteractiveUtils", "LaTeXStrings", "Markdown", "PlotlyBase", "PlutoUI", "Reexport"]
