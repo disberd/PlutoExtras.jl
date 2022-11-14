@@ -283,6 +283,10 @@ _params_container_style = @htl """
 		font-weight: 800;
 		justify-self: stretch;
 		display: flex;
+		position: sticky;
+		top: 0px;
+		background: var(--main-bg-color);
+		z-index: 100;
 	}
 	.params_container .title  > .name-container {
 		cursor: move;
@@ -686,7 +690,7 @@ function _help_popup_script(desc, def)
 	style = """
 	pluto-popup.visible {
 		transform: scale(1) translateY(30px); 
-		transition: none;
+		transition: none 1.5s;
 	}
 	pluto-popup div {
 		font-size: 14px;
@@ -917,7 +921,8 @@ md"""
 function _addbond_expr(calling_module, cell_id, name, bondvalue)
 	dictname, desc = splitdef(name)
 	_dictname = esc(dictname)
-	symbolname = Symbol(:_,dictname,:_,desc)
+	remove_dots(x) = replace(x, '.' => "")
+	symbolname = Symbol(:_,dictname,:_,desc |> remove_dots)
 	_addbond_expr(calling_module, cell_id, name, symbolname, bondvalue)
 end
 
@@ -931,6 +936,8 @@ function _addbond_expr(calling_module, cell_id, name, symbolname::Symbol, bondva
 			error("The provided key/description is already present in the dict and defined in another cell, please change the definition from that cell")
 		end
 		local wrapper = BondWrapper($desc, $cell_id, $(flexibind_expr(calling_module, symbolname, bondvalue)), $(Meta.quot(symbolname)))
+		# Delete the stale bonds
+		clean_dict!($_dictname, $(esc(calling_module)))
 		$_dictname[$desc] = wrapper
 	end
 end
@@ -948,7 +955,7 @@ end
 
 # ╔═╡ eb80cbe8-dbcc-4a45-90b3-d00b33552bae
 #=╠═╡
-@addbond params["DioSanto"] Slider(1:10)
+@addbond params["Signore.RE"] Slider(1:10)
   ╠═╡ =#
 
 # ╔═╡ 1fdca475-77d9-4f0f-9972-695eac5bc9da
@@ -975,19 +982,25 @@ md"""
   ╠═╡ =#
 
 # ╔═╡ d53dbcb4-82f6-43c4-9859-eb233dbbf585
-function _symbol_name(name_expr, suffix="")
+function _symbol_name(calling_module, name_expr, suffix="")
 	dictname, desc = splitdef(name_expr)
-	return Symbol(:_, dictname, :_, desc, (isempty(string(suffix)) ? () : (:_, suffix))...)
+	isdefined(calling_module, dictname) || return throw("The dictionary $dictname does not exist in the current module")
+	d = getfield(calling_module, dictname)
+	wrapper = get(d, desc) do
+		throw("The dictionary $dictname has no parameter $desc")
+	end
+	sym = wrapper.defines
+	return Symbol(sym, (isempty(string(suffix)) ? () : (:_, suffix))...)
 end
 
 # ╔═╡ 1c958b8a-ec45-41da-a200-5b5a712165cc
-_getbond_expr(name::Expr, suffix="") = _symbol_name(name, suffix)
+_getbond_expr(calling_module, name::Expr, suffix="") = _symbol_name(calling_module, name, suffix)
 
 # ╔═╡ fa1b5db7-5d3b-4e9b-bd08-8e11c1e84305
-function _getbond_expr(names, suffix="")
+function _getbond_expr(calling_module, names, suffix="")
 	ex = Expr(:tuple)
 	for nm ∈ names
-		push!(ex.args, _symbol_name(nm, suffix))
+		push!(ex.args, _symbol_name(calling_module, nm, suffix))
 	end
 	if length(names) == 1
 		ex = ex.args[1]
@@ -997,33 +1010,39 @@ end
 
 # ╔═╡ 2471400c-bc46-498d-b6d8-64adbd8a8b7a
 macro getbond(names::Expr...)
-	ex = _getbond_expr(names)
-	esc(ex)
+	ex = try
+		esc(_getbond_expr(__module__,names))
+	catch e
+		:(throw($(e)))
+	end
 end
 
 # ╔═╡ 81d7fd40-255a-4116-a7fa-019a735374d6
 macro getbond_static(names::Expr...)
-	ex = _getbond_expr(names, :static)
-	esc(ex)
+	ex = try
+		esc(_getbond_expr(__module__,names))
+	catch e
+		:(throw($e))
+	end
 end
 
 # ╔═╡ 264e720b-db52-40cd-be6b-53004fa0ef10
 macro getbond(kind::Union{String, Symbol}, names...)
-	ex = _getbond_expr(names, kind)
+	ex = _getbond_expr(__module__,names, kind)
 	esc(ex)
 end
 
 # ╔═╡ f88ad8a5-8875-41b8-9680-8de93c27948d
 begin
 	# export BondWrapper, LittleDict
-	export @bondsdict, @addbond, @getbond, @getbond_static, show_bondsdict
+	export @bondsdict, @addbond, @getbond
 end
 
 # ╔═╡ 154b2bfb-2d0e-47f6-8623-1d1b66df6e8a
 begin
-	var"@gb" = var"@getbond"
-	var"@gbs" = var"@getbond_static"
-end
+	const var"@gb" = var"@getbond"
+	const var"@gbs" = var"@getbond_static"
+end;
 
 # ╔═╡ 758f4fa3-1b01-4748-992e-6486cba4c905
 #=╠═╡
@@ -1046,6 +1065,11 @@ let
 	n = @gb params["MADONNA"]
 	plot(rand(10,n))
 end
+  ╠═╡ =#
+
+# ╔═╡ 025a54a9-511e-4781-b640-c76f5c43ee79
+#=╠═╡
+@gb params["Grazia Divina"]
   ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1559,6 +1583,7 @@ version = "17.4.0+0"
 # ╠═ac5e41e2-89c7-4045-9275-7cebe6b6dd92
 # ╠═b1f64f22-da01-45c0-a2f8-48cb6673d473
 # ╠═d53dbcb4-82f6-43c4-9859-eb233dbbf585
+# ╠═025a54a9-511e-4781-b640-c76f5c43ee79
 # ╠═1c958b8a-ec45-41da-a200-5b5a712165cc
 # ╠═fa1b5db7-5d3b-4e9b-bd08-8e11c1e84305
 # ╠═2471400c-bc46-498d-b6d8-64adbd8a8b7a
@@ -1567,4 +1592,3 @@ version = "17.4.0+0"
 # ╠═154b2bfb-2d0e-47f6-8623-1d1b66df6e8a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
-
