@@ -16,6 +16,9 @@ include("./latex_equations.jl")
 include("./kbd_shortcuts.jl")
 include("./html2canvas_savediv.jl")
 module BondsDict include("bonds_dict.jl") end
+module ExtendedToc include("extended_toc.jl") end # exports the ExtendedTableOfContents object
+using .ExtendedToc
+export ExtendedTableOfContents
 
 function __init__()
 	@require PlotlyBase="a03496cd-edff-5a9b-9e67-9cda94a718b5" begin
