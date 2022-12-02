@@ -1,5 +1,7 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.15
+
+#> custom_attrs = ["hide-enabled"]
 
 using Markdown
 using InteractiveUtils
@@ -14,10 +16,12 @@ begin
 end
 
 # ╔═╡ 8179a3c3-dda2-47c2-9efc-014cce2d0c75
+# ╠═╡ show_logs = false
 # ╠═╡ skip_as_script = true
 #=╠═╡
 begin
 	using PlutoPlotly
+	using PlutoUtils: ExtendedTableOfContents
 end
   ╠═╡ =#
 
@@ -30,7 +34,9 @@ md"""
   ╠═╡ =#
 
 # ╔═╡ 7cdb1e47-b06b-4cff-ab7e-b9451d261487
-TableOfContents()
+#=╠═╡
+ExtendedTableOfContents()
+  ╠═╡ =#
 
 # ╔═╡ 278449d8-b67d-4ca9-9910-e19836e42a93
 # ╠═╡ skip_as_script = true
@@ -148,11 +154,11 @@ _interaction_handler = HTLScriptPart(@htl """
 			move (event) {
 		      tb.offset.x += event.dx
 		      tb.offset.y += event.dy
-
+		
 		      tb.style.top = `min(95vh, \${tb.offset.y}px`
 		      tb.style.left = `min(95vw, \${tb.offset.x}px`
 		    },
-  }
+		}
 	}).on('doubletap', function (event) {
 		  // Double-tap on header reset the position
 		tb.style.top = ''
@@ -163,18 +169,18 @@ _interaction_handler = HTLScriptPart(@htl """
 	    edges: { top: true, left: true, bottom: true, right: true },
 	    listeners: {
 	      move: function (event) {
-
+		
 	        Object.assign(event.target.style, {
 	          width: `\${event.rect.width}px`,
 	          height: `\${event.rect.height}px`,
 	        })
-  }
-}
+	      }
+	    }
 	  }).on('doubletap', function (event) {
 		  // Double-tap on resize reset the width
 			tb.style.width = ''
 		  	tb.style.height = ''
-})
+	  })
 </script>
 """);
 
@@ -1032,11 +1038,6 @@ begin
 	const var"@gbs" = var"@getbond_static"
 end;
 
-# ╔═╡ 758f4fa3-1b01-4748-992e-6486cba4c905
-#=╠═╡
-@gb params["GESU"]
-  ╠═╡ =#
-
 # ╔═╡ e04df756-5202-46f3-a013-c2ba20b8005a
 #=╠═╡
 @gb params["GESU"] params["MADONNA"]
@@ -1069,6 +1070,7 @@ OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 PlutoPlotly = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 
 [compat]
 AbstractPlutoDingetjes = "~1.1.4"
@@ -1077,6 +1079,7 @@ OrderedCollections = "~1.4.1"
 PlutoDevMacros = "~0.4.8"
 PlutoPlotly = "~0.3.6"
 PlutoUI = "~0.7.21"
+PlutoUtils = "~0.5.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -1085,7 +1088,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "a79e64fd914c88b792ba0fae7eaefb21fcdbd4fa"
+project_hash = "aa9a25fa08439a88b2a99ab001629aab1eb348f6"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1102,6 +1105,11 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.Chain]]
+git-tree-sha1 = "8c4920235f6c561e401dfe569beb8b924adad003"
+uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
+version = "0.5.0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
@@ -1177,6 +1185,11 @@ deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
+
+[[deps.Glob]]
+git-tree-sha1 = "4df9f7e06108728ebf00a0a11edee4b29a482bb2"
+uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
+version = "1.3.0"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
@@ -1356,6 +1369,12 @@ git-tree-sha1 = "efc140104e6d0ae3e7e30d56c98c4a927154d684"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 version = "0.7.48"
 
+[[deps.PlutoUtils]]
+deps = ["AbstractPlutoDingetjes", "Chain", "Colors", "DocStringExtensions", "Glob", "HypertextLiteral", "InteractiveUtils", "Markdown", "OrderedCollections", "PlutoDevMacros", "PlutoUI", "Reexport", "Requires", "StaticArrays", "UUIDs"]
+git-tree-sha1 = "1e77b28b5d4bf2c0e8f3a3776b73a7a7f1c16236"
+uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
+version = "0.5.13"
+
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
@@ -1409,6 +1428,17 @@ deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jl
 git-tree-sha1 = "d75bda01f8c31ebb72df80a46c88b25d1c79c56d"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.7"
+
+[[deps.StaticArrays]]
+deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
+git-tree-sha1 = "4e051b85454b4e4f66e6a6b7bdc452ad9da3dcf6"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.5.10"
+
+[[deps.StaticArraysCore]]
+git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
+uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+version = "1.4.0"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1498,11 +1528,9 @@ version = "17.4.0+0"
 # ╠═33e72f37-4e78-4131-9df0-d4fbb04c8e8c
 # ╟─722ec88a-5be7-47b3-9c4c-df0062049c05
 # ╠═c7585964-0f80-48bf-b2c5-66f3077422ab
-# ╠═758f4fa3-1b01-4748-992e-6486cba4c905
-# ╠═73a3a65c-20dc-4855-800b-057c930e2e4b
 # ╟─36984080-2ef7-43fe-af3a-3d57902b5e25
 # ╠═dbea9296-2d91-49ea-bf7d-67d965e9a56a
-# ╠═4645b816-e4e0-426f-879e-ef5d9f7dc32d
+# ╟─4645b816-e4e0-426f-879e-ef5d9f7dc32d
 # ╠═8931cdeb-e397-42fb-a57f-c5b8c03c2bb9
 # ╠═b5bcc803-e8f6-4bd6-ac6e-8d7c6ee38e68
 # ╠═085a5a7b-e4e0-4dd0-af86-09c9d67c3e20
