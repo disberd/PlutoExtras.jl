@@ -127,64 +127,53 @@ _script_basic = HTLScriptPart(@htl """
 </script>
 """);
 
-# ╔═╡ 73a3a65c-20dc-4855-800b-057c930e2e4b
-@htl """
-<span class='diosantore' style='font-weight: 900;'></span>
-<style>
-	span.diosantore:after {
-		content: "LOL";
-	}
-</style>
-"""
-
 # ╔═╡ 36984080-2ef7-43fe-af3a-3d57902b5e25
 md"""
-### Drag Handler
+### Interaction Handler
 """
 
 # ╔═╡ dbea9296-2d91-49ea-bf7d-67d965e9a56a
-_drag_handler = HTLScriptPart(@htl """
+_interaction_handler = HTLScriptPart(@htl """
 <script>
-// taken from https://www.w3schools.com/howto/howto_js_draggable.asp
-function dragElement(elmnt) {
-  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  elmnt.onmousedown = dragMouseDown;
+	// We use the interactjs library to provide drag and resize handling across devices
+	const { default: interact } = await import('https://esm.sh/interactjs')
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
+	tb.offset = tb.offset ?? { x: 0, y: 0}
+	interact(tit).draggable({
+		listeners: {
+			start (event) {
+				tb.offset.y = tb.offsetTop
+				tb.offset.x = tb.offsetLeft
+			},
+			move (event) {
+		      tb.offset.x += event.dx
+		      tb.offset.y += event.dy
+
+		      tb.style.top = `min(95vh, \${tb.offset.y}px`
+		      tb.style.left = `min(95vw, \${tb.offset.x}px`
+		    },
   }
+	}).on('doubletap', function (event) {
+		  // Double-tap on header reset the position
+		tb.style.top = ''
+		tb.style.left = ''
+	})
+	interact(tb)
+	  .resizable({
+	    edges: { top: true, left: true, bottom: true, right: true },
+	    listeners: {
+	      move: function (event) {
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    tb.style.top = out.top = (tb.offsetTop - pos2) + "px";
-    tb.style.left = out.left = (tb.offsetLeft - pos1) + "px";
-  }
-
-  function closeDragElement() {
-    // stop moving when mouse button is released:
-    document.onmouseup = null;
-    document.onmousemove = null;
+	        Object.assign(event.target.style, {
+	          width: `\${event.rect.width}px`,
+	          height: `\${event.rect.height}px`,
+	        })
   }
 }
-dragElement(tit)
-
-tit.addEventListener('dblclick', (e) => {
-	tb.style.top = out.top = ''
-	tb.style.left = out.left = ''
+	  }).on('doubletap', function (event) {
+		  // Double-tap on resize reset the width
+			tb.style.width = ''
+		  	tb.style.height = ''
 })
 </script>
 """);
@@ -194,7 +183,7 @@ _script = (@htl """
 <script id='main_table_script'>
 	$([
 		_script_basic,
-		_drag_handler,
+		_interaction_handler,
 	])
 	return out
 </script>
@@ -220,16 +209,15 @@ _table_container_style = @htl """
 		top: 65px;
 		left: 20px;
 		background: var(--main-bg-color);
-		resize: both;
 		overflow: auto;
 		z-index: 50;
 		transition: transform 300ms cubic-bezier(0.18, 0.89, 0.45, 1.12);
 		border: 3px solid rgba(0, 0, 0, 0.15);
 		border-radius: 10px;
 		box-shadow: 0 0 11px 0px #00000010;
+		touch-action: none;
 	}
 	.table_container.hide {
-		resize: none;
 		transform: translateX(calc(-100% + 35px));
 		height: auto !important;
 		left: 0px !important;
