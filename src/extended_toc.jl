@@ -86,7 +86,7 @@ _basics = HTLScript(
 			propagate_state(child, state)
 		}
 	}
-	</script>♡
+	</script>
 	""")
 );
 
