@@ -21,4 +21,5 @@ This functionality is implemented in the [extended_toc.jl](./src/extended_toc.jl
 
 ### Example usage
 
-![ExtendedTableOfContents](https://user-images.githubusercontent.com/12846528/128350961-c4ccbcea-ba75-48dc-bd92-7c6551cc68f9.gif)
+![ExtendedTableOfContents](https://user-images.githubusercontent.com/12846528/208911021-807e9dd9-69df-4366-ba22-56b8eaa2f734.gif)
+
