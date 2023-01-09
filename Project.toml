@@ -1,25 +1,17 @@
-name = "PlutoUtils"
+name = "PlutoExtras"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
-version = "0.5.14"
+version = "0.6"
 
 [deps]
 AbstractPlutoDingetjes = "6e696c72-6542-2067-7265-42206c756150"
-Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
-DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
-OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
-Requires = "ae029012-a4dd-5104-9daa-d747884805df"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
-UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [compat]
 PlutoDevMacros = "~0.4.8"
-
+AbstractPlutoDingetjes = "1"
+HypertextLiteral = "0.9"
+julia = "1.6"
