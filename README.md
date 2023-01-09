@@ -1,9 +1,6 @@
-# ExtendedPlutoUI
+# PlutoExtras
 
-This provides some widgets to be used in Pluto, including an extended version of the TableOfContents from PlutoUI
-
-# IMPORTANT!
-This package was originally called PlutoUtils but is undergoing significant internal restructuring and will be published to the General Registry after this restructuring is done.
+This package provides some widgets to be used in Pluto, including an extended version of the TableOfContents from PlutoUI. It was formerly a non-registered package named PlutoUtils
 
 ## ExtendedTableOfContents
 This package exports `ExtendedTableOfContents` which takes the `TableOfContents` from `PlutoUI` and adds the following functionalities:
