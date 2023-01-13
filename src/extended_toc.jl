@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.18
 
 #> custom_attrs = ["enable_hidden", "hide-enabled"]
 
@@ -460,6 +460,7 @@ _toc_style = @htl """
 	span.toc-collapse {
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
 		margin-right: 3px;
+		min-width: var(--size);
 	}
 	.plutoui-toc section div.toc-row.collapsed span.toc-collapse {
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
