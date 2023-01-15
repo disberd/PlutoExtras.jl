@@ -83,6 +83,7 @@ md"""
 # ╔═╡ 564f1605-72cf-460a-9b8a-00277b12be8b
 struct BondWrapper
 	description::String
+	rich_description::Any # This is used to provide fancy display of the description
 	cell_id::String
 	bond::Any # This is supposed to be a Bond, but I don't know how to have the type without importing Pluto
 	defines::Symbol
@@ -724,11 +725,12 @@ md"""
 function table_row(b::BondWrapper)
 def = b.defines
 desc = b.description
+rich_desc = b.rich_description
 def_without_spaces = replace(string(def), ' ' => '_')
 is_table_name(b) && return @htl ""
 @htl """
 <div class='table-row $def_without_spaces'>
-	<span class='desc'>$(desc)$(_desc_script(b))</span>
+	<span class='desc'>$(rich_desc)$(_desc_script(b))</span>
 	$(b.bond)
 	<style>
 		.table-row {
@@ -884,7 +886,7 @@ macro bondsdict(s::Symbol, name::String = "Parameters")
 	# Find the cell_id of the macrocall where this bond is defined
 	cell_id = split(__source__.file::Symbol |> String,"#==#") |> last |> String
 	quote
-		$_s = LittleDict("__table_name__" => BondWrapper("__table_name__", $cell_id, $(HTML(name)), $(Meta.quot(s))))
+		$_s = LittleDict("__table_name__" => BondWrapper("__table_name__", $(HTML(name)), $cell_id, nothing, $(Meta.quot(s))))
 	end
 end
 
@@ -915,30 +917,55 @@ md"""
 """
   ╠═╡ =#
 
-# ╔═╡ d86e08a9-5efb-4c97-bd59-946b82f0f5fb
-function _addbond_expr(calling_module, cell_id, name, bondvalue)
-	dictname, desc = splitdef(name)
-	_dictname = esc(dictname)
+# ╔═╡ efc0cae0-6a1f-4415-abc8-f955eba8a992
+function _addbond_expr(calling_module, cell_id, name_desc, args...)
+	dictname, desc = splitdef(name_desc)
+	N = length(args)
 	remove_dots(x) = replace(x, '.' => "")
-	symbolname = Symbol(:_,dictname,:_,desc |> remove_dots)
-	_addbond_expr(calling_module, cell_id, name, symbolname, bondvalue)
+	generated_symbolname = Symbol(:_,dictname,:_,remove_dots(desc))
+	if N == 1
+		# We just have the bonds, the rich_description is just the description and the defined symbol is automatically generated from the description and dict name
+		rich_desc = desc
+		symbolname = generated_symbolname
+	elseif N == 2
+		# One argument is provided, if it's a symbol is the defined symbol otherwise it's the rich description
+		if args[1] isa Symbol
+			symbolname = args[1]
+			rich_desc = desc
+		else
+			symbolname = generated_symbolname
+			rich_desc = args[1]
+		end
+	elseif N == 3
+		# First is rich_desc, second is symbolname
+		rich_desc = args[1]
+		symbolname = args[2]
+	else
+		error("A wrong number of arguments was provided")
+	end		
+	bondelement = args[end] # Bond is always the last value
+	_addbond_expr(calling_module, cell_id, dictname, desc, rich_desc, symbolname::Symbol, bondelement)
 end
 
 # ╔═╡ ecf49c6a-fe57-41e0-9e6f-63c7e5176861
-function _addbond_expr(calling_module, cell_id, name, symbolname::Symbol, bondvalue)
-	dictname, desc = splitdef(name)
+function _addbond_expr(calling_module, cell_id, dictname, desc, rich_desc, symbolname::Symbol, bondelement)
 	_dictname = esc(dictname)
 	# Find the cell_id of the macrocall where this bond is defined
 	block = quote
 		if haskey($_dictname, $desc) && $_dictname[$desc].cell_id !== $cell_id
 			error("The provided key/description is already present in the dict and defined in another cell, please change the definition from that cell")
 		end
-		local wrapper = BondWrapper($desc, $cell_id, $(flexibind_expr(calling_module, symbolname, bondvalue)), $(Meta.quot(symbolname)))
+		local wrapper = BondWrapper($desc, $(esc(rich_desc)), $cell_id, $(flexibind_expr(calling_module, symbolname, bondelement)), $(Meta.quot(symbolname)))
 		# Delete the stale bonds
 		clean_dict!($_dictname, $(esc(calling_module)))
 		$_dictname[$desc] = wrapper
 	end
 end
+
+# ╔═╡ 3b740180-049b-406c-b29a-f6f436ee3b4d
+#=╠═╡
+@test params["SANTO"].rich_description == md"``C_n^2``"
+  ╠═╡ =#
 
 # ╔═╡ ac5e41e2-89c7-4045-9275-7cebe6b6dd92
 macro addbond(name, args...)	
@@ -969,6 +996,11 @@ end
 # ╔═╡ 7bce22ad-2de0-4d34-a660-0a3c059d9857
 #=╠═╡
 ciao
+  ╠═╡ =#
+
+# ╔═╡ 9f043f97-1f64-4eab-9749-c749c76759a7
+#=╠═╡
+@addbond params["SANTO"] md"``C_n^2``" santo Slider(1:10)
   ╠═╡ =#
 
 # ╔═╡ b1f64f22-da01-45c0-a2f8-48cb6673d473
