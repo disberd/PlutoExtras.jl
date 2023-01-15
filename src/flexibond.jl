@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.19
 
 using Markdown
 using InteractiveUtils
@@ -133,6 +133,19 @@ md"""
 asdfasdf = @bind madonnamia StaticBond(dio)
   ╠═╡ =#
 
+# ╔═╡ 4f1ce88a-188f-4f20-b2a4-14edb11f52d3
+#=╠═╡
+@htl """
+$asdfasdf
+<script>
+	const staticbond = currentScript.closest('pluto-cell').querySelector('span.staticbond')
+	if (staticbond !== undefined) {
+		staticbond.classList.toggle('hide_extra',true)
+	}
+</script>
+"""
+  ╠═╡ =#
+
 # ╔═╡ 1973e468-51f7-4a89-b7d2-5e92261df300
 #=╠═╡
 asdlol, madonnamia
@@ -213,6 +226,11 @@ diogesu = 3
 # ╠═╡ skip_as_script = true
 #=╠═╡
 a = @flexibind test Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ 64219202-d6d2-4d76-87fc-3cb01e9f8bd2
+#=╠═╡
+typeof(a)
   ╠═╡ =#
 
 # ╔═╡ f3af3238-ba1d-45f4-b9d6-a652a039b561
@@ -308,8 +326,6 @@ function _show(f::StaticBond)
 	<span class='staticbond'>$bond<script id='$id'>
 		$_preamble
 
-		
-		
 		let bond = parent.firstElementChild
 		let element = bond.firstElementChild
 		let run_btn = currentScript.nextElementSibling
@@ -320,13 +336,16 @@ function _show(f::StaticBond)
 			parent.value = element.reactive ?? get_input_value(element)
 			parent.dispatchEvent(new CustomEvent('input'))
 		})
-	</script><span class='icon run' title='Trigger a manual update of the bond value'></span></span>
+	</script><span class='icon run extra_item' title='Trigger a manual update of the bond value'></span></span>
 	<style>
 		.staticbond {
 			display: contents;
 		}
 		.staticbond > .bond {
 			display: contents;
+		}
+		.staticbond.hide_extra .extra_item {
+			display: none !important;
 		}
 		.staticbond > .icon.run { 	
 			--size: 20px;
@@ -400,7 +419,7 @@ function _show(f::FlexiWrapper)
 	}, 500)
 
 	
-	let mode_btn = this ?? html`<input type="checkbox" class='mode' checked>`
+	let mode_btn = this ?? html`<input type="checkbox" class='mode extra_item' checked>`
 	if (this == null) {
 		mode_btn.default = mode_btn.reactive = get_input_value(element)
 	} else {
@@ -500,7 +519,7 @@ PlutoUI = "~0.7.48"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.5"
 manifest_format = "2.0"
 project_hash = "f4d870e97814c459000b597b650f9edd00acf5d9"
 
@@ -529,7 +548,7 @@ version = "0.11.4"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
+version = "1.0.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -787,6 +806,7 @@ version = "17.4.0+0"
 # ╟─1e1becd2-bc0d-4cbc-9ee3-e0930f5cd35c
 # ╠═53f4d1ed-5d94-4905-9bb6-fa7b5c061a29
 # ╠═8e512166-16b5-4474-915d-e370bd9c6fa3
+# ╠═4f1ce88a-188f-4f20-b2a4-14edb11f52d3
 # ╠═1973e468-51f7-4a89-b7d2-5e92261df300
 # ╠═0f4cefed-9652-44a3-97c7-a8de930d79e5
 # ╠═db895645-a107-4c32-b808-08f48778f16c
@@ -797,6 +817,7 @@ version = "17.4.0+0"
 # ╠═fe198de7-9ddb-4d42-9251-9cee16c3cbbe
 # ╠═2fb1bd81-612c-465b-a0b3-07128f8e794e
 # ╠═0435001d-3ab2-41ff-813e-b5487aaa7357
+# ╠═64219202-d6d2-4d76-87fc-3cb01e9f8bd2
 # ╠═f3af3238-ba1d-45f4-b9d6-a652a039b561
 # ╠═dd1a1e32-61ef-4065-bf2d-9dc798e2fde9
 # ╠═5febe0d1-7d07-4252-a060-e156f0d81c5e

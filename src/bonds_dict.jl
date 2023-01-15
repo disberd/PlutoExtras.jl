@@ -1,7 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.15
-
-#> custom_attrs = ["hide-enabled"]
+# v0.19.19
 
 using Markdown
 using InteractiveUtils
@@ -265,6 +263,12 @@ _params_container_style = @htl """
 		justify-items: center;
 		padding: 5px 5px 10px 0px;
 		align-items: center;
+	}
+	.params_container.hide_extra {
+		grid-template-columns: 1fr minmax(50px, 100px);
+	}
+	.params_container.hide_extra .extra_item {
+		display: none !important;
 	}
 	.table_container.hide > .params_container > *:not(.title) {
 		display: none;
@@ -769,8 +773,8 @@ $_attach_to_window
 	<div class='params_header'>
 		<span>Name</span>
 		<span>Bond</span>
-		<span>Sync$(_sync_popup_script())</span>
-		<span>Update$(_update_popup_script())</span>
+		<span class='extra_item'>Sync$(_sync_popup_script())</span>
+		<span class='extra_item'>Update$(_update_popup_script())</span>
 	</div>
 	$(map(table_row, values(d)))
 </div>
@@ -1086,9 +1090,9 @@ PlutoUtils = "~0.5.13"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "aa9a25fa08439a88b2a99ab001629aab1eb348f6"
+project_hash = "f6140c95de62b5987e0b457fd5087a214a2b376c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1156,7 +1160,7 @@ version = "4.3.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
+version = "1.0.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
