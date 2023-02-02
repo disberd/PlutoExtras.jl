@@ -10,15 +10,8 @@ using InteractiveUtils
 begin
 	using HypertextLiteral
 	using PlutoUI
+	using PlutoDevMacros.Script
 end
-
-# ╔═╡ 1091f5d5-2e27-400f-8392-0f15fa1a7c15
-module Script
-	include("/home/amengali/Repos/github/mine/PlutoDevMacros/notebooks/htlscript.jl")
-end
-
-# ╔═╡ 275e5365-1d46-4848-80e3-7574ff28847d
-import .Script: HTLScript, combine_scripts
 
 # ╔═╡ 46520c1a-bbd8-46aa-95d9-bad3d220ee85
 # ╠═╡ custom_attrs = ["gesu"]
@@ -54,7 +47,7 @@ _basics = HTLScript(
 	let toc = document.querySelector('nav.plutoui-toc')
 
 	function getRow(el) {
-		const row = el.closest('.toc-row')
+		const row = el?.closest('.toc-row')
 		return row
 	}
 		
@@ -125,7 +118,7 @@ _basics = HTLScript(
 		const lastChild = getLastDescendant(row)
 		const end = getIndex(getNextSibling(lastChild, '.toc-row'))
 
-		return editor_state.notebook.cell_order.slice(start, end)
+		return editor_state.notebook.cell_order.slice(start, end < 0 ? Infinity : end)
 	}
 		
 	window.toc_utils = {
@@ -558,7 +551,12 @@ _move_entries_handler = HTLScript(@htl("""
 			end: function (e) {
 				// console.log('end: ', e)
 				e.target.classList.remove('dragged')
-				toc.querySelector('.toc-row-separator.active')?.classList.remove('active')
+				const dropZone = toc.querySelector('.toc-row-separator.active')
+				if (_.isNil(dropZone)) {return}
+				// We find the cell after the active separator and move the dragged row before that
+				const rowAfter = getNextSibling(dropZone)
+				const cellIdsToMove = getBlockIds(e.target)
+				pluto_actions.move_remote_cells(cellIdsToMove, editor_state.notebook.cell_order.indexOf(get_link_id(rowAfter)))
 			},
 		}
 	})
@@ -833,11 +831,13 @@ md"""
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 HypertextLiteral = "~0.9.4"
-PlutoUI = "~0.7.48"
+PlutoDevMacros = "~0.5.0"
+PlutoUI = "~0.7.49"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -846,7 +846,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-beta3"
 manifest_format = "2.0"
-project_hash = "44b10d4cebbfd7b6dfedba43749c15eb0106d3f7"
+project_hash = "f6b7f28150a0363dfa2e3afc8c0c832e230b1612"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -955,6 +955,12 @@ git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
 uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
 version = "0.1.4"
 
+[[deps.MacroTools]]
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "42324d08725e200c23d4dfb549e0d5d89dede2d2"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.5.10"
+
 [[deps.Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
@@ -982,20 +988,32 @@ version = "0.3.21+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "cceb0257b662528ecdf0b4b4302eb00e767b38e7"
+git-tree-sha1 = "151d91d63d8d6c1a5789ecb7de51547e00480f1b"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.0"
+version = "2.5.4"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.9.0"
 
+[[deps.PlutoDevMacros]]
+deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Random", "Requires"]
+git-tree-sha1 = "fa04003441d7c80b4812bd7f9678f721498259e7"
+uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
+version = "0.5.0"
+
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "efc140104e6d0ae3e7e30d56c98c4a927154d684"
+git-tree-sha1 = "eadad7b14cf046de6eb41f13c9275e5aa2711ab6"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.48"
+version = "0.7.49"
+
+[[deps.Preferences]]
+deps = ["TOML"]
+git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
+uuid = "21216c6a-2e73-6563-6e65-726566657250"
+version = "1.3.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1014,6 +1032,12 @@ git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
 
+[[deps.Requires]]
+deps = ["UUIDs"]
+git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
+uuid = "ae029012-a4dd-5104-9daa-d747884805df"
+version = "1.3.0"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -1022,9 +1046,10 @@ version = "0.7.0"
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[deps.SnoopPrecompile]]
-git-tree-sha1 = "f604441450a3c0569830946e5b33b78c928e1a85"
+deps = ["Preferences"]
+git-tree-sha1 = "e760a70afdcd461cf01a575947738d359234665c"
 uuid = "66db9d55-30c0-4569-8b51-7e840670fc0c"
-version = "1.0.1"
+version = "1.0.3"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -1063,9 +1088,9 @@ uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
 version = "0.1.6"
 
 [[deps.URIs]]
-git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
+git-tree-sha1 = "ac00576f90d8a259f2c9d823e91d1de3fd44d348"
 uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
-version = "1.4.0"
+version = "1.4.1"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1097,8 +1122,6 @@ version = "17.4.0+0"
 
 # ╔═╡ Cell order:
 # ╠═464fc674-5ed7-11ed-0aff-939456ebc5a8
-# ╠═1091f5d5-2e27-400f-8392-0f15fa1a7c15
-# ╠═275e5365-1d46-4848-80e3-7574ff28847d
 # ╠═d05d4e8c-bf50-4343-b6b5-9b77caa646cd
 # ╟─46520c1a-bbd8-46aa-95d9-bad3d220ee85
 # ╟─5795b550-5799-4b62-bc25-bc36f3802a8d
