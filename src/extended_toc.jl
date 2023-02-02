@@ -169,6 +169,19 @@ _basics = HTLScript(
 	""")
 );
 
+# ╔═╡ 6e2397db-6f95-44ed-b874-bb0e6c853169
+md"""
+## floating-ui library
+"""
+
+# ╔═╡ 3c27af28-4fee-4b74-ad10-f57c11237dbb
+_floating_ui = HTLScript(@htl("""
+<script>
+	const floating_ui = await import('https://esm.sh/@floating-ui/dom')
+	// window.floating_ui = floating_ui
+</script>
+"""));
+
 # ╔═╡ e9413fd1-d43c-4288-bcfa-850c30cc9513
 md"""
 ## modify\_cell_attributes
@@ -375,6 +388,23 @@ _mutation_observer = HTLScript(@htl("""
 		}
 		hide_list_style(new_hide)
 	}
+
+	// Reposition the hide_container using the floating-ui library
+	function repositionTooltip(e) {
+		const { computePosition } = floating_ui
+		const ref = e.target
+		const tooltip = ref.querySelector('.toc-hide-container')
+		if (_.isNil(tooltip)) {
+			console.warn("Something went wrong, no tooltip found")
+			return
+		}
+		computePosition(ref, tooltip, {
+			placement: "left",
+			strategy: "fixed",
+		}).then(pos => {
+			tooltip.style.top = pos.y + "px"
+		})
+	}
 	
 	function process_row(div, history, old_state, new_state) {
 
@@ -384,6 +414,9 @@ _mutation_observer = HTLScript(@htl("""
 		if (_.isEmpty(new_state) && _.every(history, _.isEmpty)) {
 			div.insertAdjacentElement('afterend', html`<div class='toc-row-separator'></div>`)
 		}
+
+		// We add the reposition event to the row
+		div.addEventListener('mouseenter', repositionTooltip)
 		
 		let id = get_link_id(div)
 		const a = div.querySelector('a')
@@ -587,7 +620,8 @@ md"""
 _header_manipulation = HTLScript(@htl("""
 <script>
 	const header = toc.querySelector('header')
-	const notebook_hide_icon = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'><span class='toc-header-icon toc-header-hide'>`)
+	const header_container = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'><span class='toc-header-icon toc-header-hide'>`)
+	const notebook_hide_icon = header_container.firstChild
 	
 	const save_file_icon = header.insertAdjacentElement('beforeend', html`<span class='toc-header-icon toc-header-save'>`)
 	save_file_icon.addEventListener('click', save_to_file)
@@ -599,6 +633,15 @@ _header_manipulation = HTLScript(@htl("""
 		} else {
 			cell.scrollIntoView({block: 'center', behavior: 'smooth'})
 		}
+	})
+
+	header.addEventListener('mouseenter', (e) => {
+		floating_ui.computePosition(header, header_container, {
+			placement: "left",
+			strategy: "fixed",
+		}).then(pos => {
+			header_container.style.top = pos.y + "px"
+		})
 	})
 
 	notebook_hide_icon.addEventListener('click', (e) => toggle_notebook_attribute('hide-enabled'))
@@ -750,11 +793,6 @@ _toc_style = @htl """
 </style>
 """;
 
-# ╔═╡ b06c01a6-78cf-4698-b7ae-612910b5cf38
-md"""
-### dio
-"""
-
 # ╔═╡ 0aac28b7-4771-447c-ab62-92250f46154f
 md"""
 # Main Function
@@ -825,6 +863,71 @@ md"""
 # ╔═╡ c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 md"""
 ### Short
+"""
+
+# ╔═╡ c4490c71-5994-4849-914b-ec1a88ec7881
+md"""
+# Fillers
+"""
+
+# ╔═╡ fd6772f5-085a-4ffa-bf55-dfeb8e93d32b
+md"""
+## More Fillers
+"""
+
+# ╔═╡ 863e6721-98f1-4311-8b9e-fa921030f7d7
+md"""
+## More Fillers
+"""
+
+# ╔═╡ 515b7fc0-1c03-4c82-819b-4bf70baf8f14
+md"""
+## More Fillers
+"""
+
+# ╔═╡ e4a29e2e-c2ec-463b-afb2-1681c849780b
+md"""
+## More Fillers
+"""
+
+# ╔═╡ eb559060-5da1-4a9e-af51-9007392885eb
+md"""
+## More Fillers
+"""
+
+# ╔═╡ 1aabb7b3-692f-4a27-bb34-672f8fdb0753
+md"""
+## More Fillers
+"""
+
+# ╔═╡ ac541f37-7af5-49c8-99f8-c5d6df1a6881
+md"""
+## More Fillers
+"""
+
+# ╔═╡ fdf482d1-f8fa-4628-9417-2816de367e94
+md"""
+## More Fillers
+"""
+
+# ╔═╡ 6de511d2-ad79-4f0e-95ff-ce7531f3f0c8
+md"""
+## More Fillers
+"""
+
+# ╔═╡ a8bcd2cc-ae01-4db7-822f-217c1f6bbc8f
+md"""
+## More Fillers
+"""
+
+# ╔═╡ 6dd2c458-e02c-4850-a933-fe9fb9dcdf39
+md"""
+## More Fillers
+"""
+
+# ╔═╡ 9ddc7a20-c1c9-4af3-98cc-3b803ca181b5
+md"""
+## More Fillers
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1128,6 +1231,8 @@ version = "17.4.0+0"
 # ╟─052e26d7-8bed-46fe-8b5b-a879e76714cb
 # ╟─aa74f780-96c5-4b91-9658-a34c8c3fcab9
 # ╠═a777b426-42e9-4c91-aebd-506388449042
+# ╠═6e2397db-6f95-44ed-b874-bb0e6c853169
+# ╠═3c27af28-4fee-4b74-ad10-f57c11237dbb
 # ╟─e9413fd1-d43c-4288-bcfa-850c30cc9513
 # ╠═c1fa9fa5-b35e-43c5-bd32-ebca9cb01848
 # ╟─e9668acb-451d-4d16-b9cb-cf0ddcd6a681
@@ -1145,12 +1250,24 @@ version = "17.4.0+0"
 # ╠═2ece4464-df5e-48e5-96d2-607213daebda
 # ╟─59e74c4f-c561-463e-b096-e9e587417285
 # ╠═0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
-# ╠═b06c01a6-78cf-4698-b7ae-612910b5cf38
 # ╟─0aac28b7-4771-447c-ab62-92250f46154f
 # ╠═a1a09dae-b441-484e-8f40-e51e31fb34dd
 # ╠═1bdb12d3-899d-4ce0-a053-6cf1fa15072d
 # ╟─48540378-5b63-4c20-986b-75c08ceb24b7
 # ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
 # ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
+# ╠═c4490c71-5994-4849-914b-ec1a88ec7881
+# ╠═fd6772f5-085a-4ffa-bf55-dfeb8e93d32b
+# ╠═863e6721-98f1-4311-8b9e-fa921030f7d7
+# ╠═515b7fc0-1c03-4c82-819b-4bf70baf8f14
+# ╠═e4a29e2e-c2ec-463b-afb2-1681c849780b
+# ╠═eb559060-5da1-4a9e-af51-9007392885eb
+# ╠═1aabb7b3-692f-4a27-bb34-672f8fdb0753
+# ╠═ac541f37-7af5-49c8-99f8-c5d6df1a6881
+# ╠═fdf482d1-f8fa-4628-9417-2816de367e94
+# ╠═6de511d2-ad79-4f0e-95ff-ce7531f3f0c8
+# ╠═a8bcd2cc-ae01-4db7-822f-217c1f6bbc8f
+# ╠═6dd2c458-e02c-4850-a933-fe9fb9dcdf39
+# ╠═9ddc7a20-c1c9-4af3-98cc-3b803ca181b5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
