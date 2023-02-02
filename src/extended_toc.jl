@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.18
+# v0.19.22
 
 #> custom_attrs = ["enable_hidden", "hide-enabled"]
 
@@ -10,8 +10,15 @@ using InteractiveUtils
 begin
 	using HypertextLiteral
 	using PlutoUI
-	using PlutoDevMacros.Script
 end
+
+# ╔═╡ 1091f5d5-2e27-400f-8392-0f15fa1a7c15
+module Script
+	include("/home/amengali/Repos/github/mine/PlutoDevMacros/notebooks/htlscript.jl")
+end
+
+# ╔═╡ 275e5365-1d46-4848-80e3-7574ff28847d
+import .Script: HTLScript, combine_scripts
 
 # ╔═╡ 46520c1a-bbd8-46aa-95d9-bad3d220ee85
 # ╠═╡ custom_attrs = ["gesu"]
@@ -45,11 +52,90 @@ _basics = HTLScript(
 	let cell = currentScript.closest('pluto-cell')
 	let pluto_actions = cell._internal_pluto_actions
 	let toc = document.querySelector('nav.plutoui-toc')
+
+	function getRow(el) {
+		const row = el.closest('.toc-row')
+		return row
+	}
 		
-	function get_link_id(div) {
-		const a = div.querySelector('a')
+	function get_link_id(el) {
+		const row = getRow(el)
+		if (_.isNil(row)) { return null }
+		const a = row.querySelector('a')
 		return a.href.slice(-36) // extract the last 36 characters, corresponding to the cell id
 	}
+
+	// Get next and previous sibling, taken from:
+	// https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
+	var getNextSibling = function (elem, selector) {
+
+		// Get the next sibling element
+		var sibling = elem.nextElementSibling;
+	
+		// If there's no selector, return the first sibling
+		if (!selector) return sibling;
+	
+		// If the sibling matches our selector, use it
+		// If not, jump to the next sibling and continue the loop
+		while (sibling) {
+			if (sibling.matches(selector)) return sibling;
+			sibling = sibling.nextElementSibling
+		}
+	
+	};
+	var getPreviousSibling = function (elem, selector) {
+
+		// Get the next sibling element
+		var sibling = elem.previousElementSibling;
+	
+		// If there's no selector, return the first sibling
+		if (!selector) return sibling;
+	
+		// If the sibling matches our selector, use it
+		// If not, jump to the next sibling and continue the loop
+		while (sibling) {
+			if (sibling.matches(selector)) return sibling;
+			sibling = sibling.previousElementSibling;
+		}
+	
+	};
+
+
+	// Get the last toc entry descendant from the provided one
+	function getLastDescendant(el) {
+		const row = getRow(el)
+		if (_.isNil(row)) {return}
+		const children = row.directChildren
+		if (_.isEmpty(children)) {
+			return row
+		} else {
+			return getLastDescendant(_.last(children))
+		}
+	}
+
+	// Find all the cell ids contained within the target toc rows and all its descendants
+	function getBlockIds(el) {
+		const row = getRow(el)
+		if (_.isNil(row)) {return}
+		function getIndex(row) {
+			return editor_state.notebook.cell_order.indexOf(get_link_id(row))
+		}
+		const start = getIndex(row)
+
+		const lastChild = getLastDescendant(row)
+		const end = getIndex(getNextSibling(lastChild, '.toc-row'))
+
+		return editor_state.notebook.cell_order.slice(start, end)
+	}
+		
+	window.toc_utils = {
+		getNextSibling,
+		getPreviousSibling,
+		getLastDescendant,
+		getBlockIds,
+	}
+
+	// Functions to set and propagate hidden and collapsed states
 
 	function propagate_parent(div, parent=null) {
 		if (parent != null) {
@@ -198,12 +284,12 @@ _modify_notebook_attributes = HTLScript(@htl("""
 </script>
 """));
 
-# ╔═╡ 12462846-0ade-447c-85cb-9bf1873ff13d
+# ╔═╡ 123da4b2-710e-4962-b255-80fb33894b79
 md"""
 ## hide\_cell\_blocks
 """
 
-# ╔═╡ afcfb1c1-659f-49d1-857e-35d1b3ec8e70
+# ╔═╡ 904a2b12-6ffa-4cf3-95cf-002cf2673099
 _hide_cell_blocks = HTLScript(@htl("""
 <script>
 	// For each from and to, we have to specify `pluto-cell[id]` in the part before the comm and just `[id]` in the part after the comma to ensure the specificity of the two comma-separated selectors is the same (the part after the comma has the addition of `~ pluto-cell`, so it has inherently +1 element specificity)
@@ -252,12 +338,12 @@ _hide_cell_blocks = HTLScript(@htl("""
 </script>
 """));
 
-# ╔═╡ 2343295f-eeb0-4aec-a570-ff5de3824cbe
+# ╔═╡ 60075509-fbdb-48c8-8e63-69f6fd5218b5
 md"""
 ## mutation\_observer
 """
 
-# ╔═╡ 19d2e523-3038-4280-a3d1-d286366265c5
+# ╔═╡ 702d5075-baad-4c11-a732-d062213e00e4
 _mutation_observer = HTLScript(@htl("""
 <script>
 	function toggle_state(name) {
@@ -298,6 +384,14 @@ _mutation_observer = HTLScript(@htl("""
 	}
 	
 	function process_row(div, history, old_state, new_state) {
+
+		// We add the separator
+		div.insertAdjacentElement('beforebegin', html`<div class='toc-row-separator'></div>`)
+		// If we are just processing the first element (so the last row) we also add a separator at the bottom
+		if (_.isEmpty(new_state) && _.every(history, _.isEmpty)) {
+			div.insertAdjacentElement('afterend', html`<div class='toc-row-separator'></div>`)
+		}
+		
 		let id = get_link_id(div)
 		const a = div.querySelector('a')
 		if (use_smoothscroll) {
@@ -366,12 +460,132 @@ _mutation_observer = HTLScript(@htl("""
 "observer.disconnect()"
 );
 
-# ╔═╡ 1e22c2aa-ca40-4c27-b415-92071da19990
+# ╔═╡ 2bb6e943-f99d-4eef-9846-4ee71a7fa426
+@htl """
+<style>
+	div.toc-row-separator {
+		height: 2px;
+		margin: 3px 0px;
+		background: #aaa;
+		display: none;
+	}
+	div.toc-row-separator.active {
+		display: block;
+	}
+	.drag_enabled .toc-row.dragged {
+		border: 2px dashed grey;
+	}
+
+	.drag_enabled .toc-row {
+		position: relative;
+	}
+	.drag_enabled .toc-row:after {
+		position: absolute;
+		content: '';
+		height: 100%;
+		width: 100%;
+		bottom: 0px;
+	}
+</style>
+"""
+
+# ╔═╡ a271f2cd-b941-46af-888d-3274d21b3703
+md"""
+## move\_entries\_handler
+"""
+
+# ╔═╡ 5f60d643-d79c-4081-a31e-603e062e544f
+_move_entries_handler = HTLScript(@htl("""
+<script>
+	const { default: interact } = await import('https://esm.sh/interactjs')
+
+	function dragEnabler(e) {
+		if (e.key !== 'Alt') { return }
+		switch (e.type) {
+			case "keydown":
+				toc.classList.add('drag_enabled')
+				break;
+			case "keyup":
+				toc.classList.remove('drag_enabled')
+				break;
+		}
+	}
+
+	const window_events = {
+		keydown: dragEnabler,
+		keyup: dragEnabler,
+	}
+
+	addScriptEventListeners(window, window_events)
+
+	// Interact.js part
+
+	let activeDrop = undefined
+
+	function isValidSeparator(sep) {
+		let temp = getNextSibling(sep, '.toc-row:not(.parent-collapsed)')
+		if (!_.isNil(temp) && temp.classList.contains('dragged')) { return false }
+		
+		temp = getPreviousSibling(sep, '.toc-row:not(.parent-collapsed)')
+		if (!_.isNil(temp) && temp.classList.contains('dragged')) { return false }
+
+		return true
+	}
+
+	function updateActiveSeparator(e) {
+		if (_.isNil(activeDrop)) {return}
+		const { y, height } = activeDrop.getBoundingClientRect()
+		// Check if the current position of the mouse is below or above the middle of the active drop zone
+		const isBelow = e.client.y > y + height/2
+		const getSep = isBelow ? getNextSibling : getPreviousSibling
+		const newSep = getSep(activeDrop)
+		const currentSep = toc.querySelector('.toc-row-separator.active') ?? newSep
+		if (currentSep !== newSep) {
+			currentSep.classList.remove('active')
+		}
+		if (isValidSeparator(newSep)) {
+			newSep.classList.add('active')
+		}
+	}
+
+	interact('.drag_enabled .toc-row').draggable({
+		listeners: {
+			start: function (e) {
+				// console.log('start: ', e)
+				e.target.classList.add('dragged')
+			},
+			move: updateActiveSeparator,
+			end: function (e) {
+				// console.log('end: ', e)
+				e.target.classList.remove('dragged')
+				toc.querySelector('.toc-row-separator.active')?.classList.remove('active')
+			},
+		}
+	})
+	
+	interact('.drag_enabled .toc-row').dropzone({
+		ondragenter: function (e) {
+			// console.log('enter: ', e)
+			activeDrop = e.target
+			e.target.classList.add('active_drop')
+		},
+		ondragleave: function (e) {
+			activeDrop = undefined
+			e.target.classList.remove('active_drop')
+		}
+	})
+
+</script>
+"""), """
+interact('.drag_enabled .toc-row').unset()
+""");
+
+# ╔═╡ 6dbebad0-cc03-499c-9d3a-0aa7e9b32549
 md"""
 ## header_manipulation
 """
 
-# ╔═╡ a41aa83a-d935-4c49-87b5-ee25ab03d5c0
+# ╔═╡ ef5eff51-e6e4-4f40-8763-119cbd479d66
 _header_manipulation = HTLScript(@htl("""
 <script>
 	const header = toc.querySelector('header')
@@ -393,12 +607,12 @@ _header_manipulation = HTLScript(@htl("""
 </script>
 """));
 
-# ╔═╡ ccaf91d2-c3fa-45e4-a6d3-2621db03e2a6
+# ╔═╡ 7b8f25a8-e0cf-4b1b-8cfc-9de6334e75dd
 md"""
 ## save\_to\_file
 """
 
-# ╔═╡ e1596037-2d88-40b3-9f05-97be4b86d8e5
+# ╔═╡ 2ece4464-df5e-48e5-96d2-607213daebda
 _save_to_file = HTLScript(@htl("""
 <script>
 	function save_to_file() {
@@ -588,6 +802,7 @@ $(combine_scripts([
 	_header_manipulation,
 	"cell.toggleAttribute('always-show', true)",
 	_mutation_observer,
+	_move_entries_handler,
 ]))
 $_toc_style
 """
@@ -609,16 +824,19 @@ md"""
 ## very very very very very very very very very long
 """
 
+# ╔═╡ c9bcf4b9-6769-4d5a-bbc0-a14675e11523
+md"""
+### Short
+"""
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 HypertextLiteral = "~0.9.4"
-PlutoDevMacros = "~0.4.8"
 PlutoUI = "~0.7.48"
 """
 
@@ -626,9 +844,9 @@ PlutoUI = "~0.7.48"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.9.0-beta3"
 manifest_format = "2.0"
-project_hash = "0cf11050c8c9fab1e288ace3595e3a4b242ed3ef"
+project_hash = "44b10d4cebbfd7b6dfedba43749c15eb0106d3f7"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -655,7 +873,7 @@ version = "0.11.4"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
+version = "1.0.2+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -726,7 +944,7 @@ version = "1.10.2+0"
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[deps.LinearAlgebra]]
-deps = ["Libdl", "libblastrampoline_jll"]
+deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.Logging]]
@@ -736,12 +954,6 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
 uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
 version = "0.1.4"
-
-[[deps.MacroTools]]
-deps = ["Markdown", "Random"]
-git-tree-sha1 = "42324d08725e200c23d4dfb549e0d5d89dede2d2"
-uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.10"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -757,7 +969,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2022.2.1"
+version = "2022.10.11"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
@@ -766,7 +978,7 @@ version = "1.2.0"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.20+0"
+version = "0.3.21+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
@@ -775,15 +987,9 @@ uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "2.5.0"
 
 [[deps.Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.8.0"
-
-[[deps.PlutoDevMacros]]
-deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Random", "Requires"]
-git-tree-sha1 = "b4b23b981704ac3e2c771a389c2899e69306c091"
-uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.4.8"
+version = "1.9.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -808,12 +1014,6 @@ git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
 
-[[deps.Requires]]
-deps = ["UUIDs"]
-git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
-uuid = "ae029012-a4dd-5104-9daa-d747884805df"
-version = "1.3.0"
-
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -830,22 +1030,28 @@ version = "1.0.1"
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[deps.SparseArrays]]
-deps = ["LinearAlgebra", "Random"]
+deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+version = "1.9.0"
+
+[[deps.SuiteSparse_jll]]
+deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
+uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
+version = "5.10.1+0"
 
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
-version = "1.0.0"
+version = "1.0.3"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.1"
+version = "1.10.0"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
@@ -871,12 +1077,12 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.12+3"
+version = "1.2.13+0"
 
 [[deps.libblastrampoline_jll]]
-deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
+deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.1.1+0"
+version = "5.2.0+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -891,6 +1097,8 @@ version = "17.4.0+0"
 
 # ╔═╡ Cell order:
 # ╠═464fc674-5ed7-11ed-0aff-939456ebc5a8
+# ╠═1091f5d5-2e27-400f-8392-0f15fa1a7c15
+# ╠═275e5365-1d46-4848-80e3-7574ff28847d
 # ╠═d05d4e8c-bf50-4343-b6b5-9b77caa646cd
 # ╟─46520c1a-bbd8-46aa-95d9-bad3d220ee85
 # ╟─5795b550-5799-4b62-bc25-bc36f3802a8d
@@ -901,14 +1109,17 @@ version = "17.4.0+0"
 # ╠═c1fa9fa5-b35e-43c5-bd32-ebca9cb01848
 # ╟─e9668acb-451d-4d16-b9cb-cf0ddcd6a681
 # ╠═d65daa79-cb1d-4425-9693-b737d43e9981
-# ╠═12462846-0ade-447c-85cb-9bf1873ff13d
-# ╠═afcfb1c1-659f-49d1-857e-35d1b3ec8e70
-# ╟─2343295f-eeb0-4aec-a570-ff5de3824cbe
-# ╠═19d2e523-3038-4280-a3d1-d286366265c5
-# ╟─1e22c2aa-ca40-4c27-b415-92071da19990
-# ╠═a41aa83a-d935-4c49-87b5-ee25ab03d5c0
-# ╟─ccaf91d2-c3fa-45e4-a6d3-2621db03e2a6
-# ╠═e1596037-2d88-40b3-9f05-97be4b86d8e5
+# ╠═123da4b2-710e-4962-b255-80fb33894b79
+# ╠═904a2b12-6ffa-4cf3-95cf-002cf2673099
+# ╠═60075509-fbdb-48c8-8e63-69f6fd5218b5
+# ╠═702d5075-baad-4c11-a732-d062213e00e4
+# ╠═2bb6e943-f99d-4eef-9846-4ee71a7fa426
+# ╟─a271f2cd-b941-46af-888d-3274d21b3703
+# ╠═5f60d643-d79c-4081-a31e-603e062e544f
+# ╟─6dbebad0-cc03-499c-9d3a-0aa7e9b32549
+# ╠═ef5eff51-e6e4-4f40-8763-119cbd479d66
+# ╠═7b8f25a8-e0cf-4b1b-8cfc-9de6334e75dd
+# ╠═2ece4464-df5e-48e5-96d2-607213daebda
 # ╟─59e74c4f-c561-463e-b096-e9e587417285
 # ╠═0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
 # ╠═b06c01a6-78cf-4698-b7ae-612910b5cf38
@@ -917,5 +1128,6 @@ version = "17.4.0+0"
 # ╠═1bdb12d3-899d-4ce0-a053-6cf1fa15072d
 # ╟─48540378-5b63-4c20-986b-75c08ceb24b7
 # ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
+# ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
