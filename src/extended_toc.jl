@@ -604,7 +604,10 @@ _move_entries_handler = HTLScript(@htl("""
 				// We find the cell after the active separator and move the dragged row before that
 				const rowAfter = getNextSibling(dropZone)
 				const cellIdsToMove = getBlockIds(e.target)
-				pluto_actions.move_remote_cells(cellIdsToMove, editor_state.notebook.cell_order.indexOf(get_link_id(rowAfter)))
+				// Find the index of the cell that will stay after our moved block
+				const end = editor_state.notebook.cell_order.indexOf(get_link_id(rowAfter))
+				// If we got -1, it means we have to put the cells at the end
+				pluto_actions.move_remote_cells(cellIdsToMove, end < 0 ? Infinity : end)
 			},
 		}
 	})
@@ -947,12 +950,12 @@ md"""
 ## More Fillers
 """
 
-# ╔═╡ 6dd2c458-e02c-4850-a933-fe9fb9dcdf39
+# ╔═╡ 9ddc7a20-c1c9-4af3-98cc-3b803ca181b5
 md"""
 ## More Fillers
 """
 
-# ╔═╡ 9ddc7a20-c1c9-4af3-98cc-3b803ca181b5
+# ╔═╡ 6dd2c458-e02c-4850-a933-fe9fb9dcdf39
 md"""
 ## More Fillers
 """
@@ -1283,6 +1286,9 @@ version = "17.4.0+0"
 # ╟─0aac28b7-4771-447c-ab62-92250f46154f
 # ╠═a1a09dae-b441-484e-8f40-e51e31fb34dd
 # ╠═1bdb12d3-899d-4ce0-a053-6cf1fa15072d
+# ╟─48540378-5b63-4c20-986b-75c08ceb24b7
+# ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
+# ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 # ╠═c4490c71-5994-4849-914b-ec1a88ec7881
 # ╠═fd6772f5-085a-4ffa-bf55-dfeb8e93d32b
 # ╠═863e6721-98f1-4311-8b9e-fa921030f7d7
@@ -1294,9 +1300,6 @@ version = "17.4.0+0"
 # ╠═fdf482d1-f8fa-4628-9417-2816de367e94
 # ╠═6de511d2-ad79-4f0e-95ff-ce7531f3f0c8
 # ╠═a8bcd2cc-ae01-4db7-822f-217c1f6bbc8f
-# ╟─48540378-5b63-4c20-986b-75c08ceb24b7
-# ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
-# ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 # ╠═9ddc7a20-c1c9-4af3-98cc-3b803ca181b5
 # ╠═6dd2c458-e02c-4850-a933-fe9fb9dcdf39
 # ╟─00000000-0000-0000-0000-000000000001
