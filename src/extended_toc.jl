@@ -62,6 +62,8 @@ _basics = HTLScript(
 	// https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 	var getNextSibling = function (elem, selector) {
 
+		if (_.isNil(elem)) {return elem}
+
 		// Get the next sibling element
 		var sibling = elem.nextElementSibling;
 	
@@ -78,6 +80,8 @@ _basics = HTLScript(
 	};
 	var getPreviousSibling = function (elem, selector) {
 
+		if (_.isNil(elem)) {return elem}
+		
 		// Get the next sibling element
 		var sibling = elem.previousElementSibling;
 	
@@ -558,13 +562,24 @@ _move_entries_handler = HTLScript(@htl("""
 		return true
 	}
 
+	function getSeparator(isBelow) {
+		let separator
+		if (isBelow) {
+			const validRow = getNextSibling(activeDrop, '.toc-row:not(.parent-collapsed)')
+			// If the activeDrop is the last row or the the last non-collapsed one, the validRow will be `undefined`, so in that case we take the last separator
+			separator = getPreviousSibling(validRow, '.toc-row-separator') ?? _.last(toc.querySelectorAll('.toc-row-separator'))
+		} else {
+			separator = getPreviousSibling(activeDrop, '.toc-row-separator')
+		}
+		return separator
+	}
+
 	function updateActiveSeparator(e) {
 		if (_.isNil(activeDrop)) {return}
 		const { y, height } = activeDrop.getBoundingClientRect()
 		// Check if the current position of the mouse is below or above the middle of the active drop zone
 		const isBelow = e.client.y > y + height/2
-		const getSep = isBelow ? getNextSibling : getPreviousSibling
-		const newSep = getSep(activeDrop)
+		const newSep = getSeparator(isBelow)
 		const currentSep = toc.querySelector('.toc-row-separator.active') ?? newSep
 		if (currentSep !== newSep) {
 			currentSep.classList.remove('active')
@@ -620,10 +635,10 @@ md"""
 _header_manipulation = HTLScript(@htl("""
 <script>
 	const header = toc.querySelector('header')
-	const header_container = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'><span class='toc-header-icon toc-header-hide'>`)
-	const notebook_hide_icon = header_container.firstChild
+	const header_container = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'>`)
+	const notebook_hide_icon = header_container.insertAdjacentElement('afterbegin', html`<span class='toc-header-icon toc-header-hide'>`)
 	
-	const save_file_icon = header.insertAdjacentElement('beforeend', html`<span class='toc-header-icon toc-header-save'>`)
+	const save_file_icon = header_container.insertAdjacentElement('afterbegin', html`<span class='toc-header-icon toc-header-save'>`)
 	save_file_icon.addEventListener('click', save_to_file)
 
 	header.addEventListener('click', e => {
@@ -666,17 +681,79 @@ _save_to_file = HTLScript(@htl("""
 </script>
 """));
 
-# ╔═╡ 59e74c4f-c561-463e-b096-e9e587417285
+# ╔═╡ c770fcab-93c0-4de5-b097-72c190ba0899
 md"""
-## toc_style
+# Style
 """
 
-# ╔═╡ 0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
-_toc_style = @htl """
-<style>
+# ╔═╡ 4426a0b3-98dc-49a0-8ecc-b57d0492736f
+md"""
+## header
+"""
+
+# ╔═╡ 5802c307-d68d-4e00-b6b2-d98ce295acae
+_header_style = @htl """
+<style>	
 	.plutoui-toc header {
 		cursor: pointer;
 	}
+	span.toc-header-container {
+		position: fixed;
+		right: calc(min(80vw, 300px) + 1rem - 50px + 3px);
+		display: flex;
+		--size: 25px;
+		width: calc(var(--size) + 50px + 25px);
+		height: calc(51px - 1rem);
+		z-index: -1;
+		visibility: hidden;
+	}
+	header:hover span.toc-header-container,
+	span.toc-header-container:hover {
+		visibility: visible;
+	}
+	.toc-header-hide {
+		align-self: stretch;
+		--size: 1em;
+		width: var(--size);
+		display: block;
+		background-size: var(--size) var(--size);
+	    background-repeat: no-repeat;
+	    background-position: center;
+		filter: var(--image-filters);
+		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-outline.svg);
+		cursor: pointer;
+		opacity: 50%;
+		margin-right: 20px;
+	}
+	.toc-header-save {
+		height: var(--size);
+		width: var(--size);
+	}
+	.toc-header-save:before {
+		content: "";
+		display: inline-block;
+		width: var(--size);
+		height: var(--size);
+		background-size: var(--size) var(--size);
+	    background-repeat: no-repeat;
+	    background-position: center;
+		filter: var(--image-filters);
+		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/save-outline.svg);
+	}
+	pluto-notebook[hide-enabled] span.toc-header-hide {
+		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-off-outline.svg);
+	}
+</style>
+""";
+
+# ╔═╡ 59e74c4f-c561-463e-b096-e9e587417285
+md"""
+## toc_row
+"""
+
+# ╔═╡ 0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
+_toc_row_style = @htl """
+<style>
 	span.toc-hide-container {
 		--width: min(80vw, 300px);
 		position: fixed;
@@ -738,58 +815,6 @@ _toc_style = @htl """
 	pluto-notebook[hide-enabled] div.toc-row.parent-hidden {
 		display: none;
 	}
-	span.toc-header-container {
-		position: fixed;
-		right: calc(min(80vw, 300px) + 1rem - 50px + 3px);
-		display: flex;
-		--size: 25px;
-		width: calc(var(--size) + 50px);
-		height: calc(51px - 1rem);
-		z-index: -1;
-	}
-	.toc-header-hide {
-		align-self: stretch;
-		--size: 1em;
-		width: var(--size);
-		display: block;
-		background-size: var(--size) var(--size);
-	    background-repeat: no-repeat;
-	    background-position: center;
-		filter: var(--image-filters);
-		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-outline.svg);
-		cursor: pointer;
-		opacity: 50%;
-		visibility: hidden;
-	}
-	.toc-header-save {
-		position: absolute;
-		right: 0px;
-		top: .55em;
-		--size: 1em;
-		cursor: pointer;
-		--size: 1em;
-		width: var(--size);
-		height: var(--size);
-		z-index: 500;
-	}
-	.toc-header-save:hover:before {
-		content: "";
-		display: inline-block;
-		width: var(--size);
-		height: var(--size);
-		background-size: var(--size) var(--size);
-	    background-repeat: no-repeat;
-	    background-position: center;
-		filter: var(--image-filters);
-		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/save-outline.svg);
-	}
-	.plutoui-toc header:hover .toc-header-hide,
-	.toc-header-container:hover > .toc-header-hide {
-		visibility: visible;
-	}
-	pluto-notebook[hide-enabled] span.toc-header-hide {
-		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-off-outline.svg);
-	}
 </style>
 """;
 
@@ -831,6 +856,7 @@ $(combine_scripts([
 	"const force_hide_enabled = $force_hide_enabled",
 	_smoothScroll(use_smoothscroll),
 	_basics,
+	_floating_ui,
 	_modify_notebook_attributes,
 	_modify_cell_attributes,
 	_hide_cell_blocks,
@@ -840,7 +866,8 @@ $(combine_scripts([
 	_mutation_observer,
 	_move_entries_handler,
 ]))
-$_toc_style
+$_header_style
+$_toc_row_style
 """
 
 # ╔═╡ d05d4e8c-bf50-4343-b6b5-9b77caa646cd
@@ -1227,7 +1254,7 @@ version = "17.4.0+0"
 # ╠═464fc674-5ed7-11ed-0aff-939456ebc5a8
 # ╠═d05d4e8c-bf50-4343-b6b5-9b77caa646cd
 # ╟─46520c1a-bbd8-46aa-95d9-bad3d220ee85
-# ╟─5795b550-5799-4b62-bc25-bc36f3802a8d
+# ╠═5795b550-5799-4b62-bc25-bc36f3802a8d
 # ╟─052e26d7-8bed-46fe-8b5b-a879e76714cb
 # ╟─aa74f780-96c5-4b91-9658-a34c8c3fcab9
 # ╠═a777b426-42e9-4c91-aebd-506388449042
@@ -1248,14 +1275,14 @@ version = "17.4.0+0"
 # ╠═ef5eff51-e6e4-4f40-8763-119cbd479d66
 # ╠═7b8f25a8-e0cf-4b1b-8cfc-9de6334e75dd
 # ╠═2ece4464-df5e-48e5-96d2-607213daebda
-# ╟─59e74c4f-c561-463e-b096-e9e587417285
+# ╟─c770fcab-93c0-4de5-b097-72c190ba0899
+# ╟─4426a0b3-98dc-49a0-8ecc-b57d0492736f
+# ╠═5802c307-d68d-4e00-b6b2-d98ce295acae
+# ╠═59e74c4f-c561-463e-b096-e9e587417285
 # ╠═0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
 # ╟─0aac28b7-4771-447c-ab62-92250f46154f
 # ╠═a1a09dae-b441-484e-8f40-e51e31fb34dd
 # ╠═1bdb12d3-899d-4ce0-a053-6cf1fa15072d
-# ╟─48540378-5b63-4c20-986b-75c08ceb24b7
-# ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
-# ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 # ╠═c4490c71-5994-4849-914b-ec1a88ec7881
 # ╠═fd6772f5-085a-4ffa-bf55-dfeb8e93d32b
 # ╠═863e6721-98f1-4311-8b9e-fa921030f7d7
@@ -1267,7 +1294,10 @@ version = "17.4.0+0"
 # ╠═fdf482d1-f8fa-4628-9417-2816de367e94
 # ╠═6de511d2-ad79-4f0e-95ff-ce7531f3f0c8
 # ╠═a8bcd2cc-ae01-4db7-822f-217c1f6bbc8f
-# ╠═6dd2c458-e02c-4850-a933-fe9fb9dcdf39
+# ╟─48540378-5b63-4c20-986b-75c08ceb24b7
+# ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
+# ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 # ╠═9ddc7a20-c1c9-4af3-98cc-3b803ca181b5
+# ╠═6dd2c458-e02c-4850-a933-fe9fb9dcdf39
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
