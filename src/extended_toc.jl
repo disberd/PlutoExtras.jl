@@ -58,40 +58,66 @@ _basics = HTLScript(
 		return a.href.slice(-36) // extract the last 36 characters, corresponding to the cell id
 	}
 
-	// Get next and previous sibling, taken from:
+	function getHeadingLevel(row) {
+		const a = row.querySelector('a')
+		// We return the link class without the first H
+		return Number(a.classList[0].slice(1))
+	}
+
+	function generateChecker(selector) {
+		switch (typeof selector) {
+			case 'string':
+				const func = el => {
+					return el.matches(selector)
+				}
+				return func
+			case 'function':
+				return selector
+			default:
+				console.error(`The type (\${typeof selector}) of the provided argument is not valid`)
+		}
+	}
+
+	// Get next and previous sibling, adapted from:
 	// https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 	var getNextSibling = function (elem, selector) {
 
-		if (_.isNil(elem)) {return elem}
+		// Added to return undefined is called with undefined
+		if (_.isNil(elem)) {return undefined}
 
 		// Get the next sibling element
 		var sibling = elem.nextElementSibling;
 	
 		// If there's no selector, return the first sibling
 		if (!selector) return sibling;
+
+		const checker = generateChecker(selector)
 	
 		// If the sibling matches our selector, use it
 		// If not, jump to the next sibling and continue the loop
 		while (sibling) {
-			if (sibling.matches(selector)) return sibling;
+			if (checker(sibling)) return sibling;
 			sibling = sibling.nextElementSibling
 		}
 	
 	};
 	var getPreviousSibling = function (elem, selector) {
 
-		if (_.isNil(elem)) {return elem}
+		// Added to return undefined is called with undefined
+		if (_.isNil(elem)) {return undefined}
 		
 		// Get the next sibling element
 		var sibling = elem.previousElementSibling;
 	
 		// If there's no selector, return the first sibling
 		if (!selector) return sibling;
+
+		const checker = generateChecker(selector)
 	
 		// If the sibling matches our selector, use it
 		// If not, jump to the next sibling and continue the loop
 		while (sibling) {
-			if (sibling.matches(selector)) return sibling;
+			if (checker(sibling)) return sibling;
 			sibling = sibling.previousElementSibling;
 		}
 	
@@ -426,13 +452,23 @@ _mutation_observer = HTLScript(@htl("""
 		const a = div.querySelector('a')
 		if (use_smoothscroll) {
 			const this_cell = document.getElementById(id)
-			let old_f = a.onclick;
 			a.onclick = (e) => {
-				old_f(e)
+				// We avoid triggering the click if coming out of a drag
+				e.preventDefault()
+				if (toc.classList.contains('recent-drag')) { return }
+				console.log('skipped!')
 				smoothScroll({toElement: this_cell, block: 'start'})
 			}
+		} else {
+			let old_f = a.onclick;
+			a.onclick = (e) => {
+				e.preventDefault()
+				// We avoid triggering the click if coming out of a drag
+				if (toc.classList.contains('recent-drag')) { return }
+				old_f(e)
+			}			
 		}
-		const level = Number(a.classList[0][1])
+		const level = getHeadingLevel(div)
 		if (level > 1) {
 			history[level].unshift(div)
 		}
@@ -490,35 +526,6 @@ _mutation_observer = HTLScript(@htl("""
 "observer.disconnect()"
 );
 
-# ╔═╡ 2bb6e943-f99d-4eef-9846-4ee71a7fa426
-@htl """
-<style>
-	div.toc-row-separator {
-		height: 2px;
-		margin: 3px 0px;
-		background: #aaa;
-		display: none;
-	}
-	div.toc-row-separator.active {
-		display: block;
-	}
-	.drag_enabled .toc-row.dragged {
-		border: 2px dashed grey;
-	}
-
-	.drag_enabled .toc-row {
-		position: relative;
-	}
-	.drag_enabled .toc-row:after {
-		position: absolute;
-		content: '';
-		height: 100%;
-		width: 100%;
-		bottom: 0px;
-	}
-</style>
-"""
-
 # ╔═╡ a271f2cd-b941-46af-888d-3274d21b3703
 md"""
 ## move\_entries\_handler
@@ -529,16 +536,20 @@ _move_entries_handler = HTLScript(@htl("""
 <script>
 	const { default: interact } = await import('https://esm.sh/interactjs')
 
+	// We have to enable dynamicDrop to have dropzone recomputed on dragmove
+	interact.dynamicDrop(true)
+
 	function dragEnabler(e) {
-		if (e.key !== 'Alt') { return }
+		if (!toc.classList.contains('drag_enabled') || e.key !== 'Shift') { return true }
 		switch (e.type) {
 			case "keydown":
-				toc.classList.add('drag_enabled')
+				toc.classList.add('allow_all_drop')
 				break;
 			case "keyup":
-				toc.classList.remove('drag_enabled')
+				toc.classList.remove('allow_all_drop')
 				break;
 		}
+		updateActiveSeparator()
 	}
 
 	const window_events = {
@@ -552,81 +563,188 @@ _move_entries_handler = HTLScript(@htl("""
 
 	let activeDrop = undefined
 
-	function isValidSeparator(sep) {
-		let temp = getNextSibling(sep, '.toc-row:not(.parent-collapsed)')
-		if (!_.isNil(temp) && temp.classList.contains('dragged')) { return false }
-		
-		temp = getPreviousSibling(sep, '.toc-row:not(.parent-collapsed)')
-		if (!_.isNil(temp) && temp.classList.contains('dragged')) { return false }
-
-		return true
+	function tagAdjacentSeparators(el, active) {
+		const next = getNextSibling(el, '.toc-row-separator')
+		const prev = getPreviousSibling(el, '.toc-row-separator')
+		if (active) {
+  			next?.classList.add('noshow')
+  			prev?.classList.add('noshow')
+		} else {
+  			next?.classList.remove('noshow')
+  			prev?.classList.remove('noshow')				
+		}
 	}
 
-	function getSeparator(isBelow) {
+	function getSeparator(startElement, below, allowAll, headingLevel = 8) {
 		let separator
-		if (isBelow) {
-			const validRow = getNextSibling(activeDrop, '.toc-row:not(.parent-collapsed)')
+		if (below) {
+			const selector = '.toc-row:not(.parent-collapsed)'
+			const checkerFunc = allowAll ? generateChecker(selector) : (el) => {
+				if (!el.matches(selector)) { return false }
+				// Check for the right heading level
+				for (let i = headingLevel; i > 0; i--) {
+					const cl = "H" + i
+					if (el.classList.contains(cl)) { return true }
+				}
+				return false
+			}
+			const validRow = getNextSibling(startElement, checkerFunc)
 			// If the activeDrop is the last row or the the last non-collapsed one, the validRow will be `undefined`, so in that case we take the last separator
 			separator = getPreviousSibling(validRow, '.toc-row-separator') ?? _.last(toc.querySelectorAll('.toc-row-separator'))
 		} else {
-			separator = getPreviousSibling(activeDrop, '.toc-row-separator')
+			separator = getPreviousSibling(startElement, '.toc-row-separator')
 		}
 		return separator
 	}
 
-	function updateActiveSeparator(e) {
+	function getHigherParent(row, level) {
+		const currentLevel = getHeadingLevel(row)
+		if (currentLevel <= level) {return row}
+		for (const par of row.allParents) {
+			// Parents cycle from higher level to lower levels
+			if (getHeadingLevel(par) <= level) {return par}
+		}
+		return row
+	}
+		
+	let uncollapsed = []
+
+	function reCollapse(row) {
+		const parents = row?.allParents ?? []
+		const toRemove = _.difference(uncollapsed, [...parents, row])
+		for (const el of toRemove) {
+			// debugger
+			set_state(el, "collapsed", true)
+			_.remove(uncollapsed, x => x === el)
+		}
+	}
+
+
+	function updateDropZone(row) {
+		const prev = toc.querySelector('.toc-row.active_drop')
+		if (_.isNil(row) || prev === row) {return}
+		if (prev?.timeoutId) {
+			clearTimeout(prev.timeoutId)
+			prev.timeoutId = undefined
+		}
+		prev?.classList.remove('active_drop')
+		row.classList.add('active_drop')
+		reCollapse(row)
+		if (row.classList.contains('collapsed')) {
+			row.timeoutId = setTimeout(() => {
+				uncollapsed.push(row)
+				set_state(row, "collapsed", false)
+				updateActiveSeparator()
+			}, 300)
+		}
+		activeDrop = row
+	}
+
+	function updateActiveSeparator() {
+		const e = toc.lastDragEvent
+		if (_.isNil(e)) { return }
+		const rowBelow = getRow(document.elementFromPoint(e.client.x, e.client.y))
+		updateDropZone(rowBelow)
 		if (_.isNil(activeDrop)) {return}
+		const allowAll = toc.classList.contains('allow_all_drop')
+		const headingLevel = getHeadingLevel(toc.draggedElement)
 		const { y, height } = activeDrop.getBoundingClientRect()
+		let thresholdY = y + height/2
+		if (!allowAll) {
+			// We only allow putting the dragged element above/below rows with equal or higher heading level
+			const currentHeadingLevel = getHeadingLevel(activeDrop)
+			if (currentHeadingLevel > headingLevel) {
+				// We update the threshold based on the relevant parent
+				const par = getHigherParent(activeDrop, headingLevel)
+				const { y, height } = par.getBoundingClientRect()
+				thresholdY = y + height/2						
+			}
+		}
 		// Check if the current position of the mouse is below or above the middle of the active drop zone
-		const isBelow = e.client.y > y + height/2
-		const newSep = getSeparator(isBelow)
+		const isBelow = e.client.y > thresholdY
+		const newSep = getSeparator(activeDrop, isBelow, allowAll, headingLevel)
 		const currentSep = toc.querySelector('.toc-row-separator.active') ?? newSep
 		if (currentSep !== newSep) {
 			currentSep.classList.remove('active')
 		}
-		if (isValidSeparator(newSep)) {
-			newSep.classList.add('active')
-		}
+		newSep.classList.add('active')
 	}
 
-	interact('.drag_enabled .toc-row').draggable({
+	const dragHandles = interact('.toc-row').draggable({
+		cursorChecker (action, interactable, element, interacting) {
+			// console.log({action, interactable, element, interacting})
+			return null
+		},
+		manualStart: true, // needed for consistent start after hold
 		listeners: {
 			start: function (e) {
+				toc.classList.add('drag_enabled')
+				const row = e.target
 				// console.log('start: ', e)
-				e.target.classList.add('dragged')
+				toc.lastDragEvent = e
+				row.classList.add('dragged')
+				toc.draggedElement = row
+				tagAdjacentSeparators(row, true)
 			},
-			move: updateActiveSeparator,
+			move: function (e) {
+				toc.lastDragEvent = e
+				updateActiveSeparator()
+			},
+			// move: function (e) {console.log('move: ',e)},
 			end: function (e) {
+				activeDrop = undefined
+				e.preventDefault()
+				toc.lastDragEvent = e
 				// console.log('end: ', e)
-				e.target.classList.remove('dragged')
+				const row = e.target
+				row.classList.remove('dragged')
+				toc.classList.remove('drag_enabled')	
+				for (const el of toc.querySelectorAll('.active_drop')) {
+					el.classList.remove('active_drop')
+				}
+				reCollapse()				
+				tagAdjacentSeparators(row, false)
+				// We temporary set the recentDrag flag
+				toc.classList.add('recent-drag')
+				setTimeout(() => {
+					toc.classList.remove('recent-drag')
+				}, 300)
+				// Check if there is an active dropzone
 				const dropZone = toc.querySelector('.toc-row-separator.active')
-				if (_.isNil(dropZone)) {return}
+				if (_.isNil(dropZone) || dropZone.classList.contains('noshow')) {return}
+				dropZone.classList.remove('active')
+				// Check if the release was inside the ToC
+				const releaseElement = document.elementFromPoint(e.client.x, e.client.y).closest('.plutoui-toc')
+				if (_.isNil(releaseElement)) {console.log('out!'); return}
 				// We find the cell after the active separator and move the dragged row before that
 				const rowAfter = getNextSibling(dropZone)
-				const cellIdsToMove = getBlockIds(e.target)
+				const cellIdsToMove = getBlockIds(row)
 				// Find the index of the cell that will stay after our moved block
 				const end = editor_state.notebook.cell_order.indexOf(get_link_id(rowAfter))
 				// If we got -1, it means we have to put the cells at the end
 				pluto_actions.move_remote_cells(cellIdsToMove, end < 0 ? Infinity : end)
+				toc.draggedElement = undefined		
 			},
 		}
-	})
-	
-	interact('.drag_enabled .toc-row').dropzone({
-		ondragenter: function (e) {
-			// console.log('enter: ', e)
-			activeDrop = e.target
-			e.target.classList.add('active_drop')
-		},
-		ondragleave: function (e) {
-			activeDrop = undefined
-			e.target.classList.remove('active_drop')
-		}
+	}).on('hold',function (e) {
+		e.preventDefault()
+		e.stopImmediatePropagation()
+		e.stopPropagation()
+		// console.log('this is hold', e)
+		var interaction = e.interaction
+
+	    if (!interaction.interacting()) {
+	      interaction.start(
+	        { name: 'drag' },
+	        e.interactable,
+	        e.currentTarget,
+	      )
+	    }
 	})
 
 </script>
 """), """
-interact('.drag_enabled .toc-row').unset()
+dragHandles.unset()
 """);
 
 # ╔═╡ 6dbebad0-cc03-499c-9d3a-0aa7e9b32549
@@ -639,9 +757,12 @@ _header_manipulation = HTLScript(@htl("""
 <script>
 	const header = toc.querySelector('header')
 	const header_container = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'>`)
-	const notebook_hide_icon = header_container.insertAdjacentElement('afterbegin', html`<span class='toc-header-icon toc-header-hide'>`)
 	
-	const save_file_icon = header_container.insertAdjacentElement('afterbegin', html`<span class='toc-header-icon toc-header-save'>`)
+	header_container.insertAdjacentElement('afterbegin', html`<span class='toc-header-filler'>`)
+	
+	const notebook_hide_icon = header_container.insertAdjacentElement('beforeend', html`<span class='toc-header-icon toc-header-hide'>`)
+	
+	const save_file_icon = header_container.insertAdjacentElement('beforeend', html`<span class='toc-header-icon toc-header-save'>`)
 	save_file_icon.addEventListener('click', save_to_file)
 
 	header.addEventListener('click', e => {
@@ -659,6 +780,7 @@ _header_manipulation = HTLScript(@htl("""
 			strategy: "fixed",
 		}).then(pos => {
 			header_container.style.top = pos.y + "px"
+			header_container.style.left = pos.x + "px"
 		})
 	})
 
@@ -702,46 +824,38 @@ _header_style = @htl """
 	}
 	span.toc-header-container {
 		position: fixed;
-		right: calc(min(80vw, 300px) + 1rem - 50px + 3px);
-		display: flex;
+		display: none;
 		--size: 25px;
-		width: calc(var(--size) + 50px + 25px);
 		height: calc(51px - 1rem);
+		flex-direction: row-reverse;
 		z-index: -1;
-		visibility: hidden;
+	}
+	.toc-header-icon {
+		margin-right: 0.3rem;
+		align-self: stretch;
+		display: inline-block;
+		width: var(--size);
+		background-size: var(--size) var(--size);
+	    background-repeat: no-repeat;
+	    background-position: center;
+		filter: var(--image-filters);
+		cursor: pointer;
+	}
+	.toc-header-filler {
+		margin: .25rem;
 	}
 	header:hover span.toc-header-container,
 	span.toc-header-container:hover {
-		visibility: visible;
+		display: flex;
 	}
 	.toc-header-hide {
-		align-self: stretch;
-		--size: 1em;
-		width: var(--size);
-		display: block;
-		background-size: var(--size) var(--size);
-	    background-repeat: no-repeat;
-	    background-position: center;
-		filter: var(--image-filters);
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-outline.svg);
-		cursor: pointer;
 		opacity: 50%;
-		margin-right: 20px;
+		--size: 1em;
 	}
 	.toc-header-save {
-		height: var(--size);
-		width: var(--size);
-	}
-	.toc-header-save:before {
-		content: "";
-		display: inline-block;
-		width: var(--size);
-		height: var(--size);
-		background-size: var(--size) var(--size);
-	    background-repeat: no-repeat;
-	    background-position: center;
-		filter: var(--image-filters);
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/save-outline.svg);
+		opacity: 50%;
 	}
 	pluto-notebook[hide-enabled] span.toc-header-hide {
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-off-outline.svg);
@@ -779,7 +893,7 @@ _toc_row_style = @htl """
 	div.toc-row:hover .toc-hide {
 		visibility: visible;
 	}
-	.plutoui-toc section div.toc-row a {
+	div.toc-row a {
 		display: flex;
 	}
 	span.toc-icon {
@@ -818,8 +932,34 @@ _toc_row_style = @htl """
 	pluto-notebook[hide-enabled] div.toc-row.parent-hidden {
 		display: none;
 	}
+	.drag_enabled .toc-row.dragged {
+		border: 2px dashed grey;
+	}
 </style>
 """;
+
+# ╔═╡ 8f55cdc7-8409-4685-a154-52a82b91074c
+md"""
+## row-separator
+"""
+
+# ╔═╡ e3e3f46b-8879-4f7c-ad6a-12b4d27ac27a
+_row_separator_style = @htl """
+<style>
+	div.toc-row-separator {
+		height: 2px;
+		margin: 3px 0px;
+		background: #aaa;
+		display: none;
+	}
+	div.toc-row-separator.active {
+		display: block;
+	}
+	div.toc-row-separator.active.noshow {
+		display: none;
+	}
+</style>
+"""
 
 # ╔═╡ 0aac28b7-4771-447c-ab62-92250f46154f
 md"""
@@ -871,6 +1011,7 @@ $(combine_scripts([
 ]))
 $_header_style
 $_toc_row_style
+$_row_separator_style
 """
 
 # ╔═╡ d05d4e8c-bf50-4343-b6b5-9b77caa646cd
@@ -894,6 +1035,37 @@ md"""
 md"""
 ### Short
 """
+
+# ╔═╡ 6ddee4cb-7d76-483e-aed5-bde46280cc5b
+md"""
+## Random JS Tests
+"""
+
+# ╔═╡ 239b3956-69d7-43dc-80b8-92f43b84aada
+@htl """
+<div class='parent'>
+	<span class='child first'></span>
+	<span class='child second'></span>
+	<span class='child third'></span>
+</div>
+<style>
+	div.parent {
+		position: fixed;
+		top: 30px;
+		left: 30px;
+		background: lightblue;
+		display: flex;
+		height: 30px;
+	}
+	span.child {
+		align-self: stretch;
+		width: 20px;
+		display: inline-block;
+		background: green;
+		margin: 5px 0px;
+	}
+</style>
+""";
 
 # ╔═╡ c4490c71-5994-4849-914b-ec1a88ec7881
 md"""
@@ -1257,7 +1429,7 @@ version = "17.4.0+0"
 # ╠═464fc674-5ed7-11ed-0aff-939456ebc5a8
 # ╠═d05d4e8c-bf50-4343-b6b5-9b77caa646cd
 # ╟─46520c1a-bbd8-46aa-95d9-bad3d220ee85
-# ╠═5795b550-5799-4b62-bc25-bc36f3802a8d
+# ╟─5795b550-5799-4b62-bc25-bc36f3802a8d
 # ╟─052e26d7-8bed-46fe-8b5b-a879e76714cb
 # ╟─aa74f780-96c5-4b91-9658-a34c8c3fcab9
 # ╠═a777b426-42e9-4c91-aebd-506388449042
@@ -1271,7 +1443,6 @@ version = "17.4.0+0"
 # ╠═904a2b12-6ffa-4cf3-95cf-002cf2673099
 # ╠═60075509-fbdb-48c8-8e63-69f6fd5218b5
 # ╠═702d5075-baad-4c11-a732-d062213e00e4
-# ╠═2bb6e943-f99d-4eef-9846-4ee71a7fa426
 # ╟─a271f2cd-b941-46af-888d-3274d21b3703
 # ╠═5f60d643-d79c-4081-a31e-603e062e544f
 # ╟─6dbebad0-cc03-499c-9d3a-0aa7e9b32549
@@ -1283,12 +1454,16 @@ version = "17.4.0+0"
 # ╠═5802c307-d68d-4e00-b6b2-d98ce295acae
 # ╠═59e74c4f-c561-463e-b096-e9e587417285
 # ╠═0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
+# ╟─8f55cdc7-8409-4685-a154-52a82b91074c
+# ╠═e3e3f46b-8879-4f7c-ad6a-12b4d27ac27a
 # ╟─0aac28b7-4771-447c-ab62-92250f46154f
 # ╠═a1a09dae-b441-484e-8f40-e51e31fb34dd
 # ╠═1bdb12d3-899d-4ce0-a053-6cf1fa15072d
 # ╟─48540378-5b63-4c20-986b-75c08ceb24b7
 # ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
 # ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
+# ╟─6ddee4cb-7d76-483e-aed5-bde46280cc5b
+# ╠═239b3956-69d7-43dc-80b8-92f43b84aada
 # ╠═c4490c71-5994-4849-914b-ec1a88ec7881
 # ╠═fd6772f5-085a-4ffa-bf55-dfeb8e93d32b
 # ╠═863e6721-98f1-4311-8b9e-fa921030f7d7
