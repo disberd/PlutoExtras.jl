@@ -15,7 +15,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 [compat]
 AbstractPlutoDingetjes = "1"
 HypertextLiteral = "0.9"
-PlutoDevMacros = "~0.4.8"
+PlutoDevMacros = "0.5"
 PlutoUI = "~0.7.21"
 OrderedCollections = "~1.4.1"
 julia = "1.6"
