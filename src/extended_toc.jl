@@ -471,7 +471,6 @@ _mutation_observer = HTLScript(@htl("""
 				// We avoid triggering the click if coming out of a drag
 				e.preventDefault()
 				if (toc.classList.contains('recent-drag')) { return }
-				console.log('skipped!')
 				smoothScroll({toElement: this_cell, block: 'start'})
 			}
 		} else {
@@ -749,6 +748,7 @@ _move_entries_handler = HTLScript(@htl("""
 			},
 		}
 	}).on('hold',function (e) {
+		if (document.body.classList.contains('disable_ui')) { console.log('UI disabled, no interaction!'); return }
 		e.preventDefault()
 		e.stopImmediatePropagation()
 		e.stopPropagation()
@@ -809,7 +809,9 @@ _header_manipulation = HTLScript(@htl("""
 	})
 
 	notebook_hide_icon.addEventListener('click', (e) => {
-			const ref = document.elementFromPoint(0,100)
+			// We find the x coordinate of the pluto-notebook element, to avoid missing the cell when UI is disabled
+			const { x } = document.querySelector('pluto-notebook').getBoundingClientRect()
+			const ref = document.elementFromPoint(x+1,100).closest('pluto-cell')
 			const { y } = ref.getBoundingClientRect()
 			toggle_notebook_attribute('hide-enabled')
 			const dy = ref.getBoundingClientRect().y - y
