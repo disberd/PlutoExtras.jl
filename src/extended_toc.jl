@@ -170,10 +170,20 @@ _basics = HTLScript(
 		}
 	}
 
+	// Returns true if the current hidden/collapsed toc state is different from the one saved in the file within cell metadata
+	function stateDiffersFile(state) {
+		for (const [id, st] of _.entries(state)) {
+			if (has_cell_attribute(id, 'toc-hidden') != st.hidden) { return true }
+			if (has_cell_attribute(id, 'toc-collapsed') != st.collapsed) { return true }
+		}
+		return false
+	}
+
 	function set_state(div, state, value, init = false) {
 		div.classList.toggle(state, value)
 		if (!init) {
 			window.toc_state[get_link_id(div)][state] = value
+			toc.classList.toggle('file-state-differs', stateDiffersFile(window.toc_state))
 		}
 		if (_.isEmpty(div.directChildren)) {return}
 		for (const child of div.directChildren) {
@@ -220,6 +230,11 @@ md"""
 # ╔═╡ c1fa9fa5-b35e-43c5-bd32-ebca9cb01848
 _modify_cell_attributes = HTLScript(@htl("""
 <script>
+	function has_cell_attribute(cell_id, attr) {
+		const md = editor_state.notebook.cell_inputs[cell_id].metadata
+		return _.includes(md["custom_attrs"], attr)
+	}
+	
 	function add_cell_attributes(cell_id, attrs) {
 		pluto_actions.update_notebook((notebook) => {
 			let md = notebook.cell_inputs[cell_id].metadata
@@ -517,6 +532,7 @@ _mutation_observer = HTLScript(@htl("""
 			process_row(row, history, old_state, new_state)
 		}
 		window.toc_state = new_state
+		toc.classList.toggle('file-state-differs', stateDiffersFile(new_state))
 		update_hidden()
 	})
 
@@ -802,6 +818,7 @@ _save_to_file = HTLScript(@htl("""
 			toggle_cell_attribute(k, 'toc-hidden', v.hidden)	
 			toggle_cell_attribute(k, 'toc-collapsed', v.collapsed)	
 		}
+		toc.classList.toggle('file-state-differs', stateDiffersFile(state))
 	}
 </script>
 """));
@@ -856,6 +873,9 @@ _header_style = @htl """
 	.toc-header-save {
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/save-outline.svg);
 		opacity: 50%;
+	}
+	nav:not(.file-state-differs) .toc-header-save {
+		display: none;
 	}
 	pluto-notebook[hide-enabled] span.toc-header-hide {
 		background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/eye-off-outline.svg);
@@ -1068,6 +1088,7 @@ md"""
 """;
 
 # ╔═╡ c4490c71-5994-4849-914b-ec1a88ec7881
+# ╠═╡ custom_attrs = ["toc-collapsed"]
 md"""
 # Fillers
 """
