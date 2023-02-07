@@ -809,7 +809,13 @@ _header_manipulation = HTLScript(@htl("""
 		})
 	})
 
-	notebook_hide_icon.addEventListener('click', (e) => toggle_notebook_attribute('hide-enabled'))
+	notebook_hide_icon.addEventListener('click', (e) => {
+			const ref = document.elementFromPoint(0,100)
+			const { y } = ref.getBoundingClientRect()
+			toggle_notebook_attribute('hide-enabled')
+			const dy = ref.getBoundingClientRect().y - y
+			window.scrollBy(0, dy)
+	})
 </script>
 """));
 
