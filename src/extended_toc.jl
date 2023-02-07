@@ -659,7 +659,14 @@ _move_entries_handler = HTLScript(@htl("""
 	function updateActiveSeparator() {
 		const e = toc.lastDragEvent
 		if (_.isNil(e)) { return }
-		const rowBelow = getRow(document.elementFromPoint(e.client.x, e.client.y))
+		const elBelow = document.elementFromPoint(e.client.x, e.client.y)
+		if (!elBelow.matches('.plutoui-toc :scope')) {
+			// We are out of the ToC, recollapse and remove active separator
+			reCollapse(undefined)
+			toc.querySelector('.toc-row-separator.active')?.classList.remove('active')
+			return
+		}
+		const rowBelow = getRow(elBelow)
 		updateDropZone(rowBelow)
 		if (_.isNil(activeDrop)) {return}
 		const allowAll = toc.classList.contains('allow_all_drop')
