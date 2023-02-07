@@ -651,7 +651,7 @@ _move_entries_handler = HTLScript(@htl("""
 				uncollapsed.push(row)
 				set_state(row, "collapsed", false)
 				updateActiveSeparator()
-			}, 300)
+			}, 500)
 		}
 		activeDrop = row
 	}
@@ -720,13 +720,15 @@ _move_entries_handler = HTLScript(@htl("""
 				toc.lastDragEvent = e
 				// console.log('end: ', e)
 				const row = e.target
+				// Cleanup
 				row.classList.remove('dragged')
 				toc.classList.remove('drag_enabled')	
 				for (const el of toc.querySelectorAll('.active_drop')) {
 					el.classList.remove('active_drop')
 				}
 				reCollapse()				
-				tagAdjacentSeparators(row, false)
+				tagAdjacentSeparators(row, false)				
+				toc.classList.remove('allow_all_drop')
 				// We temporary set the recentDrag flag
 				toc.classList.add('recent-drag')
 				setTimeout(() => {
@@ -736,9 +738,6 @@ _move_entries_handler = HTLScript(@htl("""
 				const dropZone = toc.querySelector('.toc-row-separator.active')
 				if (_.isNil(dropZone) || dropZone.classList.contains('noshow')) {return}
 				dropZone.classList.remove('active')
-				// Check if the release was inside the ToC
-				const releaseElement = document.elementFromPoint(e.client.x, e.client.y).closest('.plutoui-toc')
-				if (_.isNil(releaseElement)) {console.log('out!'); return}
 				// We find the cell after the active separator and move the dragged row before that
 				const rowAfter = getNextSibling(dropZone)
 				const cellIdsToMove = getBlockIds(row)
