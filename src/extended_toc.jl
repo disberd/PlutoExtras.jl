@@ -774,13 +774,14 @@ _header_manipulation = HTLScript(@htl("""
 	const header = toc.querySelector('header')
 	const header_container = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'>`)
 	
-	header_container.insertAdjacentElement('afterbegin', html`<span class='toc-header-filler'>`)
 	
 	const notebook_hide_icon = header_container.insertAdjacentElement('beforeend', html`<span class='toc-header-icon toc-header-hide'>`)
 	
 	const save_file_icon = header_container.insertAdjacentElement('beforeend', html`<span class='toc-header-icon toc-header-save'>`)
 	save_file_icon.addEventListener('click', save_to_file)
 
+	header_container.insertAdjacentElement('beforeend', html`<span class='toc-header-filler'>`)
+	
 	header.addEventListener('click', e => {
 		if (e.target != header) {return}
 		if (use_smoothscroll) {
@@ -796,7 +797,8 @@ _header_manipulation = HTLScript(@htl("""
 			strategy: "fixed",
 		}).then(pos => {
 			header_container.style.top = pos.y + "px"
-			header_container.style.left = pos.x + "px"
+			// header_container.style.left = pos.x + "px"
+			// header_container.style.right = `calc(1rem + min(80vw, 300px))`
 		})
 	})
 
@@ -845,7 +847,7 @@ _header_style = @htl """
 		--size: 25px;
 		height: calc(51px - 1rem);
 		flex-direction: row-reverse;
-		z-index: -1;
+		right: calc(1rem + min(80vh, 300px));
 	}
 	.toc-header-icon {
 		margin-right: 0.3rem;
