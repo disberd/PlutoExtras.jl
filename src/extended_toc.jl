@@ -14,7 +14,7 @@ begin
 end
 
 # ╔═╡ 46520c1a-bbd8-46aa-95d9-bad3d220ee85
-# ╠═╡ custom_attrs = ["gesu"]
+# ╠═╡ custom_attrs = ["gesu", "toc-collapsed"]
 md"""
 # Scripts
 """
@@ -820,7 +820,9 @@ _save_to_file = HTLScript(@htl("""
 			toggle_cell_attribute(k, 'toc-hidden', v.hidden)	
 			toggle_cell_attribute(k, 'toc-collapsed', v.collapsed)	
 		}
-		toc.classList.toggle('file-state-differs', stateDiffersFile(state))
+		setTimeout(() => {
+			toc.classList.toggle('file-state-differs', stateDiffersFile(state))
+		}, 500)
 	}
 </script>
 """));
