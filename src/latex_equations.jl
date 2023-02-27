@@ -479,7 +479,7 @@ HypertextLiteral = "~0.9.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.5"
 manifest_format = "2.0"
 project_hash = "12b2e5dab6bc229d7692234b6b2202f7e3ec539c"
 
