@@ -22,7 +22,6 @@ begin
 	using PlutoDevMacros.Script
 	using HypertextLiteral
 	import REPL: fielddoc
-	using MacroTools
 	using PlutoDevMacros
 	import AbstractPlutoDingetjes
 	import AbstractPlutoDingetjes.Bonds
@@ -75,9 +74,6 @@ end
 md"""
 # StructBond Helpers
 """
-
-# ╔═╡ 773c539e-2d4b-4371-a85b-dbb7e54071fc
-firstbond(x) = PlutoUI.Experimental.transformed_value(first, x)
 
 # ╔═╡ 38594a53-89d3-47ce-b7a4-686603ccf29e
 md"""
@@ -151,20 +147,6 @@ function fieldhtml(::Type, ::Val)
 	return NotDefined()
 end
 
-# ╔═╡ 4069f41f-d7e6-47db-95ca-7f0be2c03863
-true && @htl """
-<style>
-	field-html {
-		display: grid;
-		grid-template-columns: 1fr minmax(50px, .2fr);
-		grid-auto-rows: fit-content(40px);
-		justify-items: center;
-		padding: 2px 5px 10px 0px;
-		align-items: center;
-	}
-</style>
-"""
-
 # ╔═╡ 6ed4f8ca-8bac-448f-9442-ff678c29fd5f
 md"""
 ## Struct Functions
@@ -208,26 +190,6 @@ md"""
 ### HTML
 """
 
-# ╔═╡ 32848860-94b7-47c7-8648-9546405d62d3
-true && @htl """
-<style>
-	togglereactive-container field-html {
-		display: contents;
-	}
-	togglereactive-container {
-		display: grid;
-		grid-template-columns: 1fr minmax(50px, .3fr);
-		grid-auto-rows: fit-content(40px);
-		justify-items: center;
-		align-items: center;
-	}
-	togglereactive-header {
-		grid-column: 1 / -1;
-		display: flex;
-	}
-</style>
-"""
-
 # ╔═╡ 55b394f2-ebfa-4d98-84f2-ee94d81f41c7
 md"""
 # Popout
@@ -242,38 +204,13 @@ end
 Popout(element::T) where T = Popout{T}(;element)
 end
 
-# ╔═╡ e3ae14ff-df96-477d-a832-62bd43f46439
-@htl """
-<div style='background: #eee; display: flex;'>
-	<span class='mybutton'>
-</div>
-<script>
-	const div = currentScript.previousElementSibling
-	const span = div.firstElementChild
-	span.onclick = (e) => div.classList.toggle('voila')
-	div.insertAdjacentElement('beforeend', span.cloneNode())
-</script>
-<style>
-	.mybutton {
-		display: block;
-		width: 20px;
-		height: 20px;
-  		background: red;
-		margin-left: 10px;
-	}
-	.voila .mybutton {
-		background: blue;
-	}
-</style>
-"""
-
-# ╔═╡ ed2bb10a-0bb6-4c34-bd19-daba2be037d2
+# ╔═╡ d8340d9b-cd1c-4aae-9aaf-de6819fb10b6
 md"""
-## Show
+## Interact
 """
 
 # ╔═╡ 898c1182-e115-4548-93ba-ac95ec5fe6c9
-_interaction_handler = HTLScriptPart(@htl """
+popup_interaction_handler = HTLScriptPart(@htl """
 <script>
 	// We use the interactjs library to provide drag and resize handling across devices
 	const { default: interact } = await import('https://esm.sh/interactjs')
@@ -318,6 +255,11 @@ _interaction_handler = HTLScriptPart(@htl """
 </script>
 """);
 
+# ╔═╡ ed2bb10a-0bb6-4c34-bd19-daba2be037d2
+md"""
+## Show
+"""
+
 # ╔═╡ 01e6edd9-d3ed-464f-9267-bf8f3ed24b21
 _show_popout(p::Popout) = wrapped() do Child
 @htl("""
@@ -336,7 +278,7 @@ _show_popout(p::Popout) = wrapped() do Child
 	const contents = container.lastElementChild
 
 	// Load the interactjs part
-	$_interaction_handler
+	$popup_interaction_handler
 
 	function positionContents() {
 		computePosition(header, contents, {
@@ -386,7 +328,7 @@ _show_popout(p::Popout) = wrapped() do Child
 		z-index: 500;
 	}
 	popout-container.contents-hover > popout-header {
-		border-color: grey;
+		border-color: var(--pluto-logs-warn-accent-color);
 	}
 	.popout-icon {
 		--size: 20px;
@@ -404,6 +346,10 @@ _show_popout(p::Popout) = wrapped() do Child
 	}
 	popout-container.popped .popout {
 	    background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/contract.svg);
+	}
+	popout-container.popped togglereactive-header > .description {
+		touch-action: none;
+		user-select: none;
 	}
 </style>
 """)
@@ -449,6 +395,248 @@ _basics_script = HTLScript(@htl("""
 	}
 </script>
 """));
+
+# ╔═╡ d527a400-7e66-4cc4-9f9d-cfaf8c947a4a
+md"""
+# BondTable
+"""
+
+# ╔═╡ dcff7076-afaa-46b7-ae3d-5ebae0b041c4
+begin
+Base.@kwdef struct BondTable
+	bonds::Array
+	description::Any
+	secret_key::String
+	function BondTable(v::Array; description = NotDefined(), secret_key = String(rand('a':'z', 10)))
+		for el in v
+			T = typeof(el)
+			valid = nameof(T) == :Bond && hasfield(T, :element) && hasfield(T, :defines)
+			valid || error("All the elements provided as input to a `BondTable` have to be bonds themselves (i.e. created with the `@bind` macro from Pluto)")
+		end
+		new(v, description, secret_key)
+	end
+end
+end
+
+# ╔═╡ ba3462ab-998c-47f1-99a6-4cee8aefffea
+md"""
+## Interact
+"""
+
+# ╔═╡ ccc7615a-a139-4f61-9893-2b5d36a29863
+bondtable_interaction_handler = HTLScriptPart(@htl """
+<script>
+	// We use the interactjs library to provide drag and resize handling across devices
+	const { default: interact } = await import('https://esm.sh/interactjs')
+
+	container.offset = container.offset ?? { x: 0, y: 0}
+	const startPosition = {x: 0, y: 0}
+	interact(container.querySelector('bondtable-header .description')).draggable({
+		listeners: {
+			start (event) {
+				container.offset.y = startPosition.y = container.offsetTop
+				container.offset.x = startPosition.x = container.offsetLeft
+			},
+			move (event) {
+		      container.offset.x += event.dx
+		      container.offset.y += event.dy
+		
+		      container.style.top = `min(95vh, \${container.offset.y}px`
+		      container.style.left = `min(95vw, \${container.offset.x}px`
+		    },
+		}
+	}).on('doubletap', function (event) {
+		  // Double-tap on header reset the position
+		container.style.top = ''
+		container.style.left = ''
+	})
+	interact(container)
+	  .resizable({
+	    edges: { top: true, left: false, bottom: true, right: true },
+	    listeners: {
+	      move: function (event) {
+		
+	        Object.assign(event.target.style, {
+	          width: `\${event.rect.width}px`,
+	          height: `\${event.rect.height}px`,
+			  maxHeight: 'none',
+	        })
+	      }
+	    }
+	  }).on('doubletap', function (event) {
+		  // Double-tap on resize reset the width
+			container.style.width = ''
+		  	container.style.height = ''
+		  	container.style.maxHeight = ''
+	  })
+</script>
+""");
+
+# ╔═╡ b6e31301-4d4a-4d1e-a68b-bac2a70d60f6
+md"""
+## Style
+"""
+
+# ╔═╡ e9af18f8-801b-48bc-b36c-4fbcd63c5dd3
+bondtable_style = @htl """
+<style>
+	bondtable-container {
+		display: flex;
+		flex-direction: column;
+		position: fixed;
+		top: 50px;
+		left: 10px;
+		background: var(--overlay-button-bg);
+    	border: 3px solid #e7e7e7;
+    	border-radius: 10px;
+    	padding-left: 8px;
+    	padding-top: 8px;
+		z-index: 600;
+		width: 400px;
+		max-height: 600px;
+		transition: transform 300ms cubic-bezier(0.18, 0.89, 0.45, 1.12);
+	}
+	bondtable-container:not(.collapsed) > * {
+		padding-right: 8px;
+	}
+	bondtable-contents {
+		display: grid;
+		grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+		grid-auto-rows: fit-content(40px);
+		justify-items: center;
+		padding-bottom: 8px;
+		align-items: center;
+		row-gap: 5px;
+		overflow: auto;
+	}
+	bondtable-contents togglereactive-container.no-popout,
+	bondtable-contents > *, 
+	bondtable-contents struct-bond {
+		display: contents
+	}
+	togglereactive-container.no-popout:before {
+		content: '';
+  		display: block;
+		grid-column: 1 / -1;
+		justify-self: center;
+		border-bottom: 2px solid;
+		padding-top: 5px;
+		width: 100%;
+		align-self: start;
+		position: sticky;
+		top: 0px;
+		background: var(--overlay-button-bg);
+		z-index: 20;
+	}
+	togglereactive-container.no-popout > togglereactive-header {
+		align-self: start;
+		position: sticky;
+		top: 0px;
+		background: var(--overlay-button-bg);
+		padding-top: 15px;
+		margin-top: -15px;
+		z-index: 10;
+	}
+	bondtable-header {
+		display: flex;
+		justify-items: stretch;
+	}
+	bondtable-header > .description {
+		flex-grow: 1;
+		text-align: center;
+		font-size: 20px;
+		font-weight: 800;
+		touch-action: none;
+		user-select: none;
+	}
+	bondtable-header > .icon {
+		filter: var(--image-filters);
+		cursor: pointer;
+	}
+	bondtable-header .table-collapse {
+		--size: 23px;
+		background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/arrow-back.svg");
+	}
+	bondtable-container.collapsed .table-collapse {
+		background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/options-outline.svg");
+		margin-right: 0px;
+	}
+	bondtable-container.collapsed .table-collapse:hover {
+		background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/arrow-forward.svg");
+	}
+	bondtable-container.collapsed {
+		transform: translateX(calc(-100% + 35px));
+		height: auto !important;
+		left: 0px !important;
+		overflow: hidden;
+		padding: 5px;
+	}
+	bondtable-container.collapsed bondtable-contents,
+	bondtable-container.collapsed separator {
+		display: none;
+	}
+	@media (prefers-color-scheme: dark) {
+		bondtable-container {
+			border-color: #7d7d7d;
+		}
+	}
+</style>
+""";
+
+# ╔═╡ 7ba0e7e5-d273-45aa-8dc2-5f95c0ea4838
+md"""
+## Show
+"""
+
+# ╔═╡ c5140f99-9c40-4dd5-b7ec-18d4a85ba35c
+function show_bondtable(b::BondTable; description = b.description)
+	desc = description isa NotDefined ? "BondTable" : description
+	@htl("""
+	<bondtable-container key='$(b.secret_key)'>
+		<bondtable-header>
+			<span class='table-help icon'></span>
+			<span class='description'>$desc</span>
+			<span class='table-collapse icon'></span>
+		</bondtable-header>
+		<bondtable-contents>
+			$(b.bonds)
+		</bondtable-contents>
+	</bondtable-container>
+	<script id='$(b.secret_key)'>
+		const container = currentScript.previousElementSibling
+		const header = container.firstElementChild
+		const contents = container.lastElementChild
+
+		const cell = container.closest('pluto-cell')
+
+		
+		const help_btn = header.firstElementChild
+		const collapse_btn = header.lastElementChild
+
+		container.collapse = (force) => {
+			container.classList.toggle('collapsed', force)
+		}
+		collapse_btn.onclick = e => container.collapse()
+
+		// Load the interact script
+		$bondtable_interaction_handler
+
+		// Now we assign a specific class to all toggle-container that are direct children
+		for (const tr of contents.querySelectorAll('togglereactive-container')) {
+			tr.closest('popout-container') ?? tr.classList.toggle('no-popout', true)
+		}
+		// We also flag the first togglereactive-container in the table
+		contents.firstElementChild.querySelector('togglereactive-container.no-popout')?.classList.toggle('first',true)
+
+		// Click to go to definition
+		container.jumpToCell = () => {
+			cell.scrollIntoView()
+		}
+		help_btn.onclick = container.jumpToCell
+	</script>
+	$bondtable_style
+	""")
+end
 
 # ╔═╡ 7040e11d-5e53-48a7-91b9-9799fa3626a2
 md"""
@@ -562,8 +750,10 @@ end
 end
 
 # ╔═╡ 703b450b-79df-4b5e-a370-b3c460daae4a
-@fielddescription ASD begin
-	b = @htl "<span>Let's change the description!</span>"
+@only_in_nb begin
+	@fielddescription ASD begin
+	b = md"``\alpha``"
+end
 end
 
 # ╔═╡ 8c70a8ff-169a-4f39-804f-c9ab9462be81
@@ -573,9 +763,68 @@ fielddescription(ASD,:α)
   ╠═╡ =#
 
 # ╔═╡ 375fee4e-5004-4b77-b21f-5178b96b96a0
-@fieldbond ASD begin
+@only_in_nb begin
+	@fieldbond ASD begin
 	α = Scrubbable(1:10)
 	b = Slider(1:10)
+end
+end
+
+# ╔═╡ 78170a85-904c-40f5-97db-60fbe5c3881b
+@only_in_nb begin
+Base.@kwdef struct LOL
+	a::ASD
+	b::Int
+end
+end
+
+# ╔═╡ 99de3a1a-7139-4a1c-a40a-e1fcca45adca
+@only_in_nb begin
+	@fieldbond LOL begin
+	b = Slider(1:10)
+end
+end
+
+# ╔═╡ 3f425bd4-ddec-479b-8f89-ba7c2ce14e8f
+@only_in_nb begin
+Base.@kwdef struct LONG
+	a
+	b
+	c
+	d
+	e
+	f
+	g
+	h
+	i
+	l
+	m
+	n
+	o
+	p
+	q
+end
+end
+
+# ╔═╡ 46a0f39f-ee8a-42ed-a757-8a5b1b86cab9
+@only_in_nb begin
+	@fieldbond LONG begin
+	a = Slider(1:10)
+	b = Slider(1:10)
+	c = Slider(1:10)
+	d = Slider(1:10)
+	e = Slider(1:10)
+	f = Slider(1:10)
+	g = Slider(1:10)
+	h = Slider(1:10)
+	i = Slider(1:10)
+	l = Slider(1:10)
+	m = Slider(1:10)
+	n = Slider(1:10)
+	o = Slider(1:10)
+	p = Slider(1:10)
+	q = Slider(1:10)
+end
 end
 
 # ╔═╡ f3753893-33ab-40d0-a4d6-a8df11777962
@@ -599,6 +848,15 @@ function fieldhtml(s::Type, f::Symbol)
 			<field-bond class='$f'>$(Child(fieldbond(s, f)))</field-bond>
 		</field-html>
 		<style>
+			field-html {
+				display: grid;
+				grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+				grid-auto-rows: fit-content(40px);
+				justify-items: center;
+				//padding: 2px 5px 10px 0px;
+				align-items: center;
+				row-gap: 5px;
+			}
 			field-bond {
 				display: flex;
 			}
@@ -652,6 +910,21 @@ function typehtml(T::Type)
 		
 	</script>
 		<style>
+			togglereactive-container field-html {
+				display: contents;
+			}
+			togglereactive-container {
+				display: grid;
+				grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+				grid-auto-rows: fit-content(40px);
+				justify-items: center;
+				align-items: center;
+				row-gap: 5px;
+			}
+			togglereactive-header {
+				grid-column: 1 / -1;
+				display: flex;
+			}
 			togglereactive-header > .collapse {
 				--size: 17px;
 			    display: block;
@@ -662,6 +935,7 @@ function typehtml(T::Type)
 			    width: var(--size);
 			    filter: var(--image-filters);
 				background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
+				cursor: pointer;
 			}
 			togglereactive-container.collapsed > togglereactive-header > .collapse {
 				background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
@@ -674,6 +948,11 @@ function typehtml(T::Type)
 			togglereactive-header > .description {
 				text-align: center;
 				flex-grow: 1;
+				font-size: 18px;
+				font-weight: 600;
+			}
+			togglereactive-header > .toggle {
+				align-self: center
 			}
 			togglereactive-container.collapsed togglereactive-header + * {
 				display: none !important;
@@ -684,10 +963,15 @@ function typehtml(T::Type)
 end
 
 # ╔═╡ e672f10c-53aa-44dd-91d0-84d1e252a5b1
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @bind lkjsdf typehtml(ASD)
+  ╠═╡ =#
 
 # ╔═╡ 98561f62-232b-4fd8-9d2e-7bb3ffaacb4f
+#=╠═╡
 lkjsdf
+  ╠═╡ =#
 
 # ╔═╡ 76fd33fe-db99-41c3-9f80-17b07306a587
 begin
@@ -698,11 +982,34 @@ begin
 	StructBond(::Type{T}) where T = StructBond{T}(;widget = typehtml(T))
 end
 
+# ╔═╡ 3ea95602-765e-4ec6-87e3-b49404673e1e
+popoutwrap(T::Type) = Popout(StructBond(T))
+
+# ╔═╡ 2833a3c3-3741-442e-a329-516c2c73d1d0
+macro popoutasfield(args...)
+	block = Expr(:block)
+	for arg in args
+		arg isa Symbol || error("The types to show as popups have to be given as symbols")
+		push!(block.args, :($arg = $(popoutwrap)($arg)))
+	end
+	_add_generic_type(block, :typeasfield)
+end
+
+# ╔═╡ 08ad83e1-20a1-4501-be9b-c249a8333017
+export BondTable, StructBond, @fieldbond, @fielddescription, Popout, @popoutasfield, @typeasfield, popoutwrap
+
+# ╔═╡ 970dc73e-fd93-4a13-bd45-84708e67ea94
+@only_in_nb begin
+	@popoutasfield ASD
+end
+
 # ╔═╡ 1a73d400-737a-420c-8bb2-9ef0598be648
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @bind pp Popout(StructBond(ASD))
+  ╠═╡ =#
 
 # ╔═╡ 1d1d7911-ddb9-4f16-8ef7-63a414f87018
-# ╠═╡ skip_as_script = true
 #=╠═╡
 pp
   ╠═╡ =#
@@ -718,10 +1025,15 @@ _show(t::StructBond{T}) where T = @htl("""
 """)
 
 # ╔═╡ 5e4c5661-75b7-4bce-907f-6e3655459f4c
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @bind asdfasdf (StructBond(ASD) |> _show)
+  ╠═╡ =#
 
 # ╔═╡ eb40b366-987b-488a-8ed4-9a0a7bd0c853
+#=╠═╡
 asdfasdf
+  ╠═╡ =#
 
 # ╔═╡ 4f353f40-b149-40c8-8ae8-f03182429d20
 Base.show(io::IO, mime::MIME"text/html", t::StructBond) = show(io, mime, _show(t))
@@ -764,12 +1076,33 @@ a
 diosanto
   ╠═╡ =#
 
+# ╔═╡ 3af19c77-3c8f-4794-affc-8c34d0217c60
+# ╠═╡ skip_as_script = true
+#=╠═╡
+b = @bind diosantore StructBond(LOL)
+  ╠═╡ =#
+
+# ╔═╡ 11821dc7-6f51-46bb-8ec9-4d2a0acffde1
+#=╠═╡
+diosantore
+  ╠═╡ =#
+
+# ╔═╡ 983409c0-d7ba-4282-8f8f-b7541f971284
+# ╠═╡ skip_as_script = true
+#=╠═╡
+c = @bind lolol StructBond(LONG)
+  ╠═╡ =#
+
+# ╔═╡ 8c88240f-182f-4302-8017-74bec846795f
+#=╠═╡
+show_bondtable(BondTable([a,b, c]))
+  ╠═╡ =#
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 AbstractPlutoDingetjes = "6e696c72-6542-2067-7265-42206c756150"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 PlutoExtras = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
@@ -778,7 +1111,6 @@ REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [compat]
 AbstractPlutoDingetjes = "~1.1.4"
 HypertextLiteral = "~0.9.4"
-MacroTools = "~0.5.10"
 PlutoDevMacros = "~0.5.0"
 PlutoExtras = "~0.6.1"
 PlutoUI = "~0.7.49"
@@ -790,7 +1122,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-beta4"
 manifest_format = "2.0"
-project_hash = "8c9d23997958fe3c9865939803c3db7b06fe180d"
+project_hash = "f5220c50e71948897feed9b3ce1623a8c70bd3ad"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1080,13 +1412,14 @@ version = "17.4.0+0"
 # ╠═c132e4b8-eaec-435f-95ea-4c96ca8e3118
 # ╠═0069db28-5a1d-4cfa-9a4f-9ed5f15cd5cc
 # ╠═e44cac24-ee90-43b6-8c45-8a3afd61918d
+# ╠═08ad83e1-20a1-4501-be9b-c249a8333017
 # ╠═0bab1bff-138d-4db3-b092-052ff3205f16
 # ╠═df99c964-6442-420e-9956-ba4ac8994841
 # ╠═87d822f4-624b-4d49-982e-9199a6f623c2
 # ╠═69bdd709-ea1d-4c8d-9a01-da36714d5219
 # ╠═e4a5a36d-3f58-48c8-91bb-0c9124ae1c1b
 # ╟─0d4852f2-3d09-4c58-9707-b27625d80451
-# ╠═773c539e-2d4b-4371-a85b-dbb7e54071fc
+# ╠═3ea95602-765e-4ec6-87e3-b49404673e1e
 # ╟─38594a53-89d3-47ce-b7a4-686603ccf29e
 # ╠═371ec1ac-8447-4728-b61c-7065cf1bd419
 # ╟─ab5e147e-73df-4e68-8f14-7a8c1dc801ca
@@ -1104,7 +1437,6 @@ version = "17.4.0+0"
 # ╠═935f9e13-30c2-4786-9b65-e1fcf7ac8f87
 # ╠═9b9bee7a-0562-411d-968c-b8aab88f5631
 # ╠═c77e86d2-08ab-4c73-af13-65fe17389511
-# ╠═4069f41f-d7e6-47db-95ca-7f0be2c03863
 # ╟─6ed4f8ca-8bac-448f-9442-ff678c29fd5f
 # ╟─0332f86b-79dd-4d2f-9e80-1baa06914b3b
 # ╠═eacef7c5-f6de-4d46-bec8-931007e3a2e7
@@ -1114,13 +1446,12 @@ version = "17.4.0+0"
 # ╠═66314080-3ebf-4605-be90-addc18c6e633
 # ╠═e672f10c-53aa-44dd-91d0-84d1e252a5b1
 # ╠═98561f62-232b-4fd8-9d2e-7bb3ffaacb4f
-# ╠═32848860-94b7-47c7-8648-9546405d62d3
 # ╠═55b394f2-ebfa-4d98-84f2-ee94d81f41c7
 # ╠═6a1db028-e0a9-4de9-8fb6-991993aba41e
 # ╠═722ff625-e232-47ca-9c2a-6c5c2ec2a6cc
-# ╠═e3ae14ff-df96-477d-a832-62bd43f46439
-# ╟─ed2bb10a-0bb6-4c34-bd19-daba2be037d2
+# ╟─d8340d9b-cd1c-4aae-9aaf-de6819fb10b6
 # ╠═898c1182-e115-4548-93ba-ac95ec5fe6c9
+# ╟─ed2bb10a-0bb6-4c34-bd19-daba2be037d2
 # ╠═01e6edd9-d3ed-464f-9267-bf8f3ed24b21
 # ╠═728831d6-4222-4ea2-9ac4-35e1b9434d0e
 # ╠═1a73d400-737a-420c-8bb2-9ef0598be648
@@ -1134,6 +1465,15 @@ version = "17.4.0+0"
 # ╠═eb40b366-987b-488a-8ed4-9a0a7bd0c853
 # ╠═4f353f40-b149-40c8-8ae8-f03182429d20
 # ╠═01705479-b830-4f38-9e8f-53e8ef9cd7b8
+# ╟─d527a400-7e66-4cc4-9f9d-cfaf8c947a4a
+# ╠═dcff7076-afaa-46b7-ae3d-5ebae0b041c4
+# ╟─ba3462ab-998c-47f1-99a6-4cee8aefffea
+# ╠═ccc7615a-a139-4f61-9893-2b5d36a29863
+# ╟─b6e31301-4d4a-4d1e-a68b-bac2a70d60f6
+# ╠═e9af18f8-801b-48bc-b36c-4fbcd63c5dd3
+# ╟─7ba0e7e5-d273-45aa-8dc2-5f95c0ea4838
+# ╠═c5140f99-9c40-4dd5-b7ec-18d4a85ba35c
+# ╠═8c88240f-182f-4302-8017-74bec846795f
 # ╟─7040e11d-5e53-48a7-91b9-9799fa3626a2
 # ╠═9ea60044-789d-4954-befb-414c723cb593
 # ╠═900157a7-5892-462a-abb3-0d4eb79a571c
@@ -1145,6 +1485,7 @@ version = "17.4.0+0"
 # ╠═0098a7fb-fd2f-4bd3-857f-67a2b5d3037d
 # ╟─68a4b777-d214-405a-84b9-072febef3ee5
 # ╠═c78acfce-07a3-411b-b4a7-ae1a3723a476
+# ╠═2833a3c3-3741-442e-a329-516c2c73d1d0
 # ╟─f64169a0-43b6-4789-b59d-1f9cef967902
 # ╠═3ff0d7ac-67ae-4725-883e-59eb77c36f12
 # ╠═703b450b-79df-4b5e-a370-b3c460daae4a
@@ -1152,5 +1493,13 @@ version = "17.4.0+0"
 # ╠═6f9a7506-ab5f-425d-9068-89db9187b276
 # ╠═8e23f3ed-f144-49b8-9e1c-8ad03e630cc4
 # ╠═230c72d9-fa26-4b76-a012-999b03fe9e14
+# ╠═970dc73e-fd93-4a13-bd45-84708e67ea94
+# ╠═78170a85-904c-40f5-97db-60fbe5c3881b
+# ╠═99de3a1a-7139-4a1c-a40a-e1fcca45adca
+# ╠═3af19c77-3c8f-4794-affc-8c34d0217c60
+# ╠═11821dc7-6f51-46bb-8ec9-4d2a0acffde1
+# ╠═3f425bd4-ddec-479b-8f89-ba7c2ce14e8f
+# ╠═46a0f39f-ee8a-42ed-a757-8a5b1b86cab9
+# ╠═983409c0-d7ba-4282-8f8f-b7541f971284
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
