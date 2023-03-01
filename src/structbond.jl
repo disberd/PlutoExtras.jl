@@ -197,6 +197,16 @@ md"""
 
 # ╔═╡ 6a1db028-e0a9-4de9-8fb6-991993aba41e
 begin
+"""
+	Popout(T)
+Create an HTML widget wrapping the widget `T` and showing it either on hover or upon click.
+
+This is useful to generat widgets to be used with [`StructBond`](@ref) for custom fields whose types are custom Types.
+
+The convenience function [`popoutwrap`](@ref) can be used to directly create a `Popup` of a `StructBond{T}` to facilitate nested `StructBond` views.
+
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 Base.@kwdef struct Popout{T}
 	element::T
 	secret_key::String=String(rand('a':'z', 10))
@@ -403,6 +413,14 @@ md"""
 
 # ╔═╡ dcff7076-afaa-46b7-ae3d-5ebae0b041c4
 begin
+"""
+	BondTable(bondarray; description)
+Take as input an array of bonds and creates a floating table that show all the bonds in the input array. 
+
+If `description` is not provided, it defaults to the text *BondTable*. Description can be either a string or a HTML output.
+
+See also: [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 Base.@kwdef struct BondTable
 	bonds::Array
 	description::Any
@@ -638,6 +656,9 @@ function show_bondtable(b::BondTable; description = b.description)
 	""")
 end
 
+# ╔═╡ 4dae020e-5fbc-4798-9874-98c0ba3409f0
+Base.show(io::IO, mime::MIME"text/html", b::BondTable) = show(io, mime, show_bondtable(b))
+
 # ╔═╡ 7040e11d-5e53-48a7-91b9-9799fa3626a2
 md"""
 # Macros
@@ -694,6 +715,36 @@ md"""
 """
 
 # ╔═╡ 35a20c0f-f3cf-4387-9804-019f76e1ead8
+"""
+	@fieldbond typename block
+Convenience macro to define custom widgets for each field of `typename`. This is mostly inteded to be used in combintation with [`StructBond`](@ref).
+
+Given for example the following structure
+```
+Base.@kwdef struct ASD
+	a::Int 
+	b::Int
+	c::String
+end
+```
+one can create a nice widget to create instances of type `ASD` wih the following code:
+```
+@fieldbond ASD begin
+	a = Slider(1:10)
+	b = Scrubbable(1:10)
+	c = TextField()
+end
+@fielddescription ASD begin
+	a = md"Magical field with markdown description"
+	b = @htl "<span>Field with HTML description</span>"
+	c = "Normal String Description"
+end
+@bind asd StructBond(ASD)
+```
+where `asd` will be an instance of type `ASD` with each field interactively controllable by the specified widgets and showing the field description next to each widget.
+
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 macro fieldbond(s, block)
 	_add_generic_field(s, block, :fieldbond)
 end
@@ -704,6 +755,36 @@ md"""
 """
 
 # ╔═╡ 52c41cf4-6b2b-4544-9f41-05503c80eadd
+"""
+	@fielddescription typename block
+Convenience macro to define custom descriptions for the widgets of each field of `typename`. This is mostly inteded to be used in combintation with [`StructBond`](@ref).
+
+Given for example the following structure
+```
+Base.@kwdef struct ASD
+	a::Int 
+	b::Int
+	c::String
+end
+```
+one can create a nice widget to create instances of type `ASD` wih the following code:
+```
+@fieldbond ASD begin
+	a = Slider(1:10)
+	b = Scrubbable(1:10)
+	c = TextField()
+end
+@fielddescription ASD begin
+	a = md"Magical field with markdown description"
+	b = @htl "<span>Field with HTML description</span>"
+	c = "Normal String Description"
+end
+@bind asd StructBond(ASD)
+```
+where `asd` will be an instance of type `ASD` with each field interactively controllable by the specified widgets and showing the field description next to each widget.
+
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 macro fielddescription(s, block)
 	_add_generic_field(s, block, :fielddescription)
 end
@@ -863,6 +944,9 @@ function fieldhtml(s::Type, f::Symbol)
 			field-bond input {
 				width: 100%;
 			}
+   			field-description {
+				text-align: center;
+			}
 		</style>
 		""")
 	end
@@ -975,6 +1059,17 @@ lkjsdf
 
 # ╔═╡ 76fd33fe-db99-41c3-9f80-17b07306a587
 begin
+"""
+	StructBond(T)
+Create an HTML widget to be used with `@bind` from Pluto that allows to define the custom type `T` by assigning a widget to each of its fields. 
+The widget will automatically use the docstring of each field as its description if present, or the fieldname otherwise.
+
+When used with `@bind`, it automatically generates a instance of `T` by using the various fields as keyword arguments. *This means that the the structure `T` has to support a keyword-only contruction, such as those generated with `Base.@kwdef` or `Parameters.@with_kw`.
+
+In order to work, the widget to associate to eachfield of type `T` has to be provided using the convenience macro `@fieldbond`. Similarly, the description of each field can also be customized using `@fielddescription`. 
+
+See also: [`BondTable`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 	Base.@kwdef struct StructBond{T}
 		widget::Any
 		secret_key::String=String(rand('a':'z', 10))
@@ -983,6 +1078,51 @@ begin
 end
 
 # ╔═╡ 3ea95602-765e-4ec6-87e3-b49404673e1e
+"""
+	popoutwrap(T)
+Convenience function to construct a `Popout` wrapping a `StructBond` of type `T`. This is convenient when one wants to create nested `StructBond` types.
+
+Given for example the following two structures
+```
+Base.@kwdef struct ASD
+	a::Int 
+	b::Int
+	c::String
+end
+Base.@kwdef struct LOL
+	asd::ASD 
+	text::String
+end
+```
+one can create a nice widget to create instances of type `LOL` that also include a popout of widget generating `ASD` wih the following code:
+```
+# Define the widget for ASD
+@fieldbond ASD begin
+	a = Slider(1:10)
+	b = Scrubbable(1:10)
+	c = TextField()
+end
+@fielddescription ASD begin
+	a = md"Magical field with markdown description"
+	b = @htl "<span>Field with HTML description</span>"
+	c = "Normal String Description"
+end
+
+# Define the widget for LOL
+@fieldbond LOL begin
+	asd = popoutwrap(ASD)
+	text = TextField(;default = "Some Text")
+end
+@fielddescription LOL begin
+	asd = "Click on the icon to show the widget to generate this field"
+	text = "Boring Description"
+end
+@bind lol StructBond(LOL)
+```
+where `lol` will be an instance of type `LOL` with each field interactively controllable by the specified widgets and showing the field description next to each widget.
+
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`@fieldbond`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 popoutwrap(T::Type) = Popout(StructBond(T))
 
 # ╔═╡ 2833a3c3-3741-442e-a329-516c2c73d1d0
@@ -1473,6 +1613,7 @@ version = "17.4.0+0"
 # ╠═e9af18f8-801b-48bc-b36c-4fbcd63c5dd3
 # ╟─7ba0e7e5-d273-45aa-8dc2-5f95c0ea4838
 # ╠═c5140f99-9c40-4dd5-b7ec-18d4a85ba35c
+# ╠═4dae020e-5fbc-4798-9874-98c0ba3409f0
 # ╠═8c88240f-182f-4302-8017-74bec846795f
 # ╟─7040e11d-5e53-48a7-91b9-9799fa3626a2
 # ╠═9ea60044-789d-4954-befb-414c723cb593
