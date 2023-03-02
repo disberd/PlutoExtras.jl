@@ -9,4 +9,11 @@ module ExtendedToc include("extended_toc.jl") end
 import .ExtendedToc: ExtendedTableOfContents
 export ExtendedTableOfContents
 
+include("toggle_reactive_bond.jl") # exports: ToggleReactiveBond
+module StructBondModule 
+    import ..ToggleReactiveBond
+    import ..Editable
+    include("structbond.jl")
+end
+
 end # module
