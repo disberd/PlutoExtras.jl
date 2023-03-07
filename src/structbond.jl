@@ -469,6 +469,7 @@ bondtable_interaction_handler = HTLScriptPart(@htl """
 	})
 	interact(container)
 	  .resizable({
+		ignoreFrom: 'popout-container',
 	    edges: { top: true, left: false, bottom: true, right: true },
 	    listeners: {
 	      move: function (event) {		
