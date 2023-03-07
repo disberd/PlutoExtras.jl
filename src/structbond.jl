@@ -249,8 +249,7 @@ popup_interaction_handler = HTLScriptPart(@htl """
 	  .resizable({
 	    edges: { top: true, left: false, bottom: true, right: true },
 	    listeners: {
-	      move: function (event) {
-		
+	      move: function (event) {		
 	        Object.assign(event.target.style, {
 	          width: `\${event.rect.width}px`,
 	          height: `\${event.rect.height}px`,
@@ -472,8 +471,7 @@ bondtable_interaction_handler = HTLScriptPart(@htl """
 	  .resizable({
 	    edges: { top: true, left: false, bottom: true, right: true },
 	    listeners: {
-	      move: function (event) {
-		
+	      move: function (event) {		
 	        Object.assign(event.target.style, {
 	          width: `\${event.rect.width}px`,
 	          height: `\${event.rect.height}px`,
@@ -844,31 +842,24 @@ fielddescription(ASD,:α)
   ╠═╡ =#
 
 # ╔═╡ 375fee4e-5004-4b77-b21f-5178b96b96a0
-@only_in_nb begin
-	@fieldbond ASD begin
+@only_in_nb @fieldbond ASD begin
 	α = Scrubbable(1:10)
 	b = Slider(1:10)
 end
-end
 
 # ╔═╡ 78170a85-904c-40f5-97db-60fbe5c3881b
-@only_in_nb begin
-Base.@kwdef struct LOL
+@only_in_nb Base.@kwdef struct LOL
 	a::ASD
 	b::Int
 end
-end
 
 # ╔═╡ 99de3a1a-7139-4a1c-a40a-e1fcca45adca
-@only_in_nb begin
-	@fieldbond LOL begin
+@only_in_nb @fieldbond LOL begin
 	b = Slider(1:10)
-end
 end
 
 # ╔═╡ 3f425bd4-ddec-479b-8f89-ba7c2ce14e8f
-@only_in_nb begin
-Base.@kwdef struct LONG
+@only_in_nb Base.@kwdef struct LONG
 	a
 	b
 	c
@@ -885,11 +876,9 @@ Base.@kwdef struct LONG
 	p
 	q
 end
-end
 
 # ╔═╡ 46a0f39f-ee8a-42ed-a757-8a5b1b86cab9
-@only_in_nb begin
-	@fieldbond LONG begin
+@only_in_nb @fieldbond LONG begin
 	a = Slider(1:10)
 	b = Slider(1:10)
 	c = Slider(1:10)
@@ -905,7 +894,6 @@ end
 	o = Slider(1:10)
 	p = Slider(1:10)
 	q = Slider(1:10)
-end
 end
 
 # ╔═╡ f3753893-33ab-40d0-a4d6-a8df11777962
@@ -1139,9 +1127,7 @@ end
 export BondTable, StructBond, @fieldbond, @fielddescription, Popout, @popoutasfield, @typeasfield, popoutwrap
 
 # ╔═╡ 970dc73e-fd93-4a13-bd45-84708e67ea94
-@only_in_nb begin
-	@popoutasfield ASD
-end
+@only_in_nb @popoutasfield ASD
 
 # ╔═╡ 1a73d400-737a-420c-8bb2-9ef0598be648
 # ╠═╡ skip_as_script = true
