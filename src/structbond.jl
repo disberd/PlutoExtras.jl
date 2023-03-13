@@ -93,6 +93,13 @@ md"""
 ### Description
 """
 
+# ╔═╡ 6e3c7fc7-42db-490a-baef-9e251e2a7fbd
+_fielddoc(s,f) = try
+	fielddoc(s,f)
+catch
+	nothing
+end
+
 # ╔═╡ 9a9170fc-14c2-46e8-9b34-bba2907f2d7b
 # Default implementation to be overrided for specific types and fields in order to provide custom descriptions
 function fielddescription(::Type, ::Val)
@@ -108,9 +115,9 @@ function fielddescription(s::Type, f::Symbol)
 	out = fielddescription(s, Val(f))
 	out isa NotDefined || return out
 	# Now we try with the docstring of the field
-	out = fielddoc(s, f)
+	out = _fielddoc(s, f)
 	# When fielddoc doesn't find a specific field docstring (even when called with non-existing fields), it returns a standard markdown that lists the fields of the structure, se we test for a very weird symbol name to check if the returned value is actually coming from a docstring
-	out == fielddoc(s, :__Very_Long_Nonexisting_Field__) || return out
+	out == _fielddoc(s, :__Very_Long_Nonexisting_Field__) || return out
 	# Lastly, we just give the name of the field if all else failed
 	out = string(f)
 end
