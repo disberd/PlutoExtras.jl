@@ -197,6 +197,22 @@ md"""
 ### HTML
 """
 
+# ╔═╡ d51a6ac8-c96b-4a4e-8cf7-cd137bf80db1
+md"""
+### Constructor
+"""
+
+# ╔═╡ b0426606-f493-41c8-9d35-3119a73707c3
+typeconstructor(T::Type) = f(args) = T(;args...)
+
+# ╔═╡ 7939baef-a0b0-41ef-b0ae-9118a7d8fd6e
+typeconstructor(::Type{<:NamedTuple}) = identity
+
+# ╔═╡ 1d38cc1a-6e05-4fd2-8cb1-86cad5ee5151
+md"""
+# NTBond
+"""
+
 # ╔═╡ 55b394f2-ebfa-4d98-84f2-ee94d81f41c7
 md"""
 # Popout
@@ -220,6 +236,11 @@ Base.@kwdef struct Popout{T}
 end
 Popout(element::T) where T = Popout{T}(;element)
 end
+
+# ╔═╡ eb139a5e-1d4c-4c2f-9f0c-4e305fc0fc7c
+md"""
+## popoutwrap
+"""
 
 # ╔═╡ d8340d9b-cd1c-4aae-9aaf-de6819fb10b6
 md"""
@@ -672,7 +693,7 @@ md"""
 
 # ╔═╡ 9ea60044-789d-4954-befb-414c723cb593
 # Generic function for the convenience macros to add methods for the field functions
-function _add_generic_field(s, block, fname)
+function _add_generic_field(s, block, fnames)
 	if !Meta.isexpr(block, [:block, :let])
 		error("The second argument to the `@addfieldbonds` macro has to be a begin or let block")
 	end
@@ -682,14 +703,17 @@ function _add_generic_field(s, block, fname)
 	for ex in block.args
 		ex isa Expr || continue # We skip linenumbernodes
 		Meta.isexpr(ex, :(=)) || error("Only expression of the type `fieldname = value` are allowed in the second argument block") 
-		symbol = ex.args[1]
+		symbol, value = ex.args
 		symbol isa Symbol || error("The fieldname has to be provided as a symbol ($symbol was given instead)")
 		symbol = Meta.quot(symbol)
-		value = ex.args[2]
 		# Push the check  of field name expression
 		push!(out.args, esc(:(hasfield($s, $symbol) || error("The provided symbol name $($symbol) does not exist in the structure $($s)"))))
-		# Push the expression to overload the method
-		push!(out.args, esc(:($Mod.$fname(::Type{$s}, ::Val{$symbol}) = $value)))
+		# If the value is not already a tuple or vect or expressions, we wrap it in a tuple
+		values = Meta.isexpr(value, [:vect, :tuple]) ? value.args : (value,)
+		for (fname,val) in zip(reverse(fnames), reverse(values))
+			# Push the expression to overload the method
+			push!(out.args, esc(:($Mod.$fname(::Type{$s}, ::Val{$symbol}) = $val)))
+		end
 	end
 	out
 end
@@ -752,7 +776,7 @@ where `asd` will be an instance of type `ASD` with each field interactively cont
 See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
 """
 macro fieldbond(s, block)
-	_add_generic_field(s, block, :fieldbond)
+	_add_generic_field(s, block, [:fieldbond])
 end
 
 # ╔═╡ 2657b4a2-4d45-4b2e-924a-b939477b08c2
@@ -792,7 +816,7 @@ where `asd` will be an instance of type `ASD` with each field interactively cont
 See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
 """
 macro fielddescription(s, block)
-	_add_generic_field(s, block, :fielddescription)
+	_add_generic_field(s, block, [:fielddescription])
 end
 
 # ╔═╡ a316127a-f814-4eca-aa45-c87b6ca1f73a
@@ -802,7 +826,7 @@ md"""
 
 # ╔═╡ 0098a7fb-fd2f-4bd3-857f-67a2b5d3037d
 macro fieldhtml(s, block)
-	_add_generic_field(s, block, :fieldhtml)
+	_add_generic_field(s, block, [:fieldhtml])
 end
 
 # ╔═╡ 68a4b777-d214-405a-84b9-072febef3ee5
@@ -816,6 +840,21 @@ macro typeasfield(block)
 		block = Expr(:block, block)
 	end
 	_add_generic_type(block, :typeasfield)
+end
+
+# ╔═╡ 9c4f2e93-0712-4824-af4e-0735352bb772
+md"""
+## add field data
+"""
+
+# ╔═╡ e69b85b2-c667-468e-8acf-d2427c017b72
+macro fielddata(s, block)
+	_add_generic_field(s, block, [:fielddescription, :fieldbond])
+end
+
+# ╔═╡ 2c7f286b-29c5-4a61-805e-0273dd411f46
+@macroexpand @fielddata ASD begin
+	a = Slider(1:10)
 end
 
 # ╔═╡ f64169a0-43b6-4789-b59d-1f9cef967902
@@ -835,6 +874,12 @@ Base.@kwdef struct ASD
 	b::Int
 end
 end
+
+# ╔═╡ f56c1390-1958-4b94-9220-591676ba3cb6
+# ╠═╡ skip_as_script = true
+#=╠═╡
+typeconstructor(ASD)((;α = 3, b = 5))
+  ╠═╡ =#
 
 # ╔═╡ 703b450b-79df-4b5e-a370-b3c460daae4a
 @only_in_nb begin
@@ -1073,6 +1118,39 @@ See also: [`BondTable`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldb
 	StructBond(::Type{T}) where T = StructBond{T}(;widget = typehtml(T))
 end
 
+# ╔═╡ f2489fa4-ccc9-48ea-ac59-552ec1960b9d
+macro NTBond(desc, block)
+	Meta.isexpr(block, [:let, :block]) || error("You can only give `let` or `begin` blocks to the `@NTBond` macro")
+	# We will return a let block at the end anyhow to avoid method redefinitino errors in Pluto. We already create the two blocks composing the let
+	bindings, block = if block.head == :let
+		block.args
+	else
+		# This is a normal begin-end so we create an empty bindings block
+		Expr(:block), block
+	end
+	fields = Symbol[]
+	# now we just and find all the symbols defined in the block
+	for arg in block.args
+		arg isa LineNumberNode && continue
+		Meta.isexpr(arg, :(=)) || error("Only expression of type `fieldname = fieldbond` or `fieldname = (fielddescription, fieldbond)` can be provided inside the block fed to @NTBond")
+		push!(fields, arg.args[1])
+	end
+	Mod = @__MODULE__
+	T = NamedTuple{Tuple(fields)}
+	out = _add_generic_field(T, block, [:fielddescription, :fieldbond])
+	# We add the custom description
+	push!(out.args, esc(:($Mod.typedescription(::Type{$T}) = $desc)))
+	# We add the generation of the StructBond
+	push!(out.args, :($(StructBond)($T)))
+	Expr(:let, bindings, out)
+end
+
+# ╔═╡ 9f86bc62-c06c-45f2-b28e-1b34ec9dfa7f
+@only_in_nb test = @NTBond "GESU" let
+	a = ("Descrizione Magica", Slider(1:10))
+	b = Slider(1:10)
+end
+
 # ╔═╡ 3ea95602-765e-4ec6-87e3-b49404673e1e
 """
 	popoutwrap(T)
@@ -1121,6 +1199,26 @@ See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`@fieldb
 """
 popoutwrap(T::Type) = Popout(StructBond(T))
 
+# ╔═╡ 8b802a62-eb1e-47f7-bb04-1566fe9c4fe3
+popoutwrap(t::StructBond) = Popout(t)
+
+# ╔═╡ ae3de6c7-015a-4853-9fff-53703c3e1ef6
+@only_in_nb test2 = @NTBond "Madre" begin
+	c = Editable(15)
+	d = popoutwrap(test)
+end;
+
+# ╔═╡ e16a19db-8d99-41f2-bf56-7dfd6c61e90e
+# ╠═╡ skip_as_script = true
+#=╠═╡
+@bind madonnare test2
+  ╠═╡ =#
+
+# ╔═╡ c1c7241f-d912-42ef-8672-d728b834309c
+#=╠═╡
+madonnare
+  ╠═╡ =#
+
 # ╔═╡ 2833a3c3-3741-442e-a329-516c2c73d1d0
 macro popoutasfield(args...)
 	block = Expr(:block)
@@ -1132,7 +1230,7 @@ macro popoutasfield(args...)
 end
 
 # ╔═╡ 08ad83e1-20a1-4501-be9b-c249a8333017
-export BondTable, StructBond, @fieldbond, @fielddescription, Popout, @popoutasfield, @typeasfield, popoutwrap
+export BondTable, StructBond, @fieldbond, @fielddescription, Popout, @popoutasfield, @typeasfield, popoutwrap, @NTBond, @fielddata
 
 # ╔═╡ 970dc73e-fd93-4a13-bd45-84708e67ea94
 @only_in_nb @popoutasfield ASD
@@ -1176,11 +1274,11 @@ Base.show(io::IO, mime::MIME"text/html", t::StructBond) = show(io, mime, _show(t
 begin
 	function Bonds.initial_value(t::StructBond{T}) where T
 		transformed = Bonds.initial_value(t.widget)
-		T(;transformed...)
+		typeconstructor(T)(transformed)
 	end
 	function Bonds.transform_value(t::StructBond{T}, from_js) where T
 		transformed = Bonds.transform_value(t.widget, from_js)
-		T(;transformed...)
+		typeconstructor(T)(transformed)
 	end
 end
 
@@ -1254,7 +1352,7 @@ PlutoUI = "~0.7.49"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.0-beta4"
+julia_version = "1.9.0-rc1"
 manifest_format = "2.0"
 project_hash = "f5220c50e71948897feed9b3ce1623a8c70bd3ad"
 
@@ -1378,7 +1476,7 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.0+0"
+version = "2.28.2+0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -1394,7 +1492,7 @@ version = "1.2.0"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.21+0"
+version = "0.3.21+4"
 
 [[deps.OrderedCollections]]
 git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
@@ -1553,11 +1651,11 @@ version = "17.4.0+0"
 # ╠═69bdd709-ea1d-4c8d-9a01-da36714d5219
 # ╠═e4a5a36d-3f58-48c8-91bb-0c9124ae1c1b
 # ╟─0d4852f2-3d09-4c58-9707-b27625d80451
-# ╠═3ea95602-765e-4ec6-87e3-b49404673e1e
 # ╟─38594a53-89d3-47ce-b7a4-686603ccf29e
 # ╠═371ec1ac-8447-4728-b61c-7065cf1bd419
 # ╟─ab5e147e-73df-4e68-8f14-7a8c1dc801ca
 # ╟─e39895be-4c2b-4541-843b-165994846314
+# ╠═6e3c7fc7-42db-490a-baef-9e251e2a7fbd
 # ╠═9a9170fc-14c2-46e8-9b34-bba2907f2d7b
 # ╠═7cbb017e-0efa-4fb7-a2af-2ae4bc860acb
 # ╠═8c70a8ff-169a-4f39-804f-c9ab9462be81
@@ -1580,9 +1678,22 @@ version = "17.4.0+0"
 # ╠═66314080-3ebf-4605-be90-addc18c6e633
 # ╠═e672f10c-53aa-44dd-91d0-84d1e252a5b1
 # ╠═98561f62-232b-4fd8-9d2e-7bb3ffaacb4f
+# ╟─d51a6ac8-c96b-4a4e-8cf7-cd137bf80db1
+# ╠═b0426606-f493-41c8-9d35-3119a73707c3
+# ╠═f56c1390-1958-4b94-9220-591676ba3cb6
+# ╠═7939baef-a0b0-41ef-b0ae-9118a7d8fd6e
+# ╟─1d38cc1a-6e05-4fd2-8cb1-86cad5ee5151
+# ╠═f2489fa4-ccc9-48ea-ac59-552ec1960b9d
+# ╠═9f86bc62-c06c-45f2-b28e-1b34ec9dfa7f
+# ╠═ae3de6c7-015a-4853-9fff-53703c3e1ef6
+# ╠═e16a19db-8d99-41f2-bf56-7dfd6c61e90e
+# ╠═c1c7241f-d912-42ef-8672-d728b834309c
 # ╠═55b394f2-ebfa-4d98-84f2-ee94d81f41c7
 # ╠═6a1db028-e0a9-4de9-8fb6-991993aba41e
 # ╠═722ff625-e232-47ca-9c2a-6c5c2ec2a6cc
+# ╟─eb139a5e-1d4c-4c2f-9f0c-4e305fc0fc7c
+# ╠═3ea95602-765e-4ec6-87e3-b49404673e1e
+# ╠═8b802a62-eb1e-47f7-bb04-1566fe9c4fe3
 # ╟─d8340d9b-cd1c-4aae-9aaf-de6819fb10b6
 # ╠═898c1182-e115-4548-93ba-ac95ec5fe6c9
 # ╟─ed2bb10a-0bb6-4c34-bd19-daba2be037d2
@@ -1621,6 +1732,9 @@ version = "17.4.0+0"
 # ╟─68a4b777-d214-405a-84b9-072febef3ee5
 # ╠═c78acfce-07a3-411b-b4a7-ae1a3723a476
 # ╠═2833a3c3-3741-442e-a329-516c2c73d1d0
+# ╟─9c4f2e93-0712-4824-af4e-0735352bb772
+# ╠═e69b85b2-c667-468e-8acf-d2427c017b72
+# ╠═2c7f286b-29c5-4a61-805e-0273dd411f46
 # ╟─f64169a0-43b6-4789-b59d-1f9cef967902
 # ╠═3ff0d7ac-67ae-4725-883e-59eb77c36f12
 # ╠═703b450b-79df-4b5e-a370-b3c460daae4a
