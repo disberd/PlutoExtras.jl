@@ -1,6 +1,14 @@
 # PlutoExtras
 
-This package provides some widgets to be used in Pluto, including an extended version of the TableOfContents from PlutoUI. It was formerly a non-registered package named PlutoUtils
+This package provides some widgets to be used in Pluto, including an extended version of the TableOfContents from PlutoUI and a new experimental bond container (`BondTable`). 
+
+This was formerly a non-registered package named PlutoUtils
+
+## BondTable (NEW!)
+
+There is some new under-development experimental feature to simplify the grouping and displaying of many bonds within a given notebook in a floating table (similar to the TableOfContents) that stays on the left and can be hidden, resized and moved around.
+
+Have a look at the notebook at [notebooks/test_bondstable.jl](https://rawcdn.githack.com/disberd/PlutoExtras.jl/94fdc84217b5591343ba4671666511d16b1c0eaf/html_exports/test_bondstable.jl.html) for an example of the features/capabilities. (The link points to a static html export of the notebook. If you want to execute the notebook, remember that it has to be executed from the cloned repository as it currently uses the package environment of the package)
 
 ## ExtendedTableOfContents
 The [extended_toc.jl](./src/extended_toc.jl) notebook defines and exports `ExtendedTableOfContents`, which takes the `TableOfContents` from `PlutoUI` and adds the following functionalities:
@@ -43,7 +51,4 @@ The `ExtendedTableOfContents` allow to re-order the cell groups identified by ea
 #### Cell Reordering
 
 ![Cell_Reordering](https://user-images.githubusercontent.com/12846528/217245256-58e4d537-9547-42ec-b1d8-2994b6bcaf51.gif)
-
-
-
 
