@@ -400,6 +400,11 @@ md"""
 # StructBond Definition
 """
 
+# ╔═╡ f23a566d-874f-4a73-b6fa-58b0ba306e32
+md"""
+## structbondtype
+"""
+
 # ╔═╡ 00a7b97b-247c-4f5f-b859-8f3ce6692be0
 md"""
 ## Show
@@ -410,6 +415,10 @@ _basics_script = HTLScript(@htl("""
 <script>
 	const parent = currentScript.parentElement
 	const widget = currentScript.previousElementSibling
+
+	// Overwrite the description
+	const desc = widget.querySelector('.description')
+	desc.innerHTML = 
 
 	// Set-Get bond
 
@@ -438,16 +447,33 @@ md"""
 # BondWithDescription
 """
 
+# ╔═╡ 9dcb9704-3029-458a-80c4-cb1a0635b78c
+_getbond(x::T) where T = let
+	if nameof(T) == :Bond && fieldnames(T) == (:element, :defines, :unique_id) 
+		return x
+	else
+		error("The provided input is not a bond or does not seem to wrap a bond")
+	end
+end
+
+# ╔═╡ 183af7ed-4825-4c2f-935b-0c222e4a8054
+_getbond(x::Popout) = _getbond(x.element)
+
 # ╔═╡ 849316ed-8a22-49e7-8693-4d6cec2597b0
 struct BondWithDescription
 	description
 	bond
 	function BondWithDescription(description, bond)
-		T = typeof(bond)
-		nameof(T) == :Bond && fieldnames(T) == (:element, :defines, :unique_id) || error("It looks like the `bond` provided to `BondWithDescription` is not of the correct type, provide the bond given as output by the `Pluto.@bind` macro")
+		_isvalid(BondWithDescription, bond) || error("It looks like the `bond` provided to `BondWithDescription` is not of the correct type, provide the bond given as output by the `Pluto.@bind` macro")
 		new(description, bond)
 	end
 end
+
+# ╔═╡ 14fb905b-e721-44d6-87f1-e3f66076edb5
+_isvalid(::Type{BondWithDescription}, value::T) where T = nameof(T) == :Bond && fieldnames(T) == (:element, :defines, :unique_id)
+
+# ╔═╡ 30aec475-caef-46f5-b8d4-e4ad4febb132
+_isvalid(T::Type{BondWithDescription}, p::Popout) = _isvalid(T, p.element)
 
 # ╔═╡ 4f63b9ae-2ba5-49a7-928b-18b5f5e200b3
 md"""
@@ -457,7 +483,7 @@ md"""
 # ╔═╡ 5efe7901-2f11-42c1-b59d-17074e3899fe
 Base.show(io::IO, mime::MIME"text/html", bd::BondWithDescription) = show(io, mime, @htl("""
 <bond-with-description>
-	<bond-description title=$(join(["This bond is assigned to variable `", String(bd.bond.defines), "`"]))>
+	<bond-description title=$(join(["This bond is assigned to variable `", String(_getbond(bd.bond).defines), "`"]))>
 		$(bd.description)
 	</bond-description>
 	<bond-value>
@@ -632,6 +658,27 @@ md"""
 """
 
 # ╔═╡ 04739111-2441-4274-860f-b571cdcb1156
+"""
+	@BondsList description block
+Convenience macro to create a `BondsList`, which is a grouping of a various bonds (created with `@bind`) inside a table-like HTML output that can be used inside [`BondTable`](@ref). Each bond can additionally be associated to a custom description.
+The `block` given as second input to this macro must be a `begin` or `let` block where each line is an assignment of the type `description = bond`. The description can be anything that has a `show` method for MIME type `text/html`.
+
+An example usage is given in the code below:
+```
+@BondsList "My Group of Bonds" let tv = PlutoUI.Experimental.transformed_value
+	 # We use transformed_value to translate GHz to Hz in the bound variable `freq`
+	"Frequency [GHz]" = @bind freq tv(x -> x * 1e9, Slider(1:10))
+	md"Altitude ``h`` [m]" = @bind alt Scrubbable(100:10:200)
+end
+```
+which will create a table-like display grouping together the bonds for the frequency `freq` and the altitude `alt`.
+
+Unlike [`StructBond`](@ref), the output of `@BondsList` is not supposed to be bound using `@bind`, as it just groups pre-existing bonds. Also unlike `StructBond`, each row of a `BondsList` upates its corresponding bond independently from the other rows.
+
+To help identify and differentiate a `BondsList` from a `StructBond`
+
+See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddata`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 macro BondsList(description, block)
 	Meta.isexpr(block, [:block, :let]) || error("Only `let` or `begin` blocks are supported as second argument to the `@BondsList` macro")
 	bindings, block = if block.head == :let
@@ -640,6 +687,10 @@ macro BondsList(description, block)
 		# This is a normal begin-end so we create an empty bindings block
 		Expr(:block), block
 	end
+	# We escape all the arguments in the bindings
+	for i in eachindex(bindings.args)
+		bindings.args[i] = esc(bindings.args[i])
+	end		
 	vec = Expr(:vect)
 	for arg in block.args
 		arg isa LineNumberNode && continue
@@ -1097,6 +1148,34 @@ md"""
 """
 
 # ╔═╡ e69b85b2-c667-468e-8acf-d2427c017b72
+"""
+	@fielddata typename block
+Convenience macro to define custom widgets for each field of `typename`. This is mostly inteded to be used in combintation with [`StructBond`](@ref).
+
+Given for example the following structure `ASD`, one can create a nice widget to create instances of type `ASD` wih the following code:
+```
+begin
+Base.@kwdef struct ASD
+	a::Int 
+	b::Int
+	c::String
+	d::String
+end
+@fielddata ASD begin
+	a = (md"Magical field with markdown description", Slider(1:10))
+	b = (@htl("<span>Field with HTML description</span>"), Scrubbable(1:10))
+	c = ("Normal String Description", TextField())
+	d = TextField()
+end
+@bind asd StructBond(ASD)
+end
+```
+where `asd` will be an instance of type `ASD` with each field interactively controllable by the specified widgets and showing the field description next to each widget.
+The rightside argument of each `:(=)` in the `block` can either be a single element or a tuple of 2 elements. In case a single elemnent is provided, the provided value is interpreted as the `fieldbond`, so the bond/widget to show for that field. 
+If two elements are given, the first is assigned to the description and the second as the bond to show
+
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`@NTBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 macro fielddata(s, block)
 	_add_generic_field(s, block, [:fielddescription, :fieldbond])
 end
@@ -1271,6 +1350,8 @@ function typehtml(T::Type)
 	<script>
 		const trc = currentScript.closest('togglereactive-container')
 		const header = trc.firstElementChild
+		const desc = header.querySelector('.description')
+		desc.setAttribute('title', "This generates a struct of type `$(nameof(T))`")
 
 		// add the collapse button
 		const collapse_btn = html`<span class='collapse'>`
@@ -1294,6 +1375,8 @@ function typehtml(T::Type)
 				justify-items: center;
 				align-items: center;
 				row-gap: 5px;
+				/* The flex below is needed in some weird cases where the bond is display flex and the child becomes small. */
+				flex: 1;
 			}
 			togglereactive-header {
 				grid-column: 1 / -1;
@@ -1350,24 +1433,43 @@ lkjsdf
 # ╔═╡ 76fd33fe-db99-41c3-9f80-17b07306a587
 begin
 """
-	StructBond(T)
+	StructBond(T;description = typedescription(T))
 Create an HTML widget to be used with `@bind` from Pluto that allows to define the custom type `T` by assigning a widget to each of its fields. 
 The widget will automatically use the docstring of each field as its description if present, or the fieldname otherwise.
 
 When used with `@bind`, it automatically generates a instance of `T` by using the various fields as keyword arguments. *This means that the the structure `T` has to support a keyword-only contruction, such as those generated with `Base.@kwdef` or `Parameters.@with_kw`.
 
-In order to work, the widget to associate to eachfield of type `T` has to be provided using the convenience macro `@fieldbond`. Similarly, the description of each field can also be customized using `@fielddescription`. 
+In order to work, the widget (and optionally the description) to associate to eachfield of type `T` has to be provided using the convenience macro `@fielddata`. 
 
-See also: [`BondTable`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+The optional `description` kwarg default to the Type name but can be overridden with anything showable as `MIME"text/html"` 
+
+See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddata`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
 """
 	Base.@kwdef struct StructBond{T}
 		widget::Any
+		description::Any
 		secret_key::String=String(rand('a':'z', 10))
 	end
-	StructBond(::Type{T}) where T = StructBond{T}(;widget = typehtml(T))
+	StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T), description)
 end
 
 # ╔═╡ f2489fa4-ccc9-48ea-ac59-552ec1960b9d
+"""
+	@NTBond description block
+Convenience macro to create a [`StructBond`](@ref) wrapping a NamedTuple with field names provided in the second argument `block`.
+
+Useful when one wants a quick way of generating a bond that creates a NamedTuple. An example usage is given in the code below:
+```
+@bind nt @NTBond "My Fancy NTuple" begin
+	a = ("Description", Slider(1:10))
+	b = (md"*Bold* field", Slider(1:10))
+	c = Slider(1:10) # No description, defaults to the name of the field
+end
+```
+which will create a `NamedTuple{(:a, :b, :c)}` and assign it to variable `nt`.
+
+See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddata`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+"""
 macro NTBond(desc, block)
 	Meta.isexpr(block, [:let, :block]) || error("You can only give `let` or `begin` blocks to the `@NTBond` macro")
 	# We will return a let block at the end anyhow to avoid method redefinitino errors in Pluto. We already create the two blocks composing the let
@@ -1377,6 +1479,10 @@ macro NTBond(desc, block)
 		# This is a normal begin-end so we create an empty bindings block
 		Expr(:block), block
 	end
+	# We escape all the arguments in the bindings
+	for i in eachindex(bindings.args)
+		bindings.args[i] = esc(bindings.args[i])
+	end		
 	fields = Symbol[]
 	# now we just and find all the symbols defined in the block
 	for arg in block.args
@@ -1484,7 +1590,7 @@ macro popoutasfield(args...)
 end
 
 # ╔═╡ 08ad83e1-20a1-4501-be9b-c249a8333017
-export BondTable, StructBond, @fieldbond, @fielddescription, Popout, @popoutasfield, @typeasfield, popoutwrap, @NTBond, @fielddata
+export BondTable, StructBond, @NTBond, @BondsList, Popout, @popoutasfield, @typeasfield, popoutwrap, @fieldbond, @fielddescription, @fielddata
 
 # ╔═╡ 970dc73e-fd93-4a13-bd45-84708e67ea94
 @only_in_nb @popoutasfield ASD
@@ -1500,13 +1606,51 @@ export BondTable, StructBond, @fieldbond, @fielddescription, Popout, @popoutasfi
 pp
   ╠═╡ =#
 
+# ╔═╡ 6e7e45d7-007a-487f-9e2e-49c16a434e71
+structbondtype(::StructBond{T}) where T = T
+
+# ╔═╡ 5c26419d-cee0-4e73-bf33-222bac044b8f
+structbondtype(::Type{StructBond{T}}) where T = T
+
 # ╔═╡ 7a219c22-decc-4d03-bdd6-e38808198349
 _show(t::StructBond{T}) where T = @htl("""
 <struct-bond class='$T'>
 	$(t.widget)
-	$(combine_scripts([
-		_basics_script
-	]; id = t.secret_key))
+	<script id = $(t.secret_key)>
+		
+		const parent = currentScript.parentElement
+		const widget = currentScript.previousElementSibling
+	
+		// Overwrite the description
+		const desc = widget.querySelector('.description')
+		desc.innerHTML = $(t.description)
+	
+		// Set-Get bond
+	
+		const set_input_value = setBoundElementValueLikePluto
+		const get_input_value = getBoundElementValueLikePluto
+	
+		Object.defineProperty(parent, 'value', {
+			get: () => get_input_value(widget),
+			set: (newval) => {
+				set_input_value(widget, newval)
+			},
+			configurable: true,
+		});
+	
+		const old_oninput = widget.oninput ?? function(e) {}
+		widget.oninput = (e) => {
+			old_oninput(e)
+			e.stopPropagation()
+			parent.dispatchEvent(new CustomEvent('input'))
+		}
+	</script>
+	<style>
+		/* The flex below is needed in some weird cases where the bond is display flex and the child becomes small. */
+		struct-bond {
+  			flex: 1;
+		}
+	</style>
 	</struct-bond>
 """)
 
@@ -1957,6 +2101,9 @@ version = "17.4.0+0"
 # ╠═1d1d7911-ddb9-4f16-8ef7-63a414f87018
 # ╟─f6a6373f-5619-4d8c-b8c3-2a804b453f0a
 # ╠═76fd33fe-db99-41c3-9f80-17b07306a587
+# ╟─f23a566d-874f-4a73-b6fa-58b0ba306e32
+# ╠═6e7e45d7-007a-487f-9e2e-49c16a434e71
+# ╠═5c26419d-cee0-4e73-bf33-222bac044b8f
 # ╟─00a7b97b-247c-4f5f-b859-8f3ce6692be0
 # ╠═50dd6c8d-1f05-4050-8768-1a1d0415ca51
 # ╠═7a219c22-decc-4d03-bdd6-e38808198349
@@ -1965,6 +2112,10 @@ version = "17.4.0+0"
 # ╠═4f353f40-b149-40c8-8ae8-f03182429d20
 # ╠═01705479-b830-4f38-9e8f-53e8ef9cd7b8
 # ╟─7f644704-ad49-437c-8b18-ad657e4d78e8
+# ╠═14fb905b-e721-44d6-87f1-e3f66076edb5
+# ╠═30aec475-caef-46f5-b8d4-e4ad4febb132
+# ╠═9dcb9704-3029-458a-80c4-cb1a0635b78c
+# ╠═183af7ed-4825-4c2f-935b-0c222e4a8054
 # ╠═849316ed-8a22-49e7-8693-4d6cec2597b0
 # ╟─4f63b9ae-2ba5-49a7-928b-18b5f5e200b3
 # ╠═5efe7901-2f11-42c1-b59d-17074e3899fe
