@@ -255,7 +255,7 @@ popup_interaction_handler = HTLScriptPart(@htl """
 
 	contents.offset = contents.offset ?? { x: 0, y: 0}
 	const startPosition = {x: 0, y: 0}
-	interact(contents.querySelector('togglereactive-header .description')).draggable({
+	interact(contents.querySelector('togglereactive-header .description, bondslist-header .description')).draggable({
 		listeners: {
 			start (event) {
 				contents.offset.y = startPosition.y = contents.offsetTop
@@ -433,6 +433,255 @@ _basics_script = HTLScript(@htl("""
 </script>
 """));
 
+# ╔═╡ 7f644704-ad49-437c-8b18-ad657e4d78e8
+md"""
+# BondWithDescription
+"""
+
+# ╔═╡ 849316ed-8a22-49e7-8693-4d6cec2597b0
+struct BondWithDescription
+	description
+	bond
+	function BondWithDescription(description, bond)
+		T = typeof(bond)
+		nameof(T) == :Bond && fieldnames(T) == (:element, :defines, :unique_id) || error("It looks like the `bond` provided to `BondWithDescription` is not of the correct type, provide the bond given as output by the `Pluto.@bind` macro")
+		new(description, bond)
+	end
+end
+
+# ╔═╡ 4f63b9ae-2ba5-49a7-928b-18b5f5e200b3
+md"""
+## Show
+"""
+
+# ╔═╡ 5efe7901-2f11-42c1-b59d-17074e3899fe
+Base.show(io::IO, mime::MIME"text/html", bd::BondWithDescription) = show(io, mime, @htl("""
+<bond-with-description>
+	<bond-description title=$(join(["This bond is assigned to variable `", String(bd.bond.defines), "`"]))>
+		$(bd.description)
+	</bond-description>
+	<bond-value>
+		$(bd.bond)
+	</bond-value>
+	<style>
+		bond-with-description {
+			display: grid;
+			grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+			grid-auto-rows: fit-content(40px);
+			justify-items: center;
+		}
+		bondtable-contents bond-with-description,
+		bondslist-contents bond-with-description {
+			display: contents;
+		}
+		bond-value bond {
+			display: flex; // Needed for consistent sizing (width) of the input
+		}
+		bond-value input {
+			width: 100%; // Needed for consistent sizing (width) of the input
+		}
+	</style>
+</bond-with-description>
+"""))
+
+# ╔═╡ 145a1b46-16b5-497c-a949-6f61507190b8
+# ╠═╡ skip_as_script = true
+#=╠═╡
+BondWithDescription("DIO", @bind slakdjflaskdfj Slider(1:10))
+  ╠═╡ =#
+
+# ╔═╡ 94a04779-0a3f-4e40-8c0e-c9cb1db08dd7
+md"""
+# Bonds List
+"""
+
+# ╔═╡ d04b6c4c-aa81-4442-a992-e70351128433
+begin
+Base.@kwdef struct BondsList
+	description
+	bonds::Vector{BondWithDescription}
+	secret_key::String=String(rand('a':'z', 10))
+end
+BondsList(description, bonds) = BondsList(;description, bonds)
+end
+
+# ╔═╡ c8a3ab1c-91dc-4955-97e0-1d45477b4e05
+md"""
+## Show
+"""
+
+# ╔═╡ c1ab1625-dd01-4a51-bd8b-6b9d32104a0f
+Base.show(io::IO, mime::MIME"text/html", bl::BondsList) = show(io, mime, @htl("""
+<bondslist-container class='no-popout'>
+	<bondslist-header>
+		<span class='collapse bondslist-icon'></span>
+		<span class='description' title="This list contains independent bonds">$(bl.description)</span>
+		<span class='toggle bondslist-icon'></span>
+	</bondslist-header>
+	<bondslist-contents>
+	$(bl.bonds)	
+	</bondslist-contents>
+	<script id=$(bl.secret_key)>
+		const container = currentScript.parentElement
+		container.collapse = (force) => {
+			container.classList.toggle('collapsed', force)
+		}
+		const collapse_btn = container.querySelector('span.collapse')
+		collapse_btn.onclick = (e) => container.collapse()
+	</script>
+	<style>
+		bondslist-header {
+			grid-column: 1 / -1;
+			display: flex;
+			background: var(--overlay-button-bg);
+		}		
+		bondslist-header:before {
+			content: '';
+			display: inline-block;
+			position: absolute;
+			top: 0px;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+			z-index: -1;
+			background: #ffac4540;
+		}
+		bondslist-container.no-popout > bondslist-header {
+			align-self: start;
+			position: sticky;
+			top: 0px;
+			padding-top: 12px;
+			margin-top: -12px;
+			z-index: 10;
+		}
+		bondslist-contents {
+			display: contents;
+		}
+		bondslist-container.no-popout:before {
+			content: '';
+			display: block;
+			grid-column: 1 / -1;
+			justify-self: center;
+			border-bottom: 2px solid;
+			padding-top: 5px;
+			width: 100%;
+			align-self: start;
+			position: sticky;
+			top: 0px;
+			background: var(--overlay-button-bg);
+			z-index: 20;
+		}
+		bondslist-header > .bondslist-icon {
+			--size: 17px;
+			display: block;
+			align-self: stretch;
+			background-size: var(--size) var(--size);
+			background-repeat: no-repeat;
+			background-position: center;
+			width: var(--size);
+			filter: var(--image-filters);
+		}
+		bondslist-header > .collapse {
+			background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
+			cursor: pointer;
+		}
+		bondslist-container.collapsed > bondslist-header > .collapse {
+			background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
+		}
+		bondslist-header > .toggle {
+			display: inline-block;
+			width: 30px;
+			margin: 0 10px;
+		}
+		bondslist-header {
+			display: flex;
+			align-items: stretch;
+			width: 100%;
+		}
+		bondslist-header > .description {
+			text-align: center;
+			flex-grow: 1;
+			font-size: 18px;
+			font-weight: 600;
+		}
+		bondslist-header > .toggle {
+			align-self: center
+		}
+		bondslist-container.collapsed bondslist-header + * {
+			display: none !important;
+		}
+		bondslist-container {
+			display: grid;
+		    grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+		    grid-auto-rows: fit-content(40px);
+		    justify-items: center;
+		    align-items: center;
+		    row-gap: 5px;
+		}
+		bondstable-container bondslist-container {
+			display: contents;
+		}
+		
+</style>
+</bondslist-container>
+"""))
+
+# ╔═╡ 8712d1bf-1a00-4553-8794-0ae411be7e00
+md"""
+## Macro
+"""
+
+# ╔═╡ 04739111-2441-4274-860f-b571cdcb1156
+macro BondsList(description, block)
+	Meta.isexpr(block, [:block, :let]) || error("Only `let` or `begin` blocks are supported as second argument to the `@BondsList` macro")
+	bindings, block = if block.head == :let
+		block.args
+	else
+		# This is a normal begin-end so we create an empty bindings block
+		Expr(:block), block
+	end
+	vec = Expr(:vect)
+	for arg in block.args
+		arg isa LineNumberNode && continue
+		Meta.isexpr(arg, :(=)) || error("Only entries of the type `description = bond` are supported as arguments to the input block of `@BondsList`")
+		desc, bond = arg.args
+		push!(vec.args, esc(:($(BondWithDescription)($desc, $bond))))
+	end
+	out = quote
+		vec = $vec
+		$BondsList($(esc(description)), vec)
+	end
+	Expr(:let, bindings, out)
+end
+
+# ╔═╡ 719a79f9-c8bd-4c57-b404-290f27562ac0
+# ╠═╡ skip_as_script = true
+#=╠═╡
+@BondsList "GESU" begin
+	"DIO" = @bind sldakjf Slider(1:10)
+	"GESU" = @bind iosdfsi Slider(1:10)
+end
+  ╠═╡ =#
+
+# ╔═╡ edead187-0175-4cb7-9144-a9c919bf41da
+#=╠═╡
+sldakjf
+  ╠═╡ =#
+
+# ╔═╡ 1234fcbf-1f66-4150-9899-9454a0488ee5
+# ╠═╡ skip_as_script = true
+#=╠═╡
+blist = BondsList("DIORE",[
+	BondWithDescription("ASD1", @bind lskdjfaslkfjd Slider(1:10)),
+	BondWithDescription("ASD2", @bind sldfjksldkf Slider(1:10)),
+])
+  ╠═╡ =#
+
+# ╔═╡ c2c9f39f-0f35-4920-b132-8ff4a8f59daa
+#=╠═╡
+Popout(blist)
+  ╠═╡ =#
+
 # ╔═╡ d527a400-7e66-4cc4-9f9d-cfaf8c947a4a
 md"""
 # BondTable
@@ -455,7 +704,7 @@ Base.@kwdef struct BondTable
 	function BondTable(v::Array; description = NotDefined(), secret_key = String(rand('a':'z', 10)))
 		for el in v
 			T = typeof(el)
-			valid = nameof(T) == :Bond && hasfield(T, :element) && hasfield(T, :defines)
+			valid = el isa BondsList || nameof(T) == :Bond && hasfield(T, :element) && hasfield(T, :defines)
 			valid || error("All the elements provided as input to a `BondTable` have to be bonds themselves (i.e. created with the `@bind` macro from Pluto)")
 		end
 		new(v, description, secret_key)
@@ -578,8 +827,8 @@ bondtable_style = @htl """
 		position: sticky;
 		top: 0px;
 		background: var(--overlay-button-bg);
-		padding-top: 15px;
-		margin-top: -15px;
+		padding-top: 12px;
+		margin-top: -12px;
 		z-index: 10;
 	}
 	bondtable-header {
@@ -966,7 +1215,7 @@ function fieldhtml(s::Type, f::Symbol)
 	out = wrapped() do Child
 		@htl("""
 		<field-html class='$f'>
-			<field-description class='$f'>$(fielddescription(s, f))</field-description>
+			<field-description class='$f' title="This value is associated to field `$f`">$(fielddescription(s, f))</field-description>
 			<field-bond class='$f'>$(Child(fieldbond(s, f)))</field-bond>
 		</field-html>
 		<style>
@@ -1200,7 +1449,7 @@ See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`@fieldb
 popoutwrap(T::Type) = Popout(StructBond(T))
 
 # ╔═╡ 8b802a62-eb1e-47f7-bb04-1566fe9c4fe3
-popoutwrap(t::StructBond) = Popout(t)
+popoutwrap(t::Union{StructBond, BondsList}) = Popout(t)
 
 # ╔═╡ ae3de6c7-015a-4853-9fff-53703c3e1ef6
 @only_in_nb test2 = @NTBond "Madre" begin
@@ -1217,6 +1466,11 @@ end;
 # ╔═╡ c1c7241f-d912-42ef-8672-d728b834309c
 #=╠═╡
 madonnare
+  ╠═╡ =#
+
+# ╔═╡ 8235e54b-9899-4e25-bbee-36680b66ea12
+#=╠═╡
+popoutwrap(blist)
   ╠═╡ =#
 
 # ╔═╡ 2833a3c3-3741-442e-a329-516c2c73d1d0
@@ -1327,7 +1581,7 @@ c = @bind lolol StructBond(LONG)
 
 # ╔═╡ 8c88240f-182f-4302-8017-74bec846795f
 #=╠═╡
-show_bondtable(BondTable([a,b, c]))
+show_bondtable(BondTable([a, blist ,a,b, c]))
   ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1710,6 +1964,22 @@ version = "17.4.0+0"
 # ╠═eb40b366-987b-488a-8ed4-9a0a7bd0c853
 # ╠═4f353f40-b149-40c8-8ae8-f03182429d20
 # ╠═01705479-b830-4f38-9e8f-53e8ef9cd7b8
+# ╟─7f644704-ad49-437c-8b18-ad657e4d78e8
+# ╠═849316ed-8a22-49e7-8693-4d6cec2597b0
+# ╟─4f63b9ae-2ba5-49a7-928b-18b5f5e200b3
+# ╠═5efe7901-2f11-42c1-b59d-17074e3899fe
+# ╠═145a1b46-16b5-497c-a949-6f61507190b8
+# ╟─94a04779-0a3f-4e40-8c0e-c9cb1db08dd7
+# ╠═d04b6c4c-aa81-4442-a992-e70351128433
+# ╟─c8a3ab1c-91dc-4955-97e0-1d45477b4e05
+# ╠═c1ab1625-dd01-4a51-bd8b-6b9d32104a0f
+# ╟─8712d1bf-1a00-4553-8794-0ae411be7e00
+# ╠═04739111-2441-4274-860f-b571cdcb1156
+# ╠═719a79f9-c8bd-4c57-b404-290f27562ac0
+# ╠═edead187-0175-4cb7-9144-a9c919bf41da
+# ╠═1234fcbf-1f66-4150-9899-9454a0488ee5
+# ╠═c2c9f39f-0f35-4920-b132-8ff4a8f59daa
+# ╠═8235e54b-9899-4e25-bbee-36680b66ea12
 # ╟─d527a400-7e66-4cc4-9f9d-cfaf8c947a4a
 # ╠═dcff7076-afaa-46b7-ae3d-5ebae0b041c4
 # ╟─ba3462ab-998c-47f1-99a6-4cee8aefffea
