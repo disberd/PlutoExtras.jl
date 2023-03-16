@@ -1339,7 +1339,7 @@ function typehtml(T::Type)
 		@htl """
 		$([
 			Child(string(name), fieldhtml(T, name))
-			for name in fieldnames(T)
+			for name in fieldnames(T) if !Base.isgensym(name)
 		])
 		"""
 	end
@@ -1483,7 +1483,7 @@ macro NTBond(desc, block)
 	for i in eachindex(bindings.args)
 		bindings.args[i] = esc(bindings.args[i])
 	end		
-	fields = Symbol[]
+	fields = Symbol[gensym()] # This will make this unique even when defining multiple times with the same set of parameters
 	# now we just and find all the symbols defined in the block
 	for arg in block.args
 		arg isa LineNumberNode && continue
@@ -1493,10 +1493,8 @@ macro NTBond(desc, block)
 	Mod = @__MODULE__
 	T = NamedTuple{Tuple(fields)}
 	out = _add_generic_field(T, block, [:fielddescription, :fieldbond])
-	# We add the custom description
-	push!(out.args, esc(:($Mod.typedescription(::Type{$T}) = $desc)))
 	# We add the generation of the StructBond
-	push!(out.args, :($(StructBond)($T)))
+	push!(out.args, :($(StructBond)($T;description = $desc)))
 	Expr(:let, bindings, out)
 end
 
