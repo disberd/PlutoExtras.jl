@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
@@ -147,16 +147,20 @@ begin
 				}
 			})
 
-			// Function to blur the element when pressing enter instead of adding a newline
-			const onEnter = (e) => {
-				if (e.keyCode === 13) {
-				e.preventDefault();
+			const dispatchEvent = (e) => {
 				if (el.innerText === "") {
 					elp.value = $(s.default)   
 				} else {
 					elp.value =  el.innerText
 				}
 				elp.dispatchEvent(new CustomEvent("input"))
+			}
+
+			// Function to blur the element when pressing enter instead of adding a newline
+			const onEnter = (e) => {
+				if (e.keyCode === 13) {
+				e.preventDefault();
+				dispatchEvent(e)
 				el.blur()
 				}
 			}
@@ -189,6 +193,8 @@ begin
 				}
 			}
 
+			
+			el.addEventListener('focusout',dispatchEvent)
 			el.addEventListener('keydown',onEnter)
 			el.addEventListener('click',(e) => e.stopImmediatePropagation()) // modify text
 			elp.addEventListener('click',(e) => selectText(el)) // Select all text
@@ -259,7 +265,7 @@ HypertextLiteral = "~0.9.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.9.1"
 manifest_format = "2.0"
 project_hash = "af058380a13e3ba30435ef1de1b6265c90caefbc"
 
@@ -332,20 +338,20 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.0+0"
+version = "2.28.2+0"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2022.2.1"
+version = "2022.10.11"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
 
 [[deps.Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.8.0"
+version = "1.9.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -372,12 +378,12 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
-version = "1.0.0"
+version = "1.0.3"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.1"
+version = "1.10.0"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -389,7 +395,7 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.12+3"
+version = "1.2.13+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
