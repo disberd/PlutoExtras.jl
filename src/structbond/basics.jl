@@ -1,10 +1,15 @@
 
 import REPL: fielddoc
-import ..Editable
 import ..ToggleReactiveBond
 using HypertextLiteral
-using PlutoUI
+import PlutoUI.Experimental: wrapped
+using PlutoUI: combine
 
+CSS_Sheets = map(readdir(joinpath(@__DIR__, "css"))) do file
+	name = replace(file, r"\.[\w]+$" => "") |> Symbol
+	path = joinpath(@__DIR__, "css", file)
+	name => read(path, String)
+end |> NamedTuple
 # StructBond Helpers #
 ## Structs ##
 struct NotDefined end
@@ -127,7 +132,7 @@ function fieldhtml(s::Type, f::Symbol)
 end
 
 function typehtml(T::Type)
-	inner_bond = PlutoUI.combine() do Child
+	inner_bond = combine() do Child
 		@htl """
 		$([
 			Child(string(name), fieldhtml(T, name))

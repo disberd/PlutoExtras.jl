@@ -1,0 +1,100 @@
+bondtable-container {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 50px;
+    left: 10px;
+    background: var(--overlay-button-bg);
+    border: 3px solid #e7e7e7;
+    border-radius: 10px;
+    padding-left: 8px;
+    padding-top: 8px;
+    z-index: 600;
+    width: 400px;
+    max-height: 600px;
+    transition: transform 300ms cubic-bezier(0.18, 0.89, 0.45, 1.12);
+}
+bondtable-container:not(.collapsed) > * {
+    padding-right: 8px;
+}
+bondtable-contents {
+    display: grid;
+    grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+    grid-auto-rows: fit-content(40px);
+    justify-items: center;
+    padding-bottom: 8px;
+    align-items: center;
+    row-gap: 5px;
+    overflow: auto;
+}
+bondtable-contents togglereactive-container.no-popout,
+bondtable-contents > *, 
+bondtable-contents struct-bond {
+    display: contents
+}
+togglereactive-container.no-popout:before {
+    content: '';
+    display: block;
+    grid-column: 1 / -1;
+    justify-self: center;
+    border-bottom: 2px solid;
+    padding-top: 5px;
+    width: 100%;
+    align-self: start;
+    position: sticky;
+    top: 0px;
+    background: var(--overlay-button-bg);
+    z-index: 20;
+}
+togglereactive-container.no-popout > togglereactive-header {
+    align-self: start;
+    position: sticky;
+    top: 0px;
+    background: var(--overlay-button-bg);
+    padding-top: 12px;
+    margin-top: -12px;
+    z-index: 10;
+}
+bondtable-header {
+    display: flex;
+    justify-items: stretch;
+}
+bondtable-header > .description {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    touch-action: none;
+    user-select: none;
+}
+bondtable-header > .icon {
+    filter: var(--image-filters);
+    cursor: pointer;
+}
+bondtable-header .table-collapse {
+    --size: 23px;
+    background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/arrow-back.svg");
+}
+bondtable-container.collapsed .table-collapse {
+    background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/options-outline.svg");
+    margin-right: 0px;
+}
+bondtable-container.collapsed .table-collapse:hover {
+    background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/arrow-forward.svg");
+}
+bondtable-container.collapsed {
+    transform: translateX(calc(-100% + 35px));
+    height: auto !important;
+    left: 0px !important;
+    overflow: hidden;
+    padding: 5px;
+}
+bondtable-container.collapsed bondtable-contents,
+bondtable-container.collapsed separator {
+    display: none;
+}
+@media (prefers-color-scheme: dark) {
+    bondtable-container {
+        border-color: #7d7d7d;
+    }
+}
