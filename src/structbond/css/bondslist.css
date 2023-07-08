@@ -1,0 +1,91 @@
+bondslist-header {
+  grid-column: 1 / -1;
+  display: flex;
+  background: var(--overlay-button-bg);
+}
+bondslist-header:before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: -1;
+  background: #ffac4540;
+}
+bondslist-container.no-popout > bondslist-header {
+  align-self: start;
+  position: sticky;
+  top: 0px;
+  padding-top: 12px;
+  margin-top: -12px;
+  z-index: 10;
+}
+bondslist-contents {
+  display: contents;
+}
+bondslist-container.no-popout:before {
+  content: "";
+  display: block;
+  grid-column: 1 / -1;
+  justify-self: center;
+  border-bottom: 2px solid;
+  padding-top: 5px;
+  width: 100%;
+  align-self: start;
+  position: sticky;
+  top: 0px;
+  background: var(--overlay-button-bg);
+  z-index: 20;
+}
+bondslist-header > .bondslist-icon {
+  --size: 17px;
+  display: block;
+  align-self: stretch;
+  background-size: var(--size) var(--size);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: var(--size);
+  filter: var(--image-filters);
+}
+bondslist-header > .collapse {
+  background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
+  cursor: pointer;
+}
+bondslist-container.collapsed > bondslist-header > .collapse {
+  background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
+}
+bondslist-header > .toggle {
+  display: inline-block;
+  width: 30px;
+  margin: 0 10px;
+}
+bondslist-header {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+bondslist-header > .description {
+  text-align: center;
+  flex-grow: 1;
+  font-size: 18px;
+  font-weight: 600;
+}
+bondslist-header > .toggle {
+  align-self: center;
+}
+bondslist-container.collapsed bondslist-header + * {
+  display: none !important;
+}
+bondslist-container {
+  display: grid;
+  grid-template-columns: 1fr minmax(min(50px, 100%), 0.4fr);
+  grid-auto-rows: fit-content(40px);
+  justify-items: center;
+  align-items: center;
+  row-gap: 5px;
+}
+bondstable-container bondslist-container {
+  display: contents;
+}

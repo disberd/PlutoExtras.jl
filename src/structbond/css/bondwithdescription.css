@@ -1,0 +1,16 @@
+bond-with-description {
+  display: grid;
+  grid-template-columns: 1fr minmax(min(50px, 100%), 0.4fr);
+  grid-auto-rows: fit-content(40px);
+  justify-items: center;
+}
+bondtable-contents bond-with-description,
+bondslist-contents bond-with-description {
+  display: contents;
+}
+bond-value bond {
+  display: flex; /* Needed for consistent sizing (width) of the input */
+}
+bond-value input {
+  width: 100%; /* Needed for consistent sizing (width) of the input */
+}

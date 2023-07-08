@@ -1,0 +1,44 @@
+popout-header {
+    display: flex;
+    border: 3px dashed transparent;
+    border-radius: 10px;
+    justify-content: center;
+}
+popout-contents {
+    display: none;
+    width: 400px;
+    background: var(--overlay-button-bg);
+    border: 3px solid var(--overlay-button-border);
+    border-radius: 10px;
+    padding: 8px;
+}
+popout-container.popped > popout-contents,
+popout-container.header-hover > popout-contents {
+    display: block;
+    position: fixed;
+    z-index: 500;
+}
+popout-container.contents-hover > popout-header {
+    border-color: var(--pluto-logs-warn-accent-color);
+}
+.popout-icon {
+    --size: 20px;
+    display: block;
+    align-self: stretch;
+    background-size: var(--size) var(--size);
+    background-repeat: no-repeat;
+    background-position: center;
+    width: var(--size);
+    min-height: var(--size);
+    filter: var(--image-filters);
+}
+.popout-icon.popout {	
+    background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/expand.svg);
+}
+popout-container.popped .popout {
+    background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/contract.svg);
+}
+popout-container.popped togglereactive-header > .description {
+    touch-action: none;
+    user-select: none;
+}
