@@ -31,7 +31,7 @@ Base.@kwdef struct StructBond{T}
 	description::Any
 	secret_key::String=String(rand('a':'z', 10))
 end
-StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T), description)
+StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T; description), description)
 
 ## structbondtype ##
 structbondtype(::StructBond{T}) where T = T
@@ -78,11 +78,7 @@ _show(t::StructBond{T}) where T = @htl("""
 	<script id = $(t.secret_key)>
 		
 		const parent = currentScript.parentElement
-		const widget = currentScript.previousElementSibling
-	
-		// Overwrite the description
-		const desc = widget.querySelector('.description')
-		desc.innerHTML = $(t.description)
+		const widget = parent.firstElementChild
 	
 		// Set-Get bond
 	

@@ -115,7 +115,7 @@ function fieldhtml(s::Type, f::Symbol)
 	return out
 end
 
-function typehtml(T::Type)
+function typehtml(T::Type; description = typedescription(T))
 	inner_bond = combine() do Child
 		@htl """
 		$([
@@ -149,7 +149,7 @@ function typehtml(T::Type)
 		$(CSS_PARTS.typehtml)
 		</style>
 		""")
-	end; description = typedescription(T))
+	end; description)
 end
 
 ### Constructor ###

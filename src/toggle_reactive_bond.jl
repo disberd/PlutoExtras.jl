@@ -33,7 +33,7 @@ md"""
 begin
 	Base.@kwdef struct ToggleReactiveBond
 		element::Any
-		description::String
+		description::Any
 		secret_key::String=String(rand('a':'z', 10))
 	end
 	ToggleReactiveBond(element; description = "") = ToggleReactiveBond(;element, description)
