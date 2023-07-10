@@ -155,7 +155,7 @@ Base.show(io::IO, mime::MIME"text/html", bd::BondWithDescription) = show(io, mim
 		$(bd.bond)
 	</bond-value>
 	<style>
-		$(CSS_Sheets.bondwithdescription)
+		$(CSS_PARTS.bondwithdescription)
 	</style>
 </bond-with-description>
 """))
@@ -188,7 +188,7 @@ Base.show(io::IO, mime::MIME"text/html", bl::BondsList) = show(io, mime, @htl(""
 		collapse_btn.onclick = (e) => container.collapse()
 	</script>
 	<style>
-	$(CSS_Sheets.bondslist)		
+	$(CSS_PARTS.bondslist)		
 	</style>
 </bondslist-container>
 """))
@@ -364,7 +364,7 @@ _show_popout(p::Popout) = wrapped() do Child
 	header.onmouseleave = (e) => container.classList.toggle('header-hover', false)
 </script>
 <style>
-	$(CSS_Sheets.popout)
+	$(CSS_PARTS.popout)
 </style>
 """)
 end
@@ -455,7 +455,7 @@ bondtable_interaction_handler = HTLScriptPart(@htl """
 ## CSS - BondTable ##
 bondtable_style = @htl """
 <style>
-	$(CSS_Sheets.bondtable)
+	$(CSS_PARTS.bondtable)
 </style>
 """;
 

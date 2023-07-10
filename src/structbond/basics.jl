@@ -5,7 +5,8 @@ using HypertextLiteral
 import PlutoUI.Experimental: wrapped
 using PlutoUI: combine
 
-CSS_Sheets = map(readdir(joinpath(@__DIR__, "css"))) do file
+# Extract CSS that will be used in internal functions
+const CSS_PARTS = map(readdir(joinpath(@__DIR__, "css"))) do file
 	name = replace(file, r"\.[\w]+$" => "") |> Symbol
 	path = joinpath(@__DIR__, "css", file)
 	name => read(path, String)
@@ -107,24 +108,7 @@ function fieldhtml(s::Type, f::Symbol)
 			<field-bond class='$f'>$(Child(fieldbond(s, f)))</field-bond>
 		</field-html>
 		<style>
-			field-html {
-				display: grid;
-				grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
-				grid-auto-rows: fit-content(40px);
-				justify-items: center;
-				//padding: 2px 5px 10px 0px;
-				align-items: center;
-				row-gap: 5px;
-			}
-			field-bond {
-				display: flex;
-			}
-			field-bond input {
-				width: 100%;
-			}
-   			field-description {
-				text-align: center;
-			}
+		$(CSS_PARTS.fieldhtml)
 		</style>
 		""")
 	end
@@ -162,55 +146,7 @@ function typehtml(T::Type)
 		
 	</script>
 		<style>
-			togglereactive-container field-html {
-				display: contents;
-			}
-			togglereactive-container {
-				display: grid;
-				grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
-				grid-auto-rows: fit-content(40px);
-				justify-items: center;
-				align-items: center;
-				row-gap: 5px;
-				/* The flex below is needed in some weird cases where the bond is display flex and the child becomes small. */
-				flex: 1;
-			}
-			togglereactive-header {
-				grid-column: 1 / -1;
-				display: flex;
-			}
-			togglereactive-header > .collapse {
-				--size: 17px;
-			    display: block;
-			    align-self: stretch;
-			    background-size: var(--size) var(--size);
-			    background-repeat: no-repeat;
-			    background-position: center;
-			    width: var(--size);
-			    filter: var(--image-filters);
-				background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
-				cursor: pointer;
-			}
-			togglereactive-container.collapsed > togglereactive-header > .collapse {
-				background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
-			}
-			togglereactive-header {
-				display: flex;
-				align-items: stretch;
-				width: 100%;
-			}
-			togglereactive-header > .description {
-				text-align: center;
-				flex-grow: 1;
-				font-size: 18px;
-				font-weight: 600;
-			}
-			togglereactive-header > .toggle {
-				align-self: center
-			}
-			togglereactive-container.collapsed togglereactive-header + * {
-				display: none !important;
-			}
+		$(CSS_PARTS.typehtml)
 		</style>
 		""")
 	end; description = typedescription(T))
