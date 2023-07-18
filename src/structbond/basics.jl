@@ -1,6 +1,5 @@
 
 import REPL: fielddoc
-import ..ToggleReactiveBond
 using HypertextLiteral
 import PlutoUI.Experimental: wrapped
 using PlutoUI: combine
@@ -11,6 +10,19 @@ const CSS_PARTS = map(readdir(joinpath(@__DIR__, "css"))) do file
 	path = joinpath(@__DIR__, "css", file)
 	name => read(path, String)
 end |> NamedTuple
+
+# Extract JS code that will be used in funtctions
+const JS_PARTS = open(joinpath(@__DIR__, "js/code_parts.js"), "r") do file
+    code_parts = []
+    readuntil(file, "// NEW BLOCK:")
+    while !eof(file)
+        name = readline(file) |> strip |> Symbol
+        code = readuntil(file, "// NEW BLOCK:") |> strip |> HypertextLiteral.JavaScript
+        push!(code_parts, name => code) 
+    end
+	code_parts
+end |> NamedTuple
+
 # StructBond Helpers #
 ## Structs ##
 struct NotDefined end

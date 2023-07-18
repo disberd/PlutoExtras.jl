@@ -4,10 +4,11 @@ import AbstractPlutoDingetjes.Bonds
 # Structure #
 Base.@kwdef struct ToggleReactiveBond
     element::Any
-    description::Any
+    description::Any = ""
     secret_key::String=String(rand('a':'z', 10))
+	classes::Vector{String} = String[]
 end
-ToggleReactiveBond(element; description = "") = ToggleReactiveBond(;element, description)
+ToggleReactiveBond(element; kwargs...) = ToggleReactiveBond(;kwargs..., element)
 
 # AbstractPlutoDingetjes.Bonds methods
 function Bonds.initial_value(r::ToggleReactiveBond)
@@ -24,11 +25,16 @@ function Bonds.possible_values(r::ToggleReactiveBond)
 end
 
 ## Show ##
-# Base.show
-function Base.show(io::IO, mime::MIME"text/html", r::ToggleReactiveBond)
-show(io, mime, @htl("""
-<togglereactive-container>
+function _generate_html(r::ToggleReactiveBond)
+tag = if isempty(r.classes)
+	@htl("<togglereactive-container>")
+else
+	@htl("<togglereactive-container class=$(r.classes)>")
+end
+out = @htl("""
+$tag
 	<togglereactive-header>
+		<span class='collapse'></span>
 		<span class='description'>$(r.description)</span>
 		<input type='checkbox' class='toggle' checked>
 	</togglereactive-header>
@@ -72,11 +78,19 @@ show(io, mime, @htl("""
 			},
 			configurable: true,
 		});
+
+		// We do the part for the collapsing
+		parent.collapse = () => {
+  			parent.classList.toggle('collapsed')
+		}
+		const collapse_btn = parent.querySelector('span.collapse')
+		collapse_btn.onclick = e => parent.collapse()
 	</script>
 	<style>
     $(CSS_PARTS.togglereactive)
     </style>
 </togglereactive-container>
 """)
-)
 end
+# Base.show
+Base.show(io::IO, mime::MIME"text/html", r::ToggleReactiveBond) = show(io, mime, _generate_html(r))
