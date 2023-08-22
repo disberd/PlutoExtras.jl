@@ -20,16 +20,31 @@ using HypertextLiteral
 # ╔═╡ 3b1033d4-f1b3-4509-8592-75cb42d25034
 import AbstractPlutoDingetjes: AbstractPlutoDingetjes, Bonds
 
+# ╔═╡ 82bba4fc-3ad7-4f71-9d62-4100540c7d43
+md"""
+# String On Enter
+"""
+
+# ╔═╡ 1ceca066-3b1a-412e-9458-63cf3b295e0d
+md"""
+Create an element inspired by TextField from PlutoUI but with the possibility of updating the bond value only when `Enter` is pressed ot the focus is moved away from the field itself.
+"""
+
+# ╔═╡ b5d6af68-63c0-43dc-b63a-679fea381b8d
+md"""
+## Example
+"""
+
 # ╔═╡ cffff0cf-8f1b-414f-ae81-72b41ab1636a
 begin
 	
-	struct MyTextField
+	struct StringOnEnter
 		default::String
 	end
 		
-	Base.show(io::IO, mime::MIME"text/html", mt::MyTextField) = show(io, mime, @htl """
+	Base.show(io::IO, mime::MIME"text/html", mt::StringOnEnter) = show(io, mime, @htl """
 	<span><span 
-		class="text_MyTextField" style="
+		class="text_StringOnEnter" style="
 			padding: 0em .2em;
 			border-radius: .3em;
 			font-weight: bold;"
@@ -73,34 +88,35 @@ begin
 	
 	<style>
 			@media (prefers-color-scheme: light) {
-				span.text_MyTextField {
+				span.text_StringOnEnter {
 					background: hsl(135, 57%, 60%);
 				}
 			}
 			@media (prefers-color-scheme: dark) {
-				span.text_MyTextField {
+				span.text_StringOnEnter {
 					background: hsl(135, 43%, 32%);
 				}
 			}
 	</style>
 	""")
 	
-	Base.get(t::MyTextField) = t.default
-	initial_value(t::MyTextField) = t.default
-	possible_values(t::MyTextField) = InfinitePossibilities()
+	Base.get(t::StringOnEnter) = t.default
+	initial_value(t::StringOnEnter) = t.default
+	possible_values(t::StringOnEnter) = InfinitePossibilities()
 	
-	function validate_value(t::MyTextField, val)
+	function validate_value(t::StringOnEnter, val)
 		val isa AbstractString
 	end
 	
 end
 
+# ╔═╡ e6a75043-435d-4509-98dd-9c96fa6b5bbb
+export StringOnEnter
+
 # ╔═╡ 4c21d9e5-23e4-4001-be12-05959a464643
-
 md"""
-This is a text field: $(@bind text MyTextField("ciao"))
+This is an example of `StringOnEnter`: $(@bind text StringOnEnter("ciao"))
 """
-
 
 # ╔═╡ c441e589-3a31-4390-806c-c3a4546aa7b6
 text
@@ -272,8 +288,12 @@ version = "17.4.0+0"
 # ╔═╡ Cell order:
 # ╠═46af7028-633e-432f-a9fc-fad15589bf2a
 # ╠═3b1033d4-f1b3-4509-8592-75cb42d25034
-# ╠═cffff0cf-8f1b-414f-ae81-72b41ab1636a
+# ╟─82bba4fc-3ad7-4f71-9d62-4100540c7d43
+# ╟─1ceca066-3b1a-412e-9458-63cf3b295e0d
+# ╠═e6a75043-435d-4509-98dd-9c96fa6b5bbb
+# ╟─b5d6af68-63c0-43dc-b63a-679fea381b8d
 # ╠═4c21d9e5-23e4-4001-be12-05959a464643
 # ╠═c441e589-3a31-4390-806c-c3a4546aa7b6
+# ╠═cffff0cf-8f1b-414f-ae81-72b41ab1636a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
