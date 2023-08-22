@@ -101,10 +101,10 @@ begin
 	""")
 	
 	Base.get(t::StringOnEnter) = t.default
-	initial_value(t::StringOnEnter) = t.default
-	possible_values(t::StringOnEnter) = InfinitePossibilities()
+	Bonds.initial_value(t::StringOnEnter) = t.default
+	Bonds.possible_values(t::StringOnEnter) = Bonds.InfinitePossibilities()
 	
-	function validate_value(t::StringOnEnter, val)
+	function Bonds.validate_value(t::StringOnEnter, val)
 		val isa AbstractString
 	end
 	
