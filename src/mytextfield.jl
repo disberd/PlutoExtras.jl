@@ -27,7 +27,7 @@ md"""
 
 # ╔═╡ 1ceca066-3b1a-412e-9458-63cf3b295e0d
 md"""
-Create an element inspired by TextField from PlutoUI but with the possibility of updating the bond value only when `Enter` is pressed ot the focus is moved away from the field itself.
+Create an element inspired by TextField from PlutoUI but with the possibility of updating the bond value only when `Enter` is pressed or the focus is moved away from the field itself.
 """
 
 # ╔═╡ b5d6af68-63c0-43dc-b63a-679fea381b8d
@@ -43,7 +43,7 @@ begin
 			default::String
 		end
 	
-	Create an element inspired by TextField from PlutoUI but with the possibility of updating the bond value only when Enter is pressed ot the focus is moved away from the field itself.
+	Create an element inspired by TextField from PlutoUI but with the possibility of updating the bond value only when Enter is pressed or the focus is moved away from the field itself.
 	"""
 	struct StringOnEnter
 		default::String
