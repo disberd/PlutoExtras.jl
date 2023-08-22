@@ -28,7 +28,13 @@ begin
 	end
 		
 	Base.show(io::IO, mime::MIME"text/html", mt::MyTextField) = show(io, mime, @htl """
-	<span><span contentEditable=true>$(mt.default)</span></span>
+	<span><span 
+		class="text_MyTextField" style="
+			padding: 0em .2em;
+			border-radius: .3em;
+			font-weight: bold;"
+		contentEditable=true>$(mt.default)</span></span>
+	
 	<script>
 		const elp = currentScript.previousElementSibling
 		const el = elp.querySelector('span')
@@ -64,6 +70,19 @@ begin
 		elp.addEventListener('focusout',dispatchEvent)
 		elp.addEventListener('keydown',onEnter)
 	</script>
+	
+	<style>
+			@media (prefers-color-scheme: light) {
+				span.text_MyTextField {
+					background: hsl(135, 57%, 60%);
+				}
+			}
+			@media (prefers-color-scheme: dark) {
+				span.text_MyTextField {
+					background: hsl(135, 43%, 32%);
+				}
+			}
+	</style>
 	""")
 	
 	Base.get(t::MyTextField) = t.default
