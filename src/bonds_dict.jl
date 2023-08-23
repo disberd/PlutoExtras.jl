@@ -1,5 +1,7 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
+
+#> custom_attrs = ["hide-enabled"]
 
 using Markdown
 using InteractiveUtils
@@ -18,8 +20,9 @@ end
 # ╠═╡ skip_as_script = true
 #=╠═╡
 begin
-	using PlutoPlotly
-	using PlutoUtils: ExtendedTableOfContents
+	using PlutoPlotly 
+	using PlutoExtras: ExtendedTableOfContents
+	using PlutoTest
 end
   ╠═╡ =#
 
@@ -35,6 +38,18 @@ md"""
 #=╠═╡
 ExtendedTableOfContents()
   ╠═╡ =#
+
+# ╔═╡ 413bf827-4c76-4956-a6cf-37ab5b6db171
+_floating_ui = HTLScript(@htl("""
+<script>
+	const floating_ui = await import('https://esm.sh/@floating-ui/dom')
+	window.floating_ui = floating_ui
+	const { computePosition, autoPlacement, autoUpdate, offset } = floatin_ui
+</script>
+"""))
+
+# ╔═╡ 982a6c18-ef9d-4f81-8004-a484802ee6a3
+@htl "$_floating_ui"
 
 # ╔═╡ 278449d8-b67d-4ca9-9910-e19836e42a93
 # ╠═╡ skip_as_script = true
@@ -99,6 +114,7 @@ Base.show(io::IO, m::MIME"text/html", b::BondWrapper) = show(io,m,b.bond)
 is_table_name(b::BondWrapper) = b.description === "__table_name__" ? true : false 
 
 # ╔═╡ ab41cb62-44b9-4994-90ef-a9ed329c9394
+# ╠═╡ custom_attrs = ["toc-collapsed"]
 md"""
 ## Script
 """
@@ -165,7 +181,7 @@ _interaction_handler = HTLScriptPart(@htl """
 	})
 	interact(tb)
 	  .resizable({
-	    edges: { top: true, left: true, bottom: true, right: true },
+	    edges: { top: true, left: false, bottom: true, right: true },
 	    listeners: {
 	      move: function (event) {
 		
@@ -221,19 +237,41 @@ _table_container_style = @htl """
 		border-radius: 10px;
 		box-shadow: 0 0 11px 0px #00000010;
 		touch-action: none;
+		max-height: 70%;
 	}
 	.table_container.hide {
 		transform: translateX(calc(-100% + 35px));
 		height: auto !important;
 		left: 0px !important;
+		overflow: hidden;
 	}
-	.table_container > .resize_handler {
-		position: absolute;
-		right: 0px;
-		bottom: 0px;
+	.table_container .title {
+		font-weight: 800;
+		display: flex;
+		position: sticky;
+		top: 0px;
+		padding: 3px;
+		background: var(--main-bg-color);
+		z-index: 100;
+	}
+	.table_container .title  > .name-container {
+		display: inline-block;
+		flex: 1;
+		text-align: center;
+	}
+	.table_container > .title > .name-container {
+		cursor: move;
+	}
+	.table_container.hide > .title {
+		margin: 0px;
+		padding: 4px;
+	}
+	.table_container .separator {
 		height: 10px;
-		width: 10px;
-		content: '';
+		grid-column: 1 / -1;
+	}
+	.table_container .bondsdict_table:last-child .table-row:last-child > .separator {
+		height: 0px;
 	}
 	@media (prefers-color-scheme: dark) {
 		.table_container {
@@ -260,24 +298,47 @@ _params_container_style = @htl """
 		display: grid;
 		grid-template-columns: 1fr minmax(50px, 100px) auto auto;
 		grid-auto-rows: fit-content(40px);
-		row-gap: 10px;
 		justify-items: center;
-		padding: 5px 5px 10px 0px;
+		padding: 2px 5px 10px 0px;
 		align-items: center;
 	}
-	.params_container.hide_extra {
+	.table_container.hide_extra .params_container {
 		grid-template-columns: 1fr minmax(50px, 100px);
 	}
-	.params_container.hide_extra .extra_item {
+	.table_container.hide_extra .params_container .extra_item {
 		display: none !important;
 	}
-	.table_container.hide > .params_container > *:not(.title) {
+	.table_container.hide > .params_container {
 		display: none;
 	}
-	.table_container.hide > .params_container {
-		padding-bottom: 5px;
+	.params_header {
+		display: contents;
 	}
-	.params_container .title {
+	.params_container .extra_item {
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+</style>
+""";
+
+# ╔═╡ 6c140675-2f64-408d-809f-2a24ee6f4872
+md"""
+### Inner Table
+"""
+
+# ╔═╡ 88d13b76-2eb1-4cd3-87ca-733bee714a04
+_inner_table_style = @htl """
+<style>
+	.bondsdict_table {
+		display: contents;
+	}
+	.bondsdict_table .border_container {
+		grid-column: 1 / -1;
+		justify-self: center;
+		border-bottom: solid;
+		width: 95%;
+	}
+	.bondsdict_table .title {
 		grid-column: 1 / -1;
 		font-weight: 800;
 		justify-self: stretch;
@@ -286,15 +347,54 @@ _params_container_style = @htl """
 		top: 0px;
 		background: var(--main-bg-color);
 		z-index: 100;
+		margin: 0px 6px;
+		margin-top: 3px;
 	}
-	.params_container .title  > .name-container {
-		cursor: move;
+	.bondsdict_table > .bonds {
+		display: contents;
+	}
+	.bondsdict_table.collapsed > .bonds {
+		display: none;
+	}
+	.bondsdict_table.collapsed > .separator {
+		height: 3px;
+	}
+	.bondsdict_table .title  > .name-container {
 		display: inline-block;
 		flex: 1;
 		text-align: center;
 	}
-	.params_header {
+	.table-row {
 		display: contents;
+	}
+	.table-row .desc {
+		text-align: center;
+	}
+	span.bondtable_icon {
+	    --size: 17px;
+	    display: block;
+	    align-self: stretch;
+	    background-size: var(--size) var(--size);
+	    background-repeat: no-repeat;
+	    background-position: center;
+	    width: var(--size);
+	    filter: var(--image-filters);
+	}
+	span.bondtable_icon.section_collapse {
+    	background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
+	}
+	.bondsdict_table.collapsed span.bondtable_icon.section_collapse {
+    	background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
+	}
+	.bondsdict_table .params_header {
+		display: contents;
+	}
+	.bondsdict_table .params_header > .separator {
+		height: 5px;
+	}
+	.bondsdict_table:not(.active) .params_header > span {
+		visibility: hidden;
+		height: 0px;
 	}
 </style>
 """;
@@ -318,7 +418,6 @@ _icons_style = @htl """
 		cursor: help;
 		--size: 22px;
 		background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/help.svg");
-		margin-left: 3px;
 	}
 	.title > .icon.collapse {
 		cursor: pointer;
@@ -334,6 +433,7 @@ _icons_style = @htl """
 """;
 
 # ╔═╡ d4549cda-cd11-4c7d-9411-7ab0c56f9d2a
+# ╠═╡ custom_attrs = ["toc-collapsed"]
 md"""
 # Helpers scripts
 """
@@ -496,6 +596,7 @@ function _popup_events(bypass, popup_id::String=FlexiBind.randstr(6), style="plu
 end
 
 # ╔═╡ 4efe496a-6cc7-49c4-9da5-96cc24db648e
+# ╠═╡ custom_attrs = ["toc-collapsed"]
 md"""
 # Popup Contents
 """
@@ -732,11 +833,47 @@ is_table_name(b) && return @htl ""
 <div class='table-row $def_without_spaces'>
 	<span class='desc'>$(rich_desc)$(_desc_script(b))</span>
 	$(b.bond)
-	<style>
-		.table-row {
-			display: contents;
-		}
-	</style>
+	<div class='separator'></div>
+</div>
+"""
+end
+
+# ╔═╡ 372443e8-668a-4e79-a9b3-33e038f42c50
+md"""
+## bondsdict_table
+"""
+
+# ╔═╡ 11a39a25-b1e2-47b1-977f-fd240b66caed
+function bondsdict_table(d::BondTable; name = d["__table_name__"].description, class = nothing, id = nothing)
+table_info = d["__table_name__"]
+def = table_info.defines
+desc = table_info.rich_description
+@htl """
+<div class='bondsdict_table'>
+	<div class='border_container'></div>
+	<div class='title'>
+		<span class='section_collapse bondtable_icon'></span>
+		<div class='name-container'><span class='name'>$desc</span></div>
+	</div>
+	<div class='bonds'>
+	<div class='params_header'>
+		<div class='separator'></div>
+		<span>Name</span>
+		<span>Bond</span>
+		<span class='extra_item'>Sync$(_sync_popup_script())</span>
+		<span class='extra_item'>Update$(_update_popup_script())</span>
+		<div class='separator'></div>
+	</div>
+	$(map(table_row, values(d)))
+	</div>
+<script>
+	const table = currentScript.parentElement
+	const collapse_btn = table.querySelector('.section_collapse')
+ 	function collapse() {
+		table.classList.toggle('collapsed')
+	}
+	collapse_btn.addEventListener('click', collapse)
+</script>
 </div>
 """
 end
@@ -757,40 +894,30 @@ md"""
 """
   ╠═╡ =#
 
+# ╔═╡ 2bb62826-7b65-421f-86ff-8b55aa18f94e
+show_bondsdict(d::BondTable;kwargs...) = show_bondsdict([d];kwargs...)
+
 # ╔═╡ 72841851-4303-4b33-842b-d6812737023e
-function show_bondsdict(d::BondTable; name = d["__table_name__"].bond.content, class = nothing, id = nothing)
-table_name = d["__table_name__"]
-def = table_name.defines
-desc = table_name.bond.content
+function show_bondsdict(d::AbstractVector{<:BondTable}; name = "Parameters", class = nothing, id = nothing)
+def = :_parameters
+desc = name
 @htl """
 $_attach_to_window
-<div class='table_container'>
+<div class='table_container $(class)'>
 	$_script
-	<div class='params_container'>
 	<div class='title'>
 		<span class='help icon'>$(_help_popup_script(desc, def))</span>
-		<div class='name-container'><span class='name'>$desc</span></div>
+		<div class='name-container'><span class='name'>$name</span></div>
 		<span class='collapse icon'></span>
 	</div>
-	<div class='params_header'>
-		<span>Name</span>
-		<span>Bond</span>
-		<span class='extra_item'>Sync$(_sync_popup_script())</span>
-		<span class='extra_item'>Update$(_update_popup_script())</span>
-	</div>
-	$(map(table_row, values(d)))
+	<div class='params_container'>
+	$(map(bondsdict_table, d))
 </div>
-<!-- <span class='resize_handler'><script>
-	let parent = currentScript.parentElement
-	console.log(parent)
-	parent.addEventListener('click', (e) => {
-		console.log('gesu')
-	})
-</script></span> -->
 </div>
 $([
 	_table_container_style,
 	_params_container_style,
+	_inner_table_style,
 	_icons_style,
 ])
 <style>
@@ -803,6 +930,9 @@ $([
 	.params_header span {
 		font-style: italic;
 		font-size: 18px;
+	}
+	.params_container > .params_header > span {
+		height: 0px;
 	}
 	.title .name {
 		font-size: 20px;
@@ -901,13 +1031,14 @@ md"""
 # ╔═╡ 295d3811-a102-4c62-9ea1-7fd1b04a36f2
 # ╠═╡ skip_as_script = true
 #=╠═╡
-@bondsdict params "Gesu Cristo"
+@bondsdict params "First Type"
   ╠═╡ =#
 
+# ╔═╡ 84757e03-eab8-404a-ac2f-271febb9a603
+
+
 # ╔═╡ 0596419d-d9cc-47e1-9ef3-77b0a48b50a5
-#=╠═╡
-show_bondsdict(params)
-  ╠═╡ =#
+
 
 # ╔═╡ c0105f4e-632e-405a-b59d-25eaf17767ef
 # ╠═╡ skip_as_script = true
@@ -962,9 +1093,61 @@ function _addbond_expr(calling_module, cell_id, dictname, desc, rich_desc, symbo
 	end
 end
 
+# ╔═╡ 94ff65fe-4df4-4608-93c7-e13104784991
+# ╠═╡ skip_as_script = true
+#=╠═╡
+@bondsdict p2 "Second";
+  ╠═╡ =#
+
+# ╔═╡ 2bd7b82a-d0c4-48c3-88bf-2f6f7772598a
+#=╠═╡
+@htl """
+<div class='params_container'>
+	$(map(bondsdict_table, [
+		params,
+		p2
+	]))
+</div>
+"""
+  ╠═╡ =#
+
 # ╔═╡ 3b740180-049b-406c-b29a-f6f436ee3b4d
 #=╠═╡
-@test params["SANTO"].rich_description == md"``C_n^2``"
+@test p2["SANTO"].rich_description == md"``C_n^2``"
+  ╠═╡ =#
+
+# ╔═╡ 4151eaf4-fbbf-4136-a094-7ee555efdc50
+@htl """
+<input type='button' value='Rerun Show' id='rerun_show'></input>
+<script>
+	const but = document.getElementById('rerun_show')
+	const cell = document.querySelector('.table_container .bondsdict_table').closest('pluto-cell')
+	const rerun = cell.querySelector('button.runcell')
+	but.addEventListener('click', (e) => {
+		rerun.click()
+	})
+</script>
+<style>
+	#rerun_show {
+		position: fixed;
+		top: 35px;
+  		left: 15px;
+		z-index: 150;
+	}
+</style>
+"""
+
+# ╔═╡ 4713435c-cda0-435e-a07f-28ce7530e5e8
+# ╠═╡ skip_as_script = true
+#=╠═╡
+@bondsdict p3 "Third"
+  ╠═╡ =#
+
+# ╔═╡ 5653097d-9220-467c-989e-2760b5cbc4a1
+#=╠═╡
+let
+	show_bondsdict([params, p2,  p3])
+end
   ╠═╡ =#
 
 # ╔═╡ ac5e41e2-89c7-4045-9275-7cebe6b6dd92
@@ -1000,7 +1183,47 @@ ciao
 
 # ╔═╡ 9f043f97-1f64-4eab-9749-c749c76759a7
 #=╠═╡
-@addbond params["SANTO"] md"``C_n^2``" santo Slider(1:10)
+@addbond p2["SANTO"] md"``C_n^2``" santo Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ 142ebb26-09c4-4c07-a1a1-944c1dc15404
+#=╠═╡
+santo
+  ╠═╡ =#
+
+# ╔═╡ d0292ba7-030c-4251-a2ee-fe862041617c
+#=╠═╡
+@addbond p2["SIGNORE"] Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ 118feee5-9353-437d-953a-223edfb0c0db
+#=╠═╡
+@addbond p3["B"] Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ 09bab1dc-d024-4586-b57e-61c573bc7b7d
+#=╠═╡
+@addbond p3["C"] Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ 967e8b7f-cbbe-45a0-bd0a-8968db825c98
+#=╠═╡
+@addbond p3["D"] Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ d85aa78b-93fb-40d5-b00a-e4d449965e48
+#=╠═╡
+@addbond p3["E"] Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ d8bb923c-5904-41ca-a419-7bf49f15f8a3
+#=╠═╡
+@addbond p3["F"] Slider(1:10)
+  ╠═╡ =#
+
+# ╔═╡ 590ca2e8-0a48-4ba5-bf02-7ce9fd5a0a3a
+#=╠═╡
+@addbond p3["G"] Slider(1:10)
   ╠═╡ =#
 
 # ╔═╡ b1f64f22-da01-45c0-a2f8-48cb6673d473
@@ -1104,27 +1327,29 @@ AbstractPlutoDingetjes = "6e696c72-6542-2067-7265-42206c756150"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
+PlutoExtras = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 PlutoPlotly = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
+PlutoTest = "cb4044da-4d16-4ffa-a6a3-8cad7f73ebdc"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-PlutoUtils = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 
 [compat]
 AbstractPlutoDingetjes = "~1.1.4"
 HypertextLiteral = "~0.9.3"
 OrderedCollections = "~1.4.1"
 PlutoDevMacros = "~0.4.8"
+PlutoExtras = "~0.6.0"
 PlutoPlotly = "~0.3.6"
+PlutoTest = "~0.2.2"
 PlutoUI = "~0.7.21"
-PlutoUtils = "~0.5.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.5"
+julia_version = "1.9.0-beta3"
 manifest_format = "2.0"
-project_hash = "f6140c95de62b5987e0b457fd5087a214a2b376c"
+project_hash = "e1940684f13b250cb81be0ae46de8a5c67b8b9f5"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1142,28 +1367,17 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
-[[deps.Chain]]
-git-tree-sha1 = "8c4920235f6c561e401dfe569beb8b924adad003"
-uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-version = "0.5.0"
-
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "e7ff6cadf743c098e08fca25c91103ee4303c9bb"
+git-tree-sha1 = "c6d890a52d2c4d55d326439580c3b8d0875a77d9"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.15.6"
-
-[[deps.ChangesOfVariables]]
-deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
-git-tree-sha1 = "38f7a08f19d8810338d4f5085211c7dfa5d5bdd8"
-uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
-version = "0.1.4"
+version = "1.15.7"
 
 [[deps.ColorSchemes]]
-deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Random"]
-git-tree-sha1 = "1fd869cc3875b57347f7027521f561cf46d1fcd8"
+deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Random", "SnoopPrecompile"]
+git-tree-sha1 = "aa3edc8f8dea6cbfa176ee12f7c2fc82f0608ed3"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.19.0"
+version = "3.20.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -1173,26 +1387,26 @@ version = "0.11.4"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
-git-tree-sha1 = "d08c20eef1f2cbc6e60fd3612ac4340b89fea322"
+git-tree-sha1 = "600cc5508d66b78aae350f7accdb58763ac18589"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.9.9"
+version = "0.9.10"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
-git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
+git-tree-sha1 = "fc08e5930ee9a4e03f84bfb5211cb54e7769758a"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.8"
+version = "0.12.10"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
-git-tree-sha1 = "3ca828fe1b75fa84b021a7860bd039eaea84d2f2"
+git-tree-sha1 = "00a2cccc7f098ff3b66806862d275ca3db9e6e5a"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.3.0"
+version = "4.5.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.1+0"
+version = "1.0.2+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -1200,13 +1414,15 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
+git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+version = "1.9.1"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
-git-tree-sha1 = "c36550cb29cbe373e95b3f40486b9a4148f89ffd"
+git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-version = "0.9.2"
+version = "0.9.3"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -1221,11 +1437,6 @@ deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
-
-[[deps.Glob]]
-git-tree-sha1 = "4df9f7e06108728ebf00a0a11edee4b29a482bb2"
-uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
-version = "1.3.0"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
@@ -1248,12 +1459,6 @@ version = "0.2.2"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.InverseFunctions]]
-deps = ["Test"]
-git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
-uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.8"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -1300,14 +1505,24 @@ version = "1.10.2+0"
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[deps.LinearAlgebra]]
-deps = ["Libdl", "libblastrampoline_jll"]
+deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LogExpFunctions]]
-deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "94d9c52ca447e23eac0c0f074effbcd38830deb5"
+deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
+git-tree-sha1 = "45b288af6956e67e621c5cbb2d75a261ab58300b"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.18"
+version = "0.3.20"
+
+    [deps.LogExpFunctions.extensions]
+    ChainRulesCoreExt = "ChainRulesCore"
+    ChangesOfVariablesExt = "ChangesOfVariables"
+    InverseFunctionsExt = "InverseFunctions"
+
+    [deps.LogExpFunctions.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    ChangesOfVariables = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
+    InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
@@ -1337,7 +1552,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2022.2.1"
+version = "2022.10.11"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
@@ -1346,7 +1561,7 @@ version = "1.2.0"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.20+0"
+version = "0.3.21+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1372,14 +1587,14 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "cceb0257b662528ecdf0b4b4302eb00e767b38e7"
+git-tree-sha1 = "8175fc2b118a3755113c8e68084dc1a9e63c61ee"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.0"
+version = "2.5.3"
 
 [[deps.Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.8.0"
+version = "1.9.0"
 
 [[deps.PlotlyBase]]
 deps = ["ColorSchemes", "Dates", "DelimitedFiles", "DocStringExtensions", "JSON", "LaTeXStrings", "Logging", "Parameters", "Pkg", "REPL", "Requires", "Statistics", "UUIDs"]
@@ -1393,23 +1608,29 @@ git-tree-sha1 = "b4b23b981704ac3e2c771a389c2899e69306c091"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
 version = "0.4.8"
 
+[[deps.PlutoExtras]]
+deps = ["AbstractPlutoDingetjes", "HypertextLiteral", "InteractiveUtils", "Markdown", "OrderedCollections", "PlutoDevMacros", "PlutoUI"]
+git-tree-sha1 = "14128b3beefcf20a62f6f92be570d770b027f04f"
+uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
+version = "0.6.0"
+
 [[deps.PlutoPlotly]]
 deps = ["AbstractPlutoDingetjes", "Colors", "Dates", "HypertextLiteral", "InteractiveUtils", "LaTeXStrings", "Markdown", "PlotlyBase", "PlutoUI", "Reexport"]
 git-tree-sha1 = "dec81dcd52748ffc59ce3582e709414ff78d947f"
 uuid = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
 version = "0.3.6"
 
+[[deps.PlutoTest]]
+deps = ["HypertextLiteral", "InteractiveUtils", "Markdown", "Test"]
+git-tree-sha1 = "17aa9b81106e661cffa1c4c36c17ee1c50a86eda"
+uuid = "cb4044da-4d16-4ffa-a6a3-8cad7f73ebdc"
+version = "0.2.2"
+
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "efc140104e6d0ae3e7e30d56c98c4a927154d684"
+git-tree-sha1 = "eadad7b14cf046de6eb41f13c9275e5aa2711ab6"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.48"
-
-[[deps.PlutoUtils]]
-deps = ["AbstractPlutoDingetjes", "Chain", "Colors", "DocStringExtensions", "Glob", "HypertextLiteral", "InteractiveUtils", "Markdown", "OrderedCollections", "PlutoDevMacros", "PlutoUI", "Reexport", "Requires", "StaticArrays", "UUIDs"]
-git-tree-sha1 = "1e77b28b5d4bf2c0e8f3a3776b73a7a7f1c16236"
-uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
-version = "0.5.13"
+version = "0.7.49"
 
 [[deps.Preferences]]
 deps = ["TOML"]
@@ -1448,15 +1669,16 @@ version = "0.7.0"
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[deps.SnoopPrecompile]]
-git-tree-sha1 = "f604441450a3c0569830946e5b33b78c928e1a85"
+deps = ["Preferences"]
+git-tree-sha1 = "e760a70afdcd461cf01a575947738d359234665c"
 uuid = "66db9d55-30c0-4569-8b51-7e840670fc0c"
-version = "1.0.1"
+version = "1.0.3"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[deps.SparseArrays]]
-deps = ["LinearAlgebra", "Random"]
+deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SpecialFunctions]]
@@ -1465,30 +1687,25 @@ git-tree-sha1 = "d75bda01f8c31ebb72df80a46c88b25d1c79c56d"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.7"
 
-[[deps.StaticArrays]]
-deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "4e051b85454b4e4f66e6a6b7bdc452ad9da3dcf6"
-uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.10"
-
-[[deps.StaticArraysCore]]
-git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
-uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
-version = "1.4.0"
-
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+version = "1.9.0"
+
+[[deps.SuiteSparse_jll]]
+deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
+uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
+version = "5.10.1+0"
 
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
-version = "1.0.0"
+version = "1.0.3"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.1"
+version = "1.10.0"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1506,9 +1723,9 @@ uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
 version = "0.1.6"
 
 [[deps.URIs]]
-git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
+git-tree-sha1 = "ac00576f90d8a259f2c9d823e91d1de3fd44d348"
 uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
-version = "1.4.0"
+version = "1.4.1"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1525,12 +1742,12 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.12+3"
+version = "1.2.13+0"
 
 [[deps.libblastrampoline_jll]]
-deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
+deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.1.1+0"
+version = "5.2.0+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1548,6 +1765,8 @@ version = "17.4.0+0"
 # ╠═6efb9ff0-52e7-11ec-2a4d-b788e3955703
 # ╠═8179a3c3-dda2-47c2-9efc-014cce2d0c75
 # ╠═7cdb1e47-b06b-4cff-ab7e-b9451d261487
+# ╠═413bf827-4c76-4956-a6cf-37ab5b6db171
+# ╠═982a6c18-ef9d-4f81-8004-a484802ee6a3
 # ╟─278449d8-b67d-4ca9-9910-e19836e42a93
 # ╠═f88ad8a5-8875-41b8-9680-8de93c27948d
 # ╠═48414943-3a16-4826-8098-19089ed00646
@@ -1571,6 +1790,8 @@ version = "17.4.0+0"
 # ╠═b5bcc803-e8f6-4bd6-ac6e-8d7c6ee38e68
 # ╠═085a5a7b-e4e0-4dd0-af86-09c9d67c3e20
 # ╠═d9cc094b-8453-4e74-9420-ec9c3be7f585
+# ╠═6c140675-2f64-408d-809f-2a24ee6f4872
+# ╠═88d13b76-2eb1-4cd3-87ca-733bee714a04
 # ╠═b7b34f12-5930-4b6e-8a62-51b6b2b995ad
 # ╠═e9b706a0-276f-4f0e-8614-7cb4060457ea
 # ╟─d4549cda-cd11-4c7d-9411-7ab0c56f9d2a
@@ -1606,8 +1827,13 @@ version = "17.4.0+0"
 # ╟─685e1202-a553-4fcd-ae9d-152b92aede9f
 # ╟─1defc7ea-501c-40a2-b311-c2d171a09401
 # ╠═44cc8f3b-d633-47d4-b39b-7ea299ffe281
+# ╟─372443e8-668a-4e79-a9b3-33e038f42c50
+# ╠═11a39a25-b1e2-47b1-977f-fd240b66caed
+# ╠═2bd7b82a-d0c4-48c3-88bf-2f6f7772598a
+# ╠═142ebb26-09c4-4c07-a1a1-944c1dc15404
 # ╟─c74801ab-de4e-4748-aec8-339d56789506
 # ╟─ce661fec-c1b5-4150-b863-c42e47defd0a
+# ╠═2bb62826-7b65-421f-86ff-8b55aa18f94e
 # ╠═72841851-4303-4b33-842b-d6812737023e
 # ╟─ad60610b-aebb-454a-9e33-bb8affb0d484
 # ╠═4ee12b02-a0bb-4216-a9cf-92bcb89e664f
@@ -1628,10 +1854,24 @@ version = "17.4.0+0"
 # ╠═f6d39c5e-4458-44ab-a8b2-ee74e921963d
 # ╠═7bce22ad-2de0-4d34-a660-0a3c059d9857
 # ╠═32cac62a-66cb-467d-90ee-3c5c3dd4e9a2
+# ╠═84757e03-eab8-404a-ac2f-271febb9a603
 # ╠═0596419d-d9cc-47e1-9ef3-77b0a48b50a5
 # ╟─c0105f4e-632e-405a-b59d-25eaf17767ef
-# ╠═d86e08a9-5efb-4c97-bd59-946b82f0f5fb
+# ╠═efc0cae0-6a1f-4415-abc8-f955eba8a992
 # ╠═ecf49c6a-fe57-41e0-9e6f-63c7e5176861
+# ╠═94ff65fe-4df4-4608-93c7-e13104784991
+# ╠═9f043f97-1f64-4eab-9749-c749c76759a7
+# ╠═d0292ba7-030c-4251-a2ee-fe862041617c
+# ╠═3b740180-049b-406c-b29a-f6f436ee3b4d
+# ╠═4151eaf4-fbbf-4136-a094-7ee555efdc50
+# ╠═4713435c-cda0-435e-a07f-28ce7530e5e8
+# ╠═118feee5-9353-437d-953a-223edfb0c0db
+# ╠═09bab1dc-d024-4586-b57e-61c573bc7b7d
+# ╠═967e8b7f-cbbe-45a0-bd0a-8968db825c98
+# ╠═d85aa78b-93fb-40d5-b00a-e4d449965e48
+# ╠═d8bb923c-5904-41ca-a419-7bf49f15f8a3
+# ╠═590ca2e8-0a48-4ba5-bf02-7ce9fd5a0a3a
+# ╠═5653097d-9220-467c-989e-2760b5cbc4a1
 # ╠═ac5e41e2-89c7-4045-9275-7cebe6b6dd92
 # ╠═b1f64f22-da01-45c0-a2f8-48cb6673d473
 # ╠═d53dbcb4-82f6-43c4-9859-eb233dbbf585

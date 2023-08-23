@@ -8,23 +8,26 @@
 using PrettyTables, HypertextLiteral, Chain, UUIDs
 
 # ╔═╡ afebdbb9-42a5-4640-ae38-12a105a70e05
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 md"""
 PrettyTables does not provide yet a way to directly output a _showable_ HTML object so the function has to be customized to have nice printing on Pluto.
 
 We will create a custom function that always prints directly an html output (with the :html backend) and that won't allow for the `standalone` kwargs to be set to true as that always provide a full html page with header, that needs to be rendered in an `iframe` inside the pluto frontend
 """
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ b80ac7b8-11a4-45ef-8072-97a5ef0ab4e2
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 pretty_table(String,rand(10,4);backend=:html) |> Text
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ 5db046c0-48a2-478b-a8cd-a72c29c14444
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ 22386594-49c7-4c3b-948e-fd13d326d360
     css = """
@@ -59,7 +62,8 @@ pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
     """
 
 # ╔═╡ b18e8c7f-467e-427c-8487-e021bd8c283a
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @chain css begin
 	split(_,'}') # Separate different style groups
 	map(x -> lstrip(x,'\n'),_) # Remove trailing newlines		
@@ -76,7 +80,7 @@ pretty_table(String,rand(10,4);backend=:html,standalone=false) |> Text
 	Text
 end
 	
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ e880d449-0e72-45ad-bea9-bbadcdcd523d
 """
@@ -185,7 +189,8 @@ function prepend_selector(css,custom_selector)
 end
 
 # ╔═╡ fec22aa8-ffee-4b6c-a46e-a82ed3f75a9d
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 prepend_selector("""
 	caption, magic {
 		font-family: "asd", lol;
@@ -195,27 +200,30 @@ prepend_selector("""
 		color: red;
 	}
 """, "GESU")
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ e11a10bd-8d8c-4e7f-ba3a-873a3e8d349f
 export prettytable
 
 # ╔═╡ 98765fad-7349-4791-a2c9-b60d6a33b1f3
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 a = rand(10,4)
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ 81d55931-6c5e-4211-86c7-d67681183cb7
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 prettytable(a;caption = "GESU",append_css = """
 	caption {
 		font-family: "Times New Roman", Times, serif;
 	}
 """)
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ ca56394b-b4a9-4c8f-a8cc-1592dc1b6bd5
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 prettytable(a;tf=tf_html_minimalist,append_css="""
 tr:nth-child(5) {
 	font-weight: 800;
@@ -224,17 +232,19 @@ tr:nth-child(5) {
 		font-family: "Times New Roman", Times, serif;
 	}
 	""")
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ b9953787-fd44-432a-b2c1-5f9de7cfccbe
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 prettytable(a;tf=tf_html_dark)
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ 2e5c16de-957e-4f19-9a7e-2edc3ae2707c
-#=╠═╡ notebook_exclusive
+# ╠═╡ skip_as_script = true
+#=╠═╡
 prettytable(a)
-  ╠═╡ notebook_exclusive =#
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
