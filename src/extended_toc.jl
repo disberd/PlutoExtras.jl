@@ -1168,7 +1168,7 @@ $x
 </script>
 """)
 show_output_when_hidden(x) = isdefined(Main, :PlutoRunner) ?
-show_output_when_hidden(@htl("$(embed_display(x))")) : error("You can't call
+show_output_when_hidden(@htl("$(Main.PlutoRunner.embed_display(x))")) : error("You can't call
 this function outside Pluto")
 end
 
