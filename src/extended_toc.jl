@@ -1126,20 +1126,35 @@ md"""
 begin
 """
 	show_output_when_hidden(x)
-Wraps the given input `x` inside a custom HTML code created with `HypertextLiteral.@htl` that adds the `always-show-output` attribute to the calling Pluto cell.
+Wraps the given input `x` inside a custom HTML code created with
+`HypertextLiteral.@htl` that adds the `always-show-output` attribute to the
+calling Pluto cell.
 
-This makes sure that the cell output remains visible in the HTML even when the cell is hidden using the [`ExtendedTableOfContents`](@ref) cell hiding feature.
-This is mostly useful to allow having cells that generate output to be rendered within the notebook as hidden cells.
+This makes sure that the cell output remains visible in the HTML even when the
+cell is hidden using the [`ExtendedTableOfContents`](@ref) cell hiding feature.
+This is mostly useful to allow having cells that generate output to be rendered
+within the notebook as hidden cells.
 
-The provided attribute will make sure (via CSS) that cell will look exactly like a hidden cell except for its output element. When the output is floating (like for [`BondTable`](@ref) or [`ExtendedTableOfContents`](@ref)), this will make the cell hidden while the rendered output visible.
+The provided attribute will make sure (via CSS) that cell will look exactly like
+a hidden cell except for its output element. When the output is floating (like
+for [`BondTable`](@ref) or [`ExtendedTableOfContents`](@ref)), this will make
+the cell hidden while the rendered output visible.
 
 # Example usage
 ```julia
 BondTable([bonds...]) |> show_output_when_hidden
 ```
 
-The code above will allow putting the cell defining the `BondTable` within a hidden part of the notebook while still rendering the floating BondTable.
-Without this function, the `BondTable` generating cell would need to be located inside a non-hidden part of the notebook.
+The code above will allow putting the cell defining the `BondTable` within a
+hidden part of the notebook while still rendering the floating BondTable.
+Without this function, the `BondTable` generating cell would need to be located
+inside a non-hidden part of the notebook.
+
+# Note
+When calling this function with an input object that is not of type `HTML` or
+`HypertextLiteral.Result`, the function will wrap the object first using `@htl`
+and `PlutoRunner.embed_display`. Since the `embed_display` function is only
+available inside of Pluto,  
 """
 show_output_when_hidden(x::Union{HTML, HypertextLiteral.Result}) = @htl("""
 $x
@@ -1159,7 +1174,6 @@ end
 export ExtendedTableOfContents, show_output_when_hidden
 
 # ╔═╡ 48540378-5b63-4c20-986b-75c08ceb24b7
-# ╠═╡ custom_attrs = ["toc-collapsed"]
 md"""
 # Tests
 """
@@ -1170,12 +1184,16 @@ The weird looking 3 below is inside a hidden cell that has been tagged with `sho
 """
 
 # ╔═╡ 4373ab10-d4e7-4e25-b7a8-da1fcf3dcb0c
+# ╠═╡ custom_attrs = ["toc-hidden"]
 md"""
 ## Hidden Heading
 """
 
 # ╔═╡ f6e74270-bd75-4367-a0b2-1e10e1336b6c
+# ╠═╡ skip_as_script = true
+#=╠═╡
 3 |> show_output_when_hidden
+  ╠═╡ =#
 
 # ╔═╡ 091dbcb6-c5f6-469b-889a-e4b23197d2ad
 md"""
