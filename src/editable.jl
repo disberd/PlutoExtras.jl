@@ -160,7 +160,6 @@ begin
 			const onEnter = (e) => {
 				if (e.keyCode === 13) {
 				e.preventDefault();
-				dispatchEvent(e)
 				el.blur()
 				}
 			}
