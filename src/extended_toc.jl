@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.27
 
 #> custom_attrs = ["enable_hidden", "hide-enabled"]
 
@@ -19,19 +19,34 @@ md"""
 # Scripts
 """
 
-# ╔═╡ 5795b550-5799-4b62-bc25-bc36f3802a8d
+# ╔═╡ 6fb280c9-996e-4e0b-beb4-72e4acc9dada
 md"""
-## smoothScroll
-The cell below is hidden by default as it has a minified script that is a bit long
+## Smooth Scroll
 """
 
-# ╔═╡ 052e26d7-8bed-46fe-8b5b-a879e76714cb
-# The function here is taken from https://github.com/LieutenantPeacock/SmoothScroll due to some problems on chromium with the standard scrollIntoView. We put it directly here instead of loading it to make it work also offline.
-_smoothScroll(enable) = !enable ? HTLScript("") : HTLScript(@htl("""
+# ╔═╡ 98191362-88d4-42f7-a3dc-d497b012b42c
+md"""
+Since v0.7.51 PlutoUI directly supports the smooth scrolling library in the TableOfContents, so we just take it from there.
+"""
+
+# ╔═╡ 3ea073ee-59d5-43a2-98c8-a309ce327418
+_smooth_scroll = HTLScriptPart(@htl """
 <script>
-	!function(t){var e,n=t.requestAnimationFrame||t.webkitRequestAnimationFrame||t.mozRequestAnimationFrame||t.oRequestAnimationFrame||t.msRequestAnimationFrame||function(e){t.setTimeout(e,1e3/60)},o=[],r=document.getElementsByTagName("html")[0];function i(n){var o=n.getBoundingClientRect(),i=t.pageYOffset||r.scrollTop||e.scrollTop,l=t.pageXOffset||r.scrollLeft||e.scrollLeft,s=r.clientTop||e.clientTop||0,a=r.clientLeft||e.clientLeft||0;return{top:o.top+i-s,left:o.left+l-a}}function l(t){return/Element/.test({}.toString.call(t))}function s(t,e,n){var o;if("number"==typeof t)return t;switch(t){case"start":o=0;break;case"end":o=n+10;break;case"center":o=n/2;break;default:var r,i=t.split("+"),l=t.split("-");if(t.indexOf("+")>0)throw new Error("Position can only contain a + sign at the start");if(t.indexOf("-")>0)throw new Error("Position can only contain a - sign at the start");if(t.indexOf("+")>-1&&t.indexOf("-")>-1)throw new Error("Position cannot contain both + and - signs.");if(t.indexOf("%")>-1&&t.indexOf("%")!==t.length-1)throw new Error("Position can only contain a % symbol at the end.");o=i[1]?(r=i[1]).indexOf("%")>-1?e+n*(r=r.split("%")[0])/100:e+ +r:l[1]?(r=l[1]).indexOf("%")>-1?e-n*(r=r.split("%")[0])/100:e-+r:t.indexOf("%")>-1?n*(r=t.split("%")[0])/100:+t}return o}function a(t,e,n){t.addEventListener?t.addEventListener(e,n,!1):t.attachEvent&&t.attachEvent("on"+e,n)}function c(t,e,n){t.removeEventListener?t.removeEventListener(e,n,!1):t.detachEvent&&t.detachEvent("on"+e,n)}var u={duration:500,preventUserScroll:!0,scrollEvents:["scroll","mousedown","wheel","DOMMouseScroll","mousewheel","touchmove"],scrollKeys:[37,38,39,40,32],allowAnimationOverlap:!1,easing:"linear"};function f(){for(var t=0;t<arguments.length;t++)if(null!=arguments[t])return arguments[t]}function d(t,e,n,o){if("string"!=typeof t)throw new Error("Block and inline values must be strings");function r(t){return e-(n-o)*t}switch(t){case"start":return e;case"center":return r(.5);case"end":return r(1);default:if(t.indexOf("%")>-1&&t.split("%").length<3)return r(+t.split("%")[0]/100);throw new Error("Invalid block or inline string value")}}function h(e,n){if(t.getComputedStyle){var o=getComputedStyle(e,null);if(o.getPropertyValue)return o.getPropertyValue(n);if(o.getAttribute)return o.getAttribute(n);if(o[n])return o[n]}else if(e.currentStyle)return e.currentStyle[n]}function m(e){return e?{x:e.scrollLeft,y:e.scrollTop}:{x:void 0!==t.pageXOffset?t.pageXOffset:(document.documentElement||document.body.parentNode||document.body).scrollLeft,y:void 0!==t.pageYOffset?t.pageYOffset:(document.documentElement||document.body.parentNode||document.body).scrollTop}}function p(t,e,n){return t>e?e-(e-t)*n:(t-e)*n+e}function g(t){for(var e=o.length,n=e-1;n>=0;n--)if(t){var r=o[n];t(r)&&r.destroy(!0)}else o[n].destroy(!0);return!!e}t.smoothScroll=function v(w){if(e||(e=document.getElementsByTagName("body")[0]),w=w||{},this instanceof v)return{smoothScroll:function(e){e=e||{};for(var n=0;n<b.length;n++){var o=b[n];o in e||(e[o]=w[o])}t.smoothScroll(e)}};var y,E,x,M=f(w.yPos,u.yPos),O=+f(w.duration,u.duration),S=f(w.xPos,u.xPos),P=m(),T=P.x,L=P.y,A=Math.max(e.scrollHeight,e.offsetHeight,r.clientHeight,r.scrollHeight,r.offsetHeight),k=Math.max(r.clientWidth,e.scrollWidth,r.scrollWidth,e.offsetWidth,r.offsetWidth),I=A-t.innerHeight,H=k-t.innerWidth,N=f(w.complete,u.complete),W=f(w.scrollingElement,u.scrollingElement),B=f(w.toElement,u.toElement),q=f(w.firstAxis,u.firstAxis),C=f(w.preventUserScroll,u.preventUserScroll),F=f(w.easing,u.easing),R=f(w.block,u.block),K=f(w.inline,u.inline),U=t.innerHeight,X=t.innerWidth,Y=0,Q=f(w.scrollEvents,u.scrollEvents),D=f(w.scrollKeys,u.scrollKeys),V=f(w.paddingTop,u.paddingTop),z=f(w.paddingLeft,u.paddingLeft);if("string"==typeof F){var j=F;if(!(F=v.easing[F]))throw new Error("Easing function "+j+" does not exist.")}else if("function"!=typeof F)throw new Error("Easing must be the name of an easing function or an easing function");if(W){if(!l(W))throw new Error("Scrolling element must be a HTML element");W!=e&&W!=r?(A=W.scrollHeight,k=W.scrollWidth,I=A-W.clientHeight,H=k-W.clientWidth,T=W.scrollLeft,L=W.scrollTop,U=parseInt(h(W,"height"),10),X=parseInt(h(W,"width"),10),y=function(t,e){W.scrollTop=e,W.scrollLeft=t}):(W=void 0,y=t.scrollTo)}else y=t.scrollTo;if(M=null!=M?s(M,L,I):L,S=null!=S?s(S,T,H):T,isNaN(M))throw new Error("Invalid yPos");if(isNaN(S))throw new Error("Invalid xPos");if(isNaN(O))throw new Error("Invalid duration");if(O=Math.max(O,0),S=Math.max(S,0),M=Math.max(M,0),B){if(!l(B))throw new Error("Element to scroll to must be a HTML element");var G=i(B);if(W){var J=i(W);M=W.scrollTop+(G.top-J.top)-parseInt(h(W,"border-top-width"),10),S=W.scrollLeft+(G.left-J.left)-parseInt(h(W,"border-left-width"),10)}else M=G.top,S=G.left;null!=R&&(M=d(R,M,U,B.offsetHeight)),null!=K&&(S=d(K,S,X,B.offsetWidth))}if(null!=V&&(M+=V),null!=z&&(S+=z),M=Math.min(Math.round(M),A),(S=Math.min(Math.round(S),k))!==T||M!==L){if(S!==T&&M!==L||(q=null),null!=q&&(O/=2),!C){for(var Z=0;Z<Q.length;Z++){var \$=Q[Z];W?a(W,\$,_):(a(e,\$,_),a(r,\$,_))}a(W||document,"keydown",tt)}return x=function(t,e,r,i){r&&g(function(t){return t.scrollingElem==i});var l,s=!1,a=function(){s||(t(),n(a))},c=function(t){if(!s){s=!0;var n=function(t){for(var e=0;e<o.length;e++)if(o[e].destroy===t)return e}(c);null!=n&&o.splice(n,1),t&&e(!1,!0)}};return l={destroy:c,scrollingElem:i},o.push(l),n(a),{destroy:function(){c()}}}(function(){var e=t.performance&&performance.now?performance.now():+new Date;E||(E=e);var n=e-E;if(y("y"!=q?p(S,T,F(n/O)):T,"x"!=q?p(M,L,F(n/O)):L),n>=O)if(y("y"!=q?S:T,"x"!=q?M:L),null!=q&&++Y<2){switch(q){case"x":q="y",T=S;break;case"y":q="x",L=M}E=null}else nt(!1,!1)},nt,!f(w.allowAnimationOverlap,u.allowAnimationOverlap),W)}function _(){et(),nt(!0,!1)}function tt(t){D.indexOf(t.keyCode)>-1&&(et(),nt(!0,!1))}function et(){for(var t=0;t<Q.length;t++){var n=Q[t];W?c(W,n,_):(c(e,n,_),c(r,n,_))}c(W||document,"keydown",tt)}function nt(t,e){var n=m(W);x.destroy(),C||et(),N&&N({xPos:S,yPos:M,scrollingElement:W,duration:O,currentXPos:n.x,currentYPos:n.y,interrupted:t,canceled:e})}},smoothScroll.stopAll=function(){return g()},smoothScroll.easing={linear:function(t){return t},swing:function(t){return.5-Math.cos(t*Math.PI)/2}};for(var v={Sine:function(t){return 1-Math.cos(t*Math.PI/2)},Circ:function(t){return 1-Math.sqrt(1-t*t)},Elastic:function(t){return 0===t||1===t?t:-Math.pow(2,8*(t-1))*Math.sin((80*(t-1)-7.5)*Math.PI/15)},Back:function(t){return t*t*(3*t-2)},Bounce:function(t){for(var e,n=4;t<((e=Math.pow(2,--n))-1)/11;);return 1/Math.pow(4,3-n)-7.5625*Math.pow((3*e-2)/22-t,2)}},w=["Quad","Cubic","Quart","Quint","Expo"],y=0;y<w.length;y++)v[w[y]]=function(t){return Math.pow(t,y+2)};for(var E in v)if(null!=E&&null!=v[E]){var x=v[E];smoothScroll.easing["easeIn"+E]=x,smoothScroll.easing["easeOut"+E]=function(t){return 1-x(1-t)},smoothScroll.easing["easeInOut"+E]=function(t){return t<.5?x(2*t)/2:1-x(-2*t+2)/2}}smoothScroll.scrolling=function(){return!!o.length};var b=["xPos","yPos","duration","scrollingElement","toElement","preventUserScroll","easing","complete","firstAxis","scrollEvents","scrollKeys","block","inline","allowAnimationOverlap","paddingTop","paddingLeft"];smoothScroll.defaults=function(t){if(null!=t)for(var e=0;e<b.length;e++){var n=b[e];null!=t[n]&&(u[n]=t[n])}return u},smoothScroll.nativeSupported="scrollBehavior"in r.style}(window);
+// Load the library for consistent smooth scrolling
+const {default: scrollIntoView} = await import($(PlutoUI.TableOfContentsNotebook.smooth_scoll_lib_url))
+
+function scroll_to(h, config = {
+			behavior: 'smooth', 
+			block: 'start',
+		}) {
+	scrollIntoView(h, config).then(() => 
+			// sometimes it doesn't scroll to the right place
+			// solution: try a second time!
+			scrollIntoView(h, config)
+	   )
+	}
 </script>
-"""));
+""");
 
 # ╔═╡ aa74f780-96c5-4b91-9658-a34c8c3fcab9
 md"""
@@ -465,23 +480,13 @@ _mutation_observer = HTLScript(@htl("""
 		
 		let id = get_link_id(div)
 		const a = div.querySelector('a')
-		if (use_smoothscroll) {
-			const this_cell = document.getElementById(id)
-			a.onclick = (e) => {
-				// We avoid triggering the click if coming out of a drag
-				e.preventDefault()
-				if (toc.classList.contains('recent-drag')) { return }
-				smoothScroll({toElement: this_cell, block: 'start'})
-			}
-		} else {
-			let old_f = a.onclick;
-			a.onclick = (e) => {
-				e.preventDefault()
-				// We avoid triggering the click if coming out of a drag
-				if (toc.classList.contains('recent-drag')) { return }
-				old_f(e)
-			}			
-		}
+		let old_f = a.onclick;
+		a.onclick = (e) => {
+			e.preventDefault()
+			// We avoid triggering the click if coming out of a drag
+			if (toc.classList.contains('recent-drag')) { return }
+			old_f(e)
+		}			
 		const level = getHeadingLevel(div)
 		if (level > 1) {
 			history[level].unshift(div)
@@ -790,11 +795,7 @@ _header_manipulation = HTLScript(@htl("""
 	
 	header.addEventListener('click', e => {
 		if (e.target != header) {return}
-		if (use_smoothscroll) {
-			smoothScroll({toElement: cell, block: 'start'})
-		} else {
-			cell.scrollIntoView({block: 'center', behavior: 'smooth'})
-		}
+		scroll_to(cell, {block: 'center', behavior: 'smooth'})
 	})
 
 	header.addEventListener('mouseenter', (e) => {
@@ -999,6 +1000,34 @@ _row_separator_style = @htl """
 </style>
 """
 
+# ╔═╡ 3244e8a5-b710-4a31-8a5d-ea529a7d47bd
+md"""
+## always show output
+"""
+
+# ╔═╡ 9b27f07a-7aaa-41f2-806c-56b7d9fc5f96
+_always_show_output_style = @htl """
+<style>
+	/* This style permits to have a cell whose output is still being shown when
+	   the cell is hidden. This is useful for having hidden cells that still are
+	   sending HTML as output (like ToC and BondTable) */
+	
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output] {
+		display: block !important;
+	}
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-input,
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-shoulder,
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-trafficlight,
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-runarea,
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > button {
+		display: none;
+	}
+	pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) {
+		margin-top: 0px;
+	}
+</style>
+"""
+
 # ╔═╡ 0aac28b7-4771-447c-ab62-92250f46154f
 md"""
 # Main Function
@@ -1006,12 +1035,11 @@ md"""
 
 # ╔═╡ a1a09dae-b441-484e-8f40-e51e31fb34dd
 """
-	ExtendedTableOfContents(;hide_preamble = true, force_hide_enabled = hide_preamble, use_smoothscroll = true, kwargs...)
+	ExtendedTableOfContents(;hide_preamble = true, force_hide_enabled = hide_preamble, kwargs...)
 
 # Keyword Arguments
 - `hide_preamble` -> When true, all the cells from the beginning of the notebook till the first heading are hidden (when the notebook is in `hide-enabled` state)
 - `force_hide_enabled` -> Set the notebook `hide-enabled` status to true when creating the ToC. This status is used to decide whether to show or not hidden cells via CSS.
-- `use_smoothscroll` -> Replace scrolling into view from the ToC to use the [`smoothScroll`](https://github.com/LieutenantPeacock/SmoothScroll/) library for better compatibility.
 - `kwargs` -> The remaining kwargs are simply passed to `TableOfContents` from PlutoUI which is used internally to generate the ToC.
 
 # Description
@@ -1027,10 +1055,6 @@ Hiding headings and all connected cells from notebook view can be done via Exten
 
 ## Collapsing Headings in ToC
 ToC headings are grouped based on heading level, sub-headings at various levels can be collapsed by using the caret symbol that appears to the left of headings in the ToC upon hover.
-
-## Scroll behavior fix
-The weird scrolling issue appearing on chromium-based browsers with the scrolling in the TableOfContents (see https://github.com/JuliaPluto/PlutoUI.jl/issues/238) is fixed by relying on the [SmoothScroll](https://github.com/LieutenantPeacock/SmoothScroll/) library.
-- _SmoothScroll_ is used by default to replace the scroll upon heading click behavior. To maintain the original behavior, call `ExtendedTableOfContents(;use_smoothscroll = false)`
 
 ## Save Hide/Collapsed status on notebook file
 Preserving the status of collapsed/hidden heading is supported by writing to the notebook file using notebook and cell metadata, allowing to maintain the status even upon reload of Julia/Pluto
@@ -1057,13 +1081,12 @@ The `ExtendedTableOfContents` allow to re-order the cell groups identified by ea
 
 ![Cell_Reordering](https://user-images.githubusercontent.com/12846528/217245256-58e4d537-9547-42ec-b1d8-2994b6bcaf51.gif)
 """
-ExtendedTableOfContents(;hide_preamble = true, force_hide_enabled = hide_preamble, use_smoothscroll = true, kwargs...) = @htl """
+ExtendedTableOfContents(;hide_preamble = true, force_hide_enabled = hide_preamble,kwargs...) = @htl """
 $(TableOfContents(;kwargs...))
 $(combine_scripts([
-	"const use_smoothscroll = $use_smoothscroll",
 	"const hide_preamble = $hide_preamble",
 	"const force_hide_enabled = $force_hide_enabled",
-	_smoothScroll(use_smoothscroll),
+	_smooth_scroll,
 	_basics,
 	_floating_ui,
 	_modify_notebook_attributes,
@@ -1078,19 +1101,81 @@ $(combine_scripts([
 $_header_style
 $_toc_row_style
 $_row_separator_style
+$_always_show_output_style
 """
 
 # ╔═╡ d05d4e8c-bf50-4343-b6b5-9b77caa646cd
 ExtendedTableOfContents()
 
+# ╔═╡ 111d359f-0a35-43f0-b30e-a52b8c69faa2
+md"""
+# Exports
+"""
+
+# ╔═╡ 10623400-35be-49fe-9fc2-3c31d6f66610
+md"""
+# Helper Functions
+"""
+
+# ╔═╡ c681160d-b4e0-496a-8561-78fa25bf2483
+md"""
+## show output when hidden
+"""
+
+# ╔═╡ 95b8bf53-770a-4a11-8664-eb0e0dcfb299
+begin
+"""
+	show_output_when_hidden(x)
+Wraps the given input `x` inside a custom HTML code created with `HypertextLiteral.@htl` that adds the `always-show-output` attribute to the calling Pluto cell.
+
+This makes sure that the cell output remains visible in the HTML even when the cell is hidden using the [`ExtendedTableOfContents`](@ref) cell hiding feature.
+This is mostly useful to allow having cells that generate output to be rendered within the notebook as hidden cells.
+
+The provided attribute will make sure (via CSS) that cell will look exactly like a hidden cell except for its output element. When the output is floating (like for [`BondTable`](@ref) or [`ExtendedTableOfContents`](@ref)), this will make the cell hidden while the rendered output visible.
+
+# Example usage
+```julia
+BondTable([bonds...]) |> show_output_when_hidden
+```
+
+The code above will allow putting the cell defining the `BondTable` within a hidden part of the notebook while still rendering the floating BondTable.
+Without this function, the `BondTable` generating cell would need to be located inside a non-hidden part of the notebook.
+"""
+show_output_when_hidden(x::Union{HTML, HypertextLiteral.Result}) = @htl("""
+$x
+<script>
+	const cell = currentScript.closest('pluto-cell')
+	cell.toggleAttribute('always-show-output', true)
+
+	invalidation.then(() => {
+		cell.toggleAttribute('always-show-output', false)
+	})
+</script>
+""")
+show_output_when_hidden(x) = show_output_when_hidden(@htl("$(embed_display(x))"))
+end
+
 # ╔═╡ 1bdb12d3-899d-4ce0-a053-6cf1fa15072d
-export ExtendedTableOfContents
+export ExtendedTableOfContents, show_output_when_hidden
 
 # ╔═╡ 48540378-5b63-4c20-986b-75c08ceb24b7
 # ╠═╡ custom_attrs = ["toc-collapsed"]
 md"""
 # Tests
 """
+
+# ╔═╡ 7dce5ffb-48ad-4ef4-9e13-f7a34794170a
+md"""
+The weird looking 3 below is inside a hidden cell that has been tagged with `show_output_when_hidden`
+"""
+
+# ╔═╡ 4373ab10-d4e7-4e25-b7a8-da1fcf3dcb0c
+md"""
+## Hidden Heading
+"""
+
+# ╔═╡ f6e74270-bd75-4367-a0b2-1e10e1336b6c
+3 |> show_output_when_hidden
 
 # ╔═╡ 091dbcb6-c5f6-469b-889a-e4b23197d2ad
 md"""
@@ -1208,8 +1293,8 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 HypertextLiteral = "~0.9.4"
-PlutoDevMacros = "~0.5.6"
-PlutoUI = "~0.7.51"
+PlutoDevMacros = "~0.5.0"
+PlutoUI = "~0.7.49"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -1490,8 +1575,9 @@ version = "17.4.0+0"
 # ╠═464fc674-5ed7-11ed-0aff-939456ebc5a8
 # ╠═d05d4e8c-bf50-4343-b6b5-9b77caa646cd
 # ╟─46520c1a-bbd8-46aa-95d9-bad3d220ee85
-# ╟─5795b550-5799-4b62-bc25-bc36f3802a8d
-# ╟─052e26d7-8bed-46fe-8b5b-a879e76714cb
+# ╟─6fb280c9-996e-4e0b-beb4-72e4acc9dada
+# ╟─98191362-88d4-42f7-a3dc-d497b012b42c
+# ╠═3ea073ee-59d5-43a2-98c8-a309ce327418
 # ╟─aa74f780-96c5-4b91-9658-a34c8c3fcab9
 # ╠═a777b426-42e9-4c91-aebd-506388449042
 # ╠═6e2397db-6f95-44ed-b874-bb0e6c853169
@@ -1517,10 +1603,19 @@ version = "17.4.0+0"
 # ╠═0b11ce0a-bc66-41d2-9fbf-1be98b1ce39b
 # ╟─8f55cdc7-8409-4685-a154-52a82b91074c
 # ╠═e3e3f46b-8879-4f7c-ad6a-12b4d27ac27a
+# ╟─3244e8a5-b710-4a31-8a5d-ea529a7d47bd
+# ╠═9b27f07a-7aaa-41f2-806c-56b7d9fc5f96
 # ╟─0aac28b7-4771-447c-ab62-92250f46154f
 # ╠═a1a09dae-b441-484e-8f40-e51e31fb34dd
+# ╟─111d359f-0a35-43f0-b30e-a52b8c69faa2
 # ╠═1bdb12d3-899d-4ce0-a053-6cf1fa15072d
+# ╟─10623400-35be-49fe-9fc2-3c31d6f66610
+# ╟─c681160d-b4e0-496a-8561-78fa25bf2483
+# ╠═95b8bf53-770a-4a11-8664-eb0e0dcfb299
 # ╟─48540378-5b63-4c20-986b-75c08ceb24b7
+# ╟─7dce5ffb-48ad-4ef4-9e13-f7a34794170a
+# ╟─4373ab10-d4e7-4e25-b7a8-da1fcf3dcb0c
+# ╠═f6e74270-bd75-4367-a0b2-1e10e1336b6c
 # ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
 # ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
 # ╟─6ddee4cb-7d76-483e-aed5-bde46280cc5b
