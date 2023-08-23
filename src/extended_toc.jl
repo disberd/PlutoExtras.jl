@@ -1167,7 +1167,9 @@ $x
 	})
 </script>
 """)
-show_output_when_hidden(x) = show_output_when_hidden(@htl("$(embed_display(x))"))
+show_output_when_hidden(x) = isdefined(Main, :PlutoRunner) ?
+show_output_when_hidden(@htl("$(embed_display(x))")) : error("You can't call
+this function outside Pluto")
 end
 
 # ╔═╡ 1bdb12d3-899d-4ce0-a053-6cf1fa15072d
