@@ -37,77 +37,84 @@ md"""
 
 # ╔═╡ cffff0cf-8f1b-414f-ae81-72b41ab1636a
 begin
+"""
+	StringOnEnter(default::AbstractString)
+Creates a Pluto widget that allows to provide a string as output when used with `@bind`.
+
+Unlike the custom "TextField" from PlutoUI this only triggers a bond update upon pressing Enter or moving the focus out of the widget (similar to [`Editable`](@ref))
+
+When rendered in HTML, the widget text will be shown with a dark yellow background.
+
+![868c1c6e-8731-4465-959e-58cf551b9f61](https://github.com/disberd/PlutoExtras.jl/assets/12846528/782360f2-595a-4bbe-9769-5ddfaa144611)
+"""
+struct StringOnEnter
+	default::String
+end
 	
-	struct StringOnEnter
-		default::String
-	end
-		
-	Base.show(io::IO, mime::MIME"text/html", mt::StringOnEnter) = show(io, mime, @htl """
-	<span><span 
-		class="text_StringOnEnter" style="
-			padding: 0em .2em;
-			border-radius: .3em;
-			font-weight: bold;"
-		contentEditable=true>$(mt.default)</span></span>
+Base.show(io::IO, mime::MIME"text/html", mt::StringOnEnter) = show(io, mime, @htl """
+<span><span 
+	class="text_StringOnEnter" style="
+		padding: 0em .2em;
+		border-radius: .3em;
+		font-weight: bold;"
+	contentEditable=true>$(mt.default)</span></span>
+
+<script>
+	const elp = currentScript.previousElementSibling
+	const el = elp.querySelector('span')
+	Object.defineProperty(elp,"value",{
+				get: () => el.innerText,
+				set: x => {
+					el.innerText = x
+				}
+			})
 	
-	<script>
-		const elp = currentScript.previousElementSibling
-		const el = elp.querySelector('span')
-		Object.defineProperty(elp,"value",{
-					get: () => el.innerText,
-					set: x => {
-						el.innerText = x
+	const dispatchEvent = (e) => {
+					if (el.innerText === "") {
+						elp.value = $(mt.default)   
+					} else {
+						elp.value =  el.innerText
 					}
+					elp.dispatchEvent(new CustomEvent("input"))
+				}
+	
+	el.addEventListener('input',(e) => {
+					console.log(e)
+					e.preventDefault()
+					e.stopImmediatePropagation()
 				})
-		
-		const dispatchEvent = (e) => {
-						if (el.innerText === "") {
-							elp.value = $(mt.default)   
-						} else {
-							elp.value =  el.innerText
-						}
-						elp.dispatchEvent(new CustomEvent("input"))
+	
+	const onEnter = (e) => {
+					if (e.keyCode === 13) {
+					e.preventDefault();
+					el.blur()
 					}
-		
-		el.addEventListener('input',(e) => {
-						console.log(e)
-						e.preventDefault()
-						e.stopImmediatePropagation()
-					})
-		
-		const onEnter = (e) => {
-						if (e.keyCode === 13) {
-						e.preventDefault();
-						dispatchEvent(e)
-						el.blur()
-						}
-					}
-		elp.addEventListener('focusout',dispatchEvent)
-		elp.addEventListener('keydown',onEnter)
-	</script>
-	
-	<style>
-			@media (prefers-color-scheme: light) {
-				span.text_StringOnEnter {
-					background: hsl(135, 57%, 60%);
 				}
+	elp.addEventListener('focusout',dispatchEvent)
+	elp.addEventListener('keydown',onEnter)
+</script>
+
+<style>
+		@media (prefers-color-scheme: light) {
+			span.text_StringOnEnter {
+				background: hsl(48, 90%, 61%);
 			}
-			@media (prefers-color-scheme: dark) {
-				span.text_StringOnEnter {
-					background: hsl(135, 43%, 32%);
-				}
+		}
+		@media (prefers-color-scheme: dark) {
+			span.text_StringOnEnter {
+				background: hsl(48, 57%, 37%);
 			}
-	</style>
-	""")
-	
-	Base.get(t::StringOnEnter) = t.default
-	Bonds.initial_value(t::StringOnEnter) = t.default
-	Bonds.possible_values(t::StringOnEnter) = Bonds.InfinitePossibilities()
-	
-	function Bonds.validate_value(t::StringOnEnter, val)
-		val isa AbstractString
-	end
-	
+		}
+</style>
+""")
+
+Base.get(t::StringOnEnter) = t.default
+Bonds.initial_value(t::StringOnEnter) = t.default
+Bonds.possible_values(t::StringOnEnter) = Bonds.InfinitePossibilities()
+
+function Bonds.validate_value(t::StringOnEnter, val)
+	val isa AbstractString
+end
 end
 
 # ╔═╡ e6a75043-435d-4509-98dd-9c96fa6b5bbb
