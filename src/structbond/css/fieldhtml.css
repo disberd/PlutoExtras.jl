@@ -1,0 +1,18 @@
+field-html {
+  display: grid;
+  grid-template-columns: 1fr minmax(min(50px, 100%), 0.4fr);
+  grid-auto-rows: fit-content(40px);
+  justify-items: center;
+  //padding: 2px 5px 10px 0px;
+  align-items: center;
+  row-gap: 5px;
+}
+field-bond {
+  display: flex;
+}
+field-bond input {
+  width: 100%;
+}
+field-description {
+  text-align: center;
+}

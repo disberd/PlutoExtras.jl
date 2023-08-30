@@ -33,7 +33,7 @@ md"""
 begin
 	Base.@kwdef struct ToggleReactiveBond
 		element::Any
-		description::String
+		description::Any
 		secret_key::String=String(rand('a':'z', 10))
 	end
 	ToggleReactiveBond(element; description = "") = ToggleReactiveBond(;element, description)
@@ -58,38 +58,7 @@ export ToggleReactiveBond
 # ╔═╡ b88012e8-62ac-4b2d-8b6d-5a6b4a26e63d
 _style = @htl """
 <style>
-	togglereactive-header > .toggle {
-		cursor: pointer;
-		--size: 15px;
-		position: relative;
-		width: calc(2*var(--size));
-		height: var(--size);
-		appearance: none;
-		background: #c6c6c6;
-		outline: none;
-		border-radius: calc(var(--size)/2);
-		box-shadow: inset 0 0 calc(var(--size)/8) rgba(0,0,0,.2);
-		margin: 0 10px;
-	}
-	togglereactive-header > .toggle:checked {
-		background: #4BD865;
-	}
-	togglereactive-header > .toggle:before {
-		content: '';
-		position: absolute;
-		width: var(--size);
-		height: var(--size);
-		border-radius: 50%;
-		top: 0px;
-		left: 0px;
-		background: #fff;
-		transform: scale(1.1);
-		box-shadow: 0 calc(var(--size)/20) calc(var(--size)/8) rgba(0,0,0,.2);
-		transition: .1s;
-	}
-	togglereactive-header > .toggle:checked:before {
-		left: var(--size)
-	}
+$(CSS_PARTS.togglereactive)
 </style>
 """
 

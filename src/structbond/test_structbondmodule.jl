@@ -34,6 +34,9 @@ md"""
 # Packages
 """
 
+# ╔═╡ bbba4947-4fc8-4c36-8510-6bdb34f0800f
+ToggleReactiveBond(Slider(1:10); description = "ASD")
+
 # ╔═╡ 707175a9-d356-43cf-8038-620ebc401c93
 ExtendedTableOfContents()
 
@@ -69,7 +72,66 @@ end
 	d = TextField() # No description, defaults to the docstring since it's present
 	e = Slider(20:25) # No description, defaults to the fieldname as no docstring is present
 end
-asd_bond = @bind asd StructBond(ASD; description = "Custom Description")
+asd_bond = @bind asd StructBond(ASD; description = @htl("""
+<span>LOL
+</span>
+<popup>
+LOLOL
+<script>
+	// Load the floating-ui and interact libraries
+	window.floating_ui = await import('https://esm.sh/@floating-ui/dom')
+
+	const { computePosition, autoPlacement, offset } = floating_ui
+
+	const togglereactive_container = currentScript.closest('togglereactive-container')
+	const popup = currentScript.closest('popup')
+	const container = popup.previousElementSibling
+
+	function positionContents() {
+		computePosition(container, popup, {
+			strategy: "fixed",
+			middleware: [
+				offset({
+					mainAxis: 10,
+					crossAxis: 0,
+				}),
+				autoPlacement({
+					allowedPlacements: ['left-start','left-end','right-start','right-end'],
+					crossAxis: true
+				}),
+			],
+		}).then((pos) => {
+			popup.style.left = pos.x + "px"
+			popup.style.top = pos.y + "px"
+		})
+	}
+
+	container.onmouseenter = (e) => {
+		positionContents()
+		togglereactive_container.insertAdjacentElement('beforeend',popup)
+		popup.classList.toggle('active', true)
+	}
+	container.onmouseleave = (e) => {
+		popup.classList.toggle('active', false)
+		container.insertAdjacentElement('afterend',popup)
+	}
+</script>
+</popup>
+<style>
+popup {
+	display: none;
+	position: fixed;
+	z-index: 1500;
+    background: var(--overlay-button-bg);
+    border: 3px solid var(--overlay-button-border);
+    border-radius: 10px;
+    padding: 8px;
+}
+popup.active {
+	display: block;
+}
+</style>
+"""))
 end
 
 # ╔═╡ cdc0a7ad-a3ac-4270-b707-35b1939da276
@@ -192,6 +254,10 @@ BondTable([
 	bl,
 	blc
 ]; description = "My Bonds")
+
+# ╔═╡ 60ae886b-d6a5-452b-b1cd-a29e52564f80
+@BondsList "asd" begin
+end;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -365,27 +431,29 @@ version = "17.4.0+0"
 # ╠═9d4455af-96f1-46d7-a4f3-434495b11c8a
 # ╠═8db82e94-5c81-4c52-9228-7e22395fb68f
 # ╠═949ac1ef-c502-4e28-81ff-f99b0d19aa03
+# ╠═bbba4947-4fc8-4c36-8510-6bdb34f0800f
 # ╠═707175a9-d356-43cf-8038-620ebc401c93
-# ╠═4843983c-df64-4b94-8634-7a10d9423a70
+# ╟─4843983c-df64-4b94-8634-7a10d9423a70
 # ╟─a8995224-83c6-4f82-b5a5-87a6f86fc7a0
 # ╠═9e3601f5-efc2-44e9-83d8-5b65ce7e9ccf
 # ╠═cdc0a7ad-a3ac-4270-b707-35b1939da276
-# ╠═49516374-f625-4a84-ac5c-f92497d45025
-# ╠═8cc53cd2-9114-4067-ab0b-37fd8cd79240
+# ╟─49516374-f625-4a84-ac5c-f92497d45025
+# ╟─8cc53cd2-9114-4067-ab0b-37fd8cd79240
 # ╠═0db51d39-7c05-4e00-b951-7fe776a8e0f9
 # ╠═e2b79a58-e66e-4d40-8673-418823753b38
-# ╠═9d23382c-cf35-4b20-a46c-0f4e2de17fc7
-# ╠═959acb40-1fd6-43f5-a1a6-73a6ceaae1d7
+# ╟─9d23382c-cf35-4b20-a46c-0f4e2de17fc7
+# ╟─959acb40-1fd6-43f5-a1a6-73a6ceaae1d7
 # ╠═4d611425-c8e3-4bc3-912b-8bc0465363bc
 # ╠═a5490a6b-dc11-42b7-87e0-d38870fc55e4
-# ╠═2ee7f26d-f383-4e7e-a69a-8fb72717467c
-# ╠═79beba88-932f-4147-b3a0-d821ef1bc1e2
+# ╟─2ee7f26d-f383-4e7e-a69a-8fb72717467c
+# ╟─79beba88-932f-4147-b3a0-d821ef1bc1e2
 # ╠═63d6c2df-a411-407c-af11-4f5d09fbb322
 # ╠═633029af-8cac-426e-b35c-c9fb3938b784
-# ╠═2073f11e-8196-4ebc-922f-5fa589e91797
+# ╟─2073f11e-8196-4ebc-922f-5fa589e91797
 # ╠═811cf78b-e870-45bb-9173-89a3b3d495f5
-# ╠═3a066bf4-3466-469e-90d0-6b14be3ed8d5
-# ╠═3213d977-7b65-43b0-a881-10fcc2523f14
+# ╟─3a066bf4-3466-469e-90d0-6b14be3ed8d5
+# ╟─3213d977-7b65-43b0-a881-10fcc2523f14
 # ╠═903fee67-6b23-41dc-a03d-f1040b696be6
+# ╠═60ae886b-d6a5-452b-b1cd-a29e52564f80
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

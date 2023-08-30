@@ -31,7 +31,7 @@ Base.@kwdef struct StructBond{T}
 	description::Any
 	secret_key::String=String(rand('a':'z', 10))
 end
-StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T), description)
+StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T; description), description)
 
 ## structbondtype ##
 structbondtype(::StructBond{T}) where T = T
@@ -78,11 +78,7 @@ _show(t::StructBond{T}) where T = @htl("""
 	<script id = $(t.secret_key)>
 		
 		const parent = currentScript.parentElement
-		const widget = currentScript.previousElementSibling
-	
-		// Overwrite the description
-		const desc = widget.querySelector('.description')
-		desc.innerHTML = $(t.description)
+		const widget = parent.firstElementChild
 	
 		// Set-Get bond
 	
@@ -155,7 +151,7 @@ Base.show(io::IO, mime::MIME"text/html", bd::BondWithDescription) = show(io, mim
 		$(bd.bond)
 	</bond-value>
 	<style>
-		$(CSS_Sheets.bondwithdescription)
+		$(CSS_PARTS.bondwithdescription)
 	</style>
 </bond-with-description>
 """))
@@ -188,7 +184,7 @@ Base.show(io::IO, mime::MIME"text/html", bl::BondsList) = show(io, mime, @htl(""
 		collapse_btn.onclick = (e) => container.collapse()
 	</script>
 	<style>
-	$(CSS_Sheets.bondslist)		
+	$(CSS_PARTS.bondslist)		
 	</style>
 </bondslist-container>
 """))
@@ -364,7 +360,7 @@ _show_popout(p::Popout) = wrapped() do Child
 	header.onmouseleave = (e) => container.classList.toggle('header-hover', false)
 </script>
 <style>
-	$(CSS_Sheets.popout)
+	$(CSS_PARTS.popout)
 </style>
 """)
 end
@@ -455,7 +451,7 @@ bondtable_interaction_handler = HTLScriptPart(@htl """
 ## CSS - BondTable ##
 bondtable_style = @htl """
 <style>
-	$(CSS_Sheets.bondtable)
+	$(CSS_PARTS.bondtable)
 </style>
 """;
 

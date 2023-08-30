@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
@@ -15,12 +15,6 @@ md"""
 """
   ╠═╡ =#
 
-# ╔═╡ b8782294-d6b9-43ac-b745-b2cbb6ed06b1
-# ╠═╡ skip_as_script = true
-#=╠═╡
-a = 1:10
-  ╠═╡ =#
-
 # ╔═╡ de8473c1-dea1-4221-9562-30679ae58e34
 # ╠═╡ skip_as_script = true
 #=╠═╡
@@ -29,10 +23,10 @@ $$3+2$$
 """
   ╠═╡ =#
 
-# ╔═╡ 900f494b-690d-43cf-b1b7-61c5d3e68a6d
+# ╔═╡ b8782294-d6b9-43ac-b745-b2cbb6ed06b1
 # ╠═╡ skip_as_script = true
 #=╠═╡
-"\n"
+a = 1:15
   ╠═╡ =#
 
 # ╔═╡ 9446acfc-a310-4de6-8876-e30ede527e9c
@@ -296,6 +290,12 @@ $(texeq("
 """
   ╠═╡ =#
 
+# ╔═╡ 7879d7e3-38ad-4a06-8057-ec30da534d76
+# ╠═╡ skip_as_script = true
+#=╠═╡
+texeq("y=2x^2")
+  ╠═╡ =#
+
 # ╔═╡ ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
 # ╠═╡ skip_as_script = true
 #=╠═╡
@@ -305,12 +305,6 @@ texeq("
 									&= 10
 	\\end{align*}
 	")
-  ╠═╡ =#
-
-# ╔═╡ 7879d7e3-38ad-4a06-8057-ec30da534d76
-# ╠═╡ skip_as_script = true
-#=╠═╡
-texeq("y=2x^2")
   ╠═╡ =#
 
 # ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
@@ -479,7 +473,7 @@ HypertextLiteral = "~0.9.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.5"
+julia_version = "1.9.2"
 manifest_format = "2.0"
 project_hash = "12b2e5dab6bc229d7692234b6b2202f7e3ec539c"
 
@@ -492,23 +486,22 @@ version = "0.9.3"
 # ╔═╡ Cell order:
 # ╠═945ee770-e082-11eb-0c8b-25e53f4d718c
 # ╟─b35233a0-6d2f-4eac-8cb0-e317eef4c835
-# ╠═b8782294-d6b9-43ac-b745-b2cbb6ed06b1
 # ╠═0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
 # ╠═1482e175-cf32-42f3-b8fb-64f1f14c1501
 # ╠═0df86e0e-6813-4f9f-9f36-7badf2f85597
 # ╠═0bd44757-90b8-452f-999f-6109239ac826
 # ╠═de8473c1-dea1-4221-9562-30679ae58e34
 # ╠═b9213424-f814-4bb8-a05f-33249f4f0a8f
-# ╠═9e69e30e-506a-4bd7-b213-0b5c0b31a10d
-# ╠═ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
-# ╠═900f494b-690d-43cf-b1b7-61c5d3e68a6d
-# ╠═7879d7e3-38ad-4a06-8057-ec30da534d76
+# ╟─9e69e30e-506a-4bd7-b213-0b5c0b31a10d
+# ╟─7879d7e3-38ad-4a06-8057-ec30da534d76
+# ╟─ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
+# ╠═b8782294-d6b9-43ac-b745-b2cbb6ed06b1
 # ╠═958531c1-fa83-477c-be3d-927155800f1b
-# ╠═9446acfc-a310-4de6-8876-e30ede527e9c
-# ╠═6d750d01-b851-4614-b448-1a6e00fa5754
+# ╟─9446acfc-a310-4de6-8876-e30ede527e9c
+# ╟─6d750d01-b851-4614-b448-1a6e00fa5754
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472
 # ╟─b6b08bf0-7282-40b9-ae87-b776a64c519f
-# ╠═6584afb8-b085-4c56-93cb-a5b57e16520c
+# ╟─6584afb8-b085-4c56-93cb-a5b57e16520c
 # ╠═a78aa624-6504-4b3f-914a-833261b92f19
 # ╟─d14197d8-cab1-4d92-b81c-d826ea8183f3
 # ╠═2ad9500c-187b-4b69-8e7b-ef76af8fc39a

@@ -1,6 +1,7 @@
 module PlutoExtras
 using HypertextLiteral
 using PlutoDevMacros
+using Reexport
 
 include("editable.jl") # exports: Editable 
 include("stringonenter.jl") # exports: StringOnEnter
@@ -9,9 +10,10 @@ module ExtendedToc include("extended_toc.jl") end
 import .ExtendedToc: ExtendedTableOfContents, show_output_when_hidden
 export ExtendedTableOfContents, show_output_when_hidden
 
-include("toggle_reactive_bond.jl") # exports: ToggleReactiveBond
+# include("toggle_reactive_bond.jl") # exports: ToggleReactiveBond
 
 include("structbond/StructBondModule.jl")
+@reexport using .StructBondModule
 
 
 end # module
