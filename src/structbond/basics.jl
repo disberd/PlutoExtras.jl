@@ -1,15 +1,3 @@
-
-import REPL: fielddoc
-import ..ToggleReactiveBond
-using HypertextLiteral
-import PlutoUI.Experimental: wrapped
-using PlutoUI: combine
-
-CSS_Sheets = map(readdir(joinpath(@__DIR__, "css"))) do file
-	name = replace(file, r"\.[\w]+$" => "") |> Symbol
-	path = joinpath(@__DIR__, "css", file)
-	name => read(path, String)
-end |> NamedTuple
 # StructBond Helpers #
 ## Structs ##
 struct NotDefined end

@@ -1,6 +1,3 @@
-using PlutoDevMacros.Script
-import AbstractPlutoDingetjes.Bonds
-
 # StructBond Definition #
 
 """
