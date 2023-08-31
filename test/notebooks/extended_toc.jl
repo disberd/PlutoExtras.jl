@@ -38,10 +38,13 @@ md"""
 ## Hidden Heading
 """
 
+# ╔═╡ 77e467b9-c86c-4f13-a259-c38dfd80a3aa
+2 # This will be completely hidden
+
 # ╔═╡ f6e74270-bd75-4367-a0b2-1e10e1336b6c
 # ╠═╡ skip_as_script = true
 #=╠═╡
-3 |> show_output_when_hidden
+3 |> show_output_when_hidden # This will keep showing
   ╠═╡ =#
 
 # ╔═╡ 091dbcb6-c5f6-469b-889a-e4b23197d2ad
@@ -446,6 +449,7 @@ version = "17.4.0+2"
 # ╟─48540378-5b63-4c20-986b-75c08ceb24b7
 # ╟─7dce5ffb-48ad-4ef4-9e13-f7a34794170a
 # ╟─4373ab10-d4e7-4e25-b7a8-da1fcf3dcb0c
+# ╠═77e467b9-c86c-4f13-a259-c38dfd80a3aa
 # ╠═f6e74270-bd75-4367-a0b2-1e10e1336b6c
 # ╠═091dbcb6-c5f6-469b-889a-e4b23197d2ad
 # ╠═c9bcf4b9-6769-4d5a-bbc0-a14675e11523
