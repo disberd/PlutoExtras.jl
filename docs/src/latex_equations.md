@@ -23,6 +23,8 @@ If one wants the exploit equation referencing with automatic numbering update, t
 ```
 Open the [latex test notebook](https://github.com/disberd/PlutoExtras.jl/blob/master/test/notebooks/latex_equations.jl) to check this functionality in action!
 
+!!! note
+    The notebook must be run from the original folder (`test/notebooks`) within the `PlutoExtras` package folder to properly load the PlutoExtras package
 ## API
 ```@docs
 initialize_eqref

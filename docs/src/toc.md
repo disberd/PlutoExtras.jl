@@ -34,6 +34,10 @@ The `ExtendedTableOfContents` allow to re-order the cell groups identified by ea
   - Holding shift during the dragging process allows to put headings before/after any other heading regardless of the level
 
 ## Examples
+Open the [extended ToC test notebook](https://github.com/disberd/PlutoExtras.jl/blob/master/test/notebooks/extended_toc.jl) to check this functionality in action!
+!!! note
+    The notebook must be run from the original folder (`test/notebooks`) within the `PlutoExtras` package folder to properly load the PlutoExtras package
+
 ### State Manipulation
 ![State_Manipulation](https://user-images.githubusercontent.com/12846528/217245898-5166682d-b41d-4f1e-b71b-4d7f69c8f192.gif)
 

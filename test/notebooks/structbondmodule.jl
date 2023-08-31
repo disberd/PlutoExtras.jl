@@ -37,6 +37,15 @@ md"""
 # ╔═╡ 707175a9-d356-43cf-8038-620ebc401c93
 ExtendedTableOfContents()
 
+# ╔═╡ cbfc6eec-8991-4a9c-ada0-295c8052854d
+# html"""
+# <style>
+# main {
+# 	margin-right: 350px !important;
+# }
+# </style>
+# """
+
 # ╔═╡ 4843983c-df64-4b94-8634-7a10d9423a70
 md"""
 # StructBond
@@ -62,11 +71,12 @@ Base.@kwdef struct ASD
 	d::String
 	e::Int
 end
+@typeasfield String = TextField() # String fields with no struct-specific default will use this 
 @fielddata ASD begin
 	a = (md"Markdown description, including ``LaTeX``", Slider(1:10))
 	b = (@htl("<span>Field with <b>HTML</b> description</span>"), Scrubbable(1:10))
 	c = ("Normal String Description", TextField())
-	d = TextField() # No description, defaults to the docstring since it's present
+	# d has no ASD-specific custom bond, so it will use the field docstring as description and the default String widget as widget
 	e = Slider(20:25) # No description, defaults to the fieldname as no docstring is present
 end
 asd_bond = @bind asd StructBond(ASD; description = "Custom Description")
@@ -131,7 +141,7 @@ md"""
 
 # ╔═╡ 959acb40-1fd6-43f5-a1a6-73a6ceaae1d7
 md"""
-In some cases, one does not want to have a single bond wrapping either a Structure or a NamedTuple, and single independent bonds are more convenient.
+In some cases, one does not want to have a single bond wrapping either a Structure or a NamedTuple because single independent bonds are more convenient.
 
 `@BondsList` is a convenience macro to create an object of type `BondsList` which simply allow to add a description to separate bonds and group them all together in a table-like format equivalent to those of `StructBond`.
 
@@ -184,7 +194,10 @@ end
 end
 
 # ╔═╡ 633029af-8cac-426e-b35c-c9fb3938b784
-popoutwrap(LOL)
+@bind lol_pop popoutwrap(LOL)
+
+# ╔═╡ 065bad73-5fa8-4496-ba33-9e66940b5806
+lol_pop
 
 # ╔═╡ 2073f11e-8196-4ebc-922f-5fa589e91797
 md"""
@@ -198,6 +211,12 @@ blc = @BondsList "Popout Container" begin
 	"Structure ASD" = Popout(asd_bond)
 	"NamedTuple" = Popout(nt_bond)
 end
+
+# ╔═╡ e7d67662-77b3-482a-b032-8db4afbc01a6
+asd
+
+# ╔═╡ 996b4085-114c-48f4-9f90-8e637f29c06a
+nt
 
 # ╔═╡ 3a066bf4-3466-469e-90d0-6b14be3ed8d5
 md"""
@@ -220,6 +239,18 @@ BondTable([
 	bl,
 	blc
 ]; description = "My Bonds")
+
+# ╔═╡ 08d711c0-e2cc-4444-94ca-0c4c3cfe901f
+nt
+
+# ╔═╡ 03e9d75e-e6c9-4199-933b-2be306daf978
+asd
+
+# ╔═╡ 26d11600-2827-4e08-9195-109c8a8bddc3
+freq
+
+# ╔═╡ be2a7820-e194-4410-b00d-a9332b234ad6
+alt
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -394,6 +425,7 @@ version = "17.4.0+2"
 # ╠═8db82e94-5c81-4c52-9228-7e22395fb68f
 # ╠═949ac1ef-c502-4e28-81ff-f99b0d19aa03
 # ╠═707175a9-d356-43cf-8038-620ebc401c93
+# ╠═cbfc6eec-8991-4a9c-ada0-295c8052854d
 # ╟─4843983c-df64-4b94-8634-7a10d9423a70
 # ╟─a8995224-83c6-4f82-b5a5-87a6f86fc7a0
 # ╠═9e3601f5-efc2-44e9-83d8-5b65ce7e9ccf
@@ -414,10 +446,17 @@ version = "17.4.0+2"
 # ╟─79beba88-932f-4147-b3a0-d821ef1bc1e2
 # ╠═63d6c2df-a411-407c-af11-4f5d09fbb322
 # ╠═633029af-8cac-426e-b35c-c9fb3938b784
+# ╠═065bad73-5fa8-4496-ba33-9e66940b5806
 # ╟─2073f11e-8196-4ebc-922f-5fa589e91797
 # ╠═811cf78b-e870-45bb-9173-89a3b3d495f5
+# ╠═e7d67662-77b3-482a-b032-8db4afbc01a6
+# ╠═996b4085-114c-48f4-9f90-8e637f29c06a
 # ╟─3a066bf4-3466-469e-90d0-6b14be3ed8d5
 # ╟─3213d977-7b65-43b0-a881-10fcc2523f14
 # ╠═903fee67-6b23-41dc-a03d-f1040b696be6
+# ╠═08d711c0-e2cc-4444-94ca-0c4c3cfe901f
+# ╠═03e9d75e-e6c9-4199-933b-2be306daf978
+# ╠═26d11600-2827-4e08-9195-109c8a8bddc3
+# ╠═be2a7820-e194-4410-b00d-a9332b234ad6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -18,6 +18,7 @@ makedocs(;
         "basic_widgets.md",
         "latex_equations.md",
         "toc.md",
+        "structbond.md",
     ],
 )
 
