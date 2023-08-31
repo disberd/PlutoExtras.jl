@@ -1,17 +1,31 @@
 module PlutoExtras
 using HypertextLiteral
 using PlutoDevMacros
+using PlutoDevMacros.Script
+using AbstractPlutoDingetjes.Bonds
+using AbstractPlutoDingetjes
+using Reexport
+@reexport using PlutoUI
 
-include("editable.jl") # exports: Editable 
-include("stringonenter.jl") # exports: StringOnEnter
-include("latex_equations.jl") # exports the following: texeq, eqref, initialize_eqref, @texeq_str
+# This is similar to `@reexport` but does not export the module name
+function re_export_without_modname(m::Module)
+    mod_name = nameof(m)
+    exprts = setdiff(names(m), (nameof(m),))
+    eval(:(using .$mod_name))
+    eval(:(export $(exprts...)))
+end
+
+export Editable, StringOnEnter # from basic_widgets.jl
+export ToggleReactiveBond # From within StructBondModule
+
+include("basic_widgets.jl")
+include("latex_equations.jl") 
 module ExtendedToc include("extended_toc.jl") end
-import .ExtendedToc: ExtendedTableOfContents, show_output_when_hidden
-export ExtendedTableOfContents, show_output_when_hidden
-
-include("toggle_reactive_bond.jl") # exports: ToggleReactiveBond
 
 include("structbond/StructBondModule.jl")
+using .StructBondModule
 
+## ReExports ##
+re_export_without_modname.((ExtendedToc, LaTeXEqModule))
 
 end # module

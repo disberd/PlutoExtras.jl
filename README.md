@@ -1,4 +1,6 @@
 # PlutoExtras
+[![Build Status](https://github.com/disberd/PlutoExtras.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/disberd/PlutoExtras.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Coverage](https://codecov.io/gh/disberd/PlutoExtras.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/disberd/PlutoExtras.jl)
 
 This package provides some widgets to be used in Pluto, including an extended version of the TableOfContents from PlutoUI and a new experimental bond container (`BondTable`). 
 
@@ -11,7 +13,7 @@ There is some new under-development experimental feature to simplify the groupin
 Have a look at the notebook at [notebooks/test_bondstable.jl](https://rawcdn.githack.com/disberd/PlutoExtras.jl/94fdc84217b5591343ba4671666511d16b1c0eaf/html_exports/test_bondstable.jl.html) for an example of the features/capabilities. (The link points to a static html export of the notebook. If you want to execute the notebook, remember that it has to be executed from the cloned repository as it currently uses the package environment of the package)
 
 ## ExtendedTableOfContents
-The [extended_toc.jl](./src/extended_toc.jl) notebook defines and exports `ExtendedTableOfContents`, which takes the `TableOfContents` from `PlutoUI` and adds the following functionalities:
+The [extended_toc.jl](./test/notebooks/extended_toc.jl) notebook shows the example use of `ExtendedTableOfContents`, which takes the `TableOfContents` from `PlutoUI` and adds the following functionalities:
 
 ### Hiding Heading/Cells
 Hiding headings and all connected cells from notebook view can be done via ExtendedTableOfContents
@@ -22,10 +24,6 @@ Hiding headings and all connected cells from notebook view can be done via Exten
 
 ### Collapsing Headings in ToC
 ToC headings are grouped based on heading level, sub-headings at various levels can be collapsed by using the caret symbol that appears to the left of headings in the ToC upon hover.
-
-### Scroll behavior fix
-The weird scrolling issue appearing on chromium-based browsers with the scrolling in the TableOfContents (see https://github.com/JuliaPluto/PlutoUI.jl/issues/238) is fixed by relying on the [SmoothScroll](https://github.com/LieutenantPeacock/SmoothScroll/) library.
-- _SmoothScroll_ is used by default to replace the scroll upon heading click behavior. To maintain the original behavior, call `ExtendedTableOfContents(;use_smoothscroll = false)`
 
 ### Save Hide/Collapsed status on notebook file
 Preserving the status of collapsed/hidden heading is supported by writing to the notebook file using notebook and cell metadata, allowing to maintain the status even upon reload of Julia/Pluto

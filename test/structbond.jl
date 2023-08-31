@@ -1,0 +1,45 @@
+import Pluto: update_save_run!, update_run!, WorkspaceManager, ClientSession,
+ServerSession, Notebook, Cell, project_relative_path, SessionActions,
+load_notebook, Configuration, set_bond_values_reactive
+using PlutoExtras
+
+function noerror(cell; verbose=true)
+    if cell.errored && verbose
+        @show cell.output.body
+    end
+    !cell.errored
+end
+
+
+options = Configuration.from_flat_kwargs(; disable_writing_notebook_files=true)
+srcdir = normpath(@__DIR__, "./notebooks")
+eval_in_nb(sn, expr) = WorkspaceManager.eval_fetch_in_workspace(sn, expr)
+
+function set_bond_value_sn(sn)
+    (session, notebook) = sn
+    function set_bond_value(name, value, is_first_value=false)
+        notebook.bonds[name] = Dict("value" => value)
+        set_bond_values_reactive(; session, notebook, bound_sym_names=[name],
+            is_first_values=[is_first_value],
+            run_async=false,
+        )
+    end
+end
+
+@testset "Struct Bond notebook" begin
+    ss = ServerSession(; options)
+    path = joinpath(srcdir, "structbondmodule.jl")
+    nb = SessionActions.open(ss, path; run_async=false)
+    sn = (ss, nb)
+    set_bond_value = set_bond_value_sn(sn)
+    for cell in nb.cells
+        @test noerror(cell)
+    end
+
+    @test eval_in_nb(sn, :nt) == (;a = 1, b = 1, c = 1)
+    @test eval_in_nb(sn, :(asd == ASD(1,6,"","",20)))
+
+    @test eval_in_nb(sn, :alt) == 150
+    @test eval_in_nb(sn, :freq) == 2e10
+    SessionActions.shutdown(ss, nb)
+end
