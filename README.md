@@ -6,11 +6,13 @@ This package provides some widgets to be used in Pluto, including an extended ve
 
 This was formerly a non-registered package named PlutoUtils
 
+To check out the functionalities in more detail, check the notebooks located in the test folder at [test/notebooks](./test/notebooks/) (You have to execute them from their original folder within the package folder, or the loading of the package with `@frompackage` will fail.)
+
 ## BondTable (NEW!)
 
 There is some new under-development experimental feature to simplify the grouping and displaying of many bonds within a given notebook in a floating table (similar to the TableOfContents) that stays on the left and can be hidden, resized and moved around.
 
-Have a look at the notebook at [notebooks/test_bondstable.jl](https://rawcdn.githack.com/disberd/PlutoExtras.jl/94fdc84217b5591343ba4671666511d16b1c0eaf/html_exports/test_bondstable.jl.html) for an example of the features/capabilities. (The link points to a static html export of the notebook. If you want to execute the notebook, remember that it has to be executed from the cloned repository as it currently uses the package environment of the package)
+Have a look at the notebook at [notebooks/test_bondstable.jl](https://rawcdn.githack.com/disberd/PlutoExtras.jl/5b57bbb25276ff44cd79e93b72b8c504fd46a432/html_exports/test_bondstable.jl.html) for an example of the features/capabilities. (The link points to a static html export of the notebook. If you want to execute the notebook, remember that it has to be executed from the cloned repository as it currently uses the package environment of the package)
 
 ## ExtendedTableOfContents
 The [extended_toc.jl](./test/notebooks/extended_toc.jl) notebook shows the example use of `ExtendedTableOfContents`, which takes the `TableOfContents` from `PlutoUI` and adds the following functionalities:
