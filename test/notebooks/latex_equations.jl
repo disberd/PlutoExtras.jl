@@ -23,15 +23,23 @@ md"""
 """
   ╠═╡ =#
 
+# ╔═╡ a78aa624-6504-4b3f-914a-833261b92f19
+initialize_eqref() # This is important for making `eqref(label)` work!
+
 # ╔═╡ b8782294-d6b9-43ac-b745-b2cbb6ed06b1
 a = 1:10
 
 # ╔═╡ 0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
 texeq("3+2=5")
 
+# ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
+texeq"
+	\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \label{interactive}
+"
+
 # ╔═╡ 1482e175-cf32-42f3-b8fb-64f1f14c1501
 md"""
-The sum in $(eqref("interactive")) is interactive!
+The sum in $(eqref("interactive")) is interactive and its equation number reference automatically updates!
 """
 
 # ╔═╡ 0df86e0e-6813-4f9f-9f36-7badf2f85597
@@ -84,11 +92,6 @@ texeq("
 # ╔═╡ 7879d7e3-38ad-4a06-8057-ec30da534d76
 texeq("y=2x^2")
 
-# ╔═╡ 958531c1-fa83-477c-be3d-927155800f1b
-texeq("
-	\\sum_{i=$(a[1])}^{$(a[end])} i=$(sum(a)) \\label{interactive}
-	")
-
 # ╔═╡ 9446acfc-a310-4de6-8876-e30ede527e9c
 md"""
 $$Y = \overline {A} - m \phi (\overline {r} - \gamma \pi)$$
@@ -114,9 +117,6 @@ We then create a function that loops through all possible katex equation and cou
 
 The code for the mutationobservers to trigger re-computation of the numbers are taken from the **TableOfContents** in **PlutoUI**
 """
-
-# ╔═╡ a78aa624-6504-4b3f-914a-833261b92f19
-initialize_eqref()
 
 # ╔═╡ d14197d8-cab1-4d92-b81c-d826ea8183f3
 # ╠═╡ skip_as_script = true
@@ -314,8 +314,10 @@ version = "17.4.0+2"
 # ╠═945ee770-e082-11eb-0c8b-25e53f4d718c
 # ╠═57ec4f3e-ed4d-4c44-af8a-c1e32a3f4bd7
 # ╟─b35233a0-6d2f-4eac-8cb0-e317eef4c835
+# ╠═a78aa624-6504-4b3f-914a-833261b92f19
 # ╠═b8782294-d6b9-43ac-b745-b2cbb6ed06b1
 # ╠═0bfb8ee9-14e2-44ee-b0d5-98790d47f7b8
+# ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═1482e175-cf32-42f3-b8fb-64f1f14c1501
 # ╠═0df86e0e-6813-4f9f-9f36-7badf2f85597
 # ╠═0bd44757-90b8-452f-999f-6109239ac826
@@ -325,12 +327,10 @@ version = "17.4.0+2"
 # ╠═ea09b6ec-8d39-4cd9-9c79-85c1fcce3828
 # ╠═900f494b-690d-43cf-b1b7-61c5d3e68a6d
 # ╠═7879d7e3-38ad-4a06-8057-ec30da534d76
-# ╠═958531c1-fa83-477c-be3d-927155800f1b
 # ╠═9446acfc-a310-4de6-8876-e30ede527e9c
 # ╠═6d750d01-b851-4614-b448-1a6e00fa5754
 # ╟─1471265c-4934-45e3-a4b2-37da94ff7472
 # ╟─b6b08bf0-7282-40b9-ae87-b776a64c519f
-# ╠═a78aa624-6504-4b3f-914a-833261b92f19
 # ╟─d14197d8-cab1-4d92-b81c-d826ea8183f3
 # ╠═2078d2c8-1f38-42fe-9945-b2235e267b38
 # ╠═943e5ef8-9187-4bfd-aefa-8f405b50e6aa
