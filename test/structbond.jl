@@ -2,6 +2,62 @@ import Pluto: update_save_run!, update_run!, WorkspaceManager, ClientSession,
 ServerSession, Notebook, Cell, project_relative_path, SessionActions,
 load_notebook, Configuration, set_bond_values_reactive
 using PlutoExtras
+using Markdown
+using PlutoExtras.StructBondModule
+using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield
+import PlutoExtras.AbstractPlutoDingetjes.Bonds
+using Test
+
+
+@testset "APD methods and Coverage" begin
+    tr = ToggleReactiveBond(Editable(3))
+    @testset "Toggle Reactive" begin
+        @test Bonds.validate_value(tr, 3) === true
+        @test Bonds.validate_value(tr, 3im) === false
+        @test Bonds.transform_value(tr, 3) === 3
+        @test Bonds.possible_values(tr) === Bonds.InfinitePossibilities()
+    end
+    ntb = @NTBond "My Fancy NTuple" begin
+        a = ("Description", Slider(1:10))
+        b = (md"**Bold** field", Slider(1:10))
+        c = Slider(1:10) # No description, defaults to the name of the field
+    end
+    nt = (;a=1,b=1,c=1)
+    @testset "StructBond" begin
+        @test structbondtype(ntb) <: NamedTuple
+        @test structbondtype(typeof(ntb)) <: NamedTuple
+
+        @test Bonds.transform_value(ntb, [[[1], [1], [1]]]) === nt
+        @test fieldbond(structbondtype(ntb), Val(:a)) isa Slider
+        @test fieldbond(structbondtype(ntb), Val(:asd)) isa NotDefined
+
+        # Test custom field bonds
+        struct ASD
+            a::Int
+        end
+        # This is needed for local testing to reset the typeasfield to NotDefined
+        StructBondModule.typeasfield(::Type{Int}) = NotDefined()
+        @test_throws "no custom method" StructBond(ASD)
+        @typeasfield Int = Slider(1:10)
+        @test StructBond(ASD) isa StructBond
+        struct BOH
+            asd::ASD
+        end
+        # This is needed for local testing to reset the typeasfield to NotDefined
+        StructBondModule.typeasfield(::Type{ASD}) = NotDefined()
+        @test_throws "no custom method" StructBond(BOH)
+        @popoutasfield ASD
+        @test StructBond(BOH) isa StructBond
+        @test typeasfield(ASD) isa Popout
+        @test fieldbond(BOH, :asd) isa Popout
+    end
+
+    p = popoutwrap(ntb)
+    @testset "Popout" begin
+       @test Bonds.initial_value(p) === nt
+       @test Bonds.transform_value(p, [[[[1], [1], [1]]]]) === nt
+    end
+end
 
 function noerror(cell; verbose=true)
     if cell.errored && verbose
@@ -38,6 +94,7 @@ end
 
     @test eval_in_nb(sn, :nt) == (;a = 1, b = 1, c = 1)
     @test eval_in_nb(sn, :(asd == ASD(1,6,"","",20)))
+    @test eval_in_nb(sn, :(boh == BOH(MAH(1))))
 
     @test eval_in_nb(sn, :alt) == 150
     @test eval_in_nb(sn, :freq) == 2e10

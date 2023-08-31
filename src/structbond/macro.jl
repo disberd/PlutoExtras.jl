@@ -2,7 +2,7 @@
 # Generic function for the convenience macros to add methods for the field functions
 function _add_generic_field(s, block, fnames)
 	if !Meta.isexpr(block, [:block, :let])
-		error("The second argument to the `@addfieldbonds` macro has to be a begin or let block")
+		error("The second argument to the `@fieldbond` macro has to be a begin or let block")
 	end
 	Mod = @__MODULE__
 	# We create the output block
@@ -28,7 +28,7 @@ end
 # Generic function for the convenience macros to add methods for the type functions
 function _add_generic_type(block, fname)
 	if !Meta.isexpr(block, [:block, :let])
-		error("The second argument to the `@addfieldbonds` macro has to be a begin or let block")
+		error("The second argument to the `@fieldtype` macro has to be a begin or let block")
 	end
 	Mod = @__MODULE__
 	# We create the output block
@@ -48,7 +48,8 @@ end
 # @fieldbond #
 """
 	@fieldbond typename block
-Convenience macro to define custom widgets for each field of `typename`. This is mostly inteded to be used in combintation with [`StructBond`](@ref).
+Convenience macro to define custom widgets for each field of `typename`. This is
+mostly inteded to be used in combintation with [`StructBond`](@ref).
 
 Given for example the following structure
 ```
@@ -72,9 +73,13 @@ end
 end
 @bind asd StructBond(ASD)
 ```
-where `asd` will be an instance of type `ASD` with each field interactively controllable by the specified widgets and showing the field description next to each widget.
+where `asd` will be an instance of type `ASD` with each field interactively
+controllable by the specified widgets and showing the field description next to
+each widget.
 
-See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref),
+[`popoutwrap`](@ref), [`@fielddescription`](@ref), [`@fieldhtml`](@ref),
+[`@typeasfield`](@ref), [`@popoutasfield`](@ref)
 """
 macro fieldbond(s, block)
 	_add_generic_field(s, block, [:fieldbond])
@@ -83,7 +88,9 @@ end
 # @fielddescription #
 """
 	@fielddescription typename block
-Convenience macro to define custom descriptions for the widgets of each field of `typename`. This is mostly inteded to be used in combintation with [`StructBond`](@ref).
+Convenience macro to define custom descriptions for the widgets of each field of
+`typename`. This is mostly inteded to be used in combintation with
+[`StructBond`](@ref).
 
 Given for example the following structure
 ```
@@ -107,9 +114,13 @@ end
 end
 @bind asd StructBond(ASD)
 ```
-where `asd` will be an instance of type `ASD` with each field interactively controllable by the specified widgets and showing the field description next to each widget.
+where `asd` will be an instance of type `ASD` with each field interactively
+controllable by the specified widgets and showing the field description next to
+each widget.
 
-See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+See also: [`BondTable`](@ref), [`StructBond`](@ref), [`Popout`](@ref),
+[`popoutwrap`](@ref), [`@fieldbond`](@ref), [`@fieldhtml`](@ref),
+[`@typeasfield`](@ref), [`@popoutasfield`](@ref)
 """
 macro fielddescription(s, block)
 	_add_generic_field(s, block, [:fielddescription])
@@ -121,6 +132,41 @@ macro fieldhtml(s, block)
 end
 
 # @typeasfield #
+"""
+	@typeasfield T = Widget
+	@typeasfield begin
+		T1 = Widget1
+		T2 = Widget2
+		...
+	end
+
+Macro to give a default widget for a specific type `T`, `T1`, or `T2`.
+This can be over-ridden by specifying a more specific default for a custom type
+using [`@fieldbond`](@ref)
+When a custom type is wrapped inside a [`StructBond`](@ref) and a custom widget
+for one of its field is not defined, the show method will use the one defined by
+this macro for the field type.
+
+# Examples
+The following julia code will error because a default widget is not defined for field `a`
+
+```
+using PlutoExtras.StructBondModule
+struct ASD 
+	a::Int
+end
+StructBond(ASD)
+```
+
+Apart from defining a specific value for `ASD` with [`@fieldbond`](@ref), one
+can also define a default widget for Int with:
+```julia
+@typeasfield Int = Slider(1:10)
+```
+
+Now calling `StructBond(ASD)` will not error and will default to showing a
+`Slider(1:10)` as bond for field `a` of `ASD`.
+"""
 macro typeasfield(block)
 	if Meta.isexpr(block, :(=))
 		block = Expr(:block, block)
@@ -129,6 +175,41 @@ macro typeasfield(block)
 end
 
 # @popoutasfield #
+"""
+	@popoutasfield T
+	@popoutasfield T1 T2 ...
+This macro will make the default widget for fields of type `T` a
+[`Popout`](@ref) wrapping a `StructBond{T}` type.
+For this to work, the `StructBond{T}` must have a default widget associated to
+each of its field, either by using [`@fieldbond`](@ref) or
+[`@typeasfield`](@ref)
+
+# Example (in Pluto)
+```julia
+# ╔═╡ 8db82e94-5c81-4c52-9228-7e22395fb68f
+using PlutoExtras.StructBondModule
+
+# ╔═╡ 86a80228-f495-43e8-b1d4-c93b7b52c8d8
+begin
+	@kwdef struct MAH
+		a::Int
+	end
+	@kwdef struct BOH
+		mah::MAH
+	end
+	
+	# This will make the default widget for an Int a Slider
+	@typeasfield Int = Slider(1:10)
+	# This will make the default widget for fields of type ASD a popout that wraps a StructBond{ASD}
+	@popoutasfield MAH
+	
+	@bind boh StructBond(BOH)
+end
+
+# ╔═╡ 2358f686-1950-40f9-9d5c-dac2d98f4c24
+boh === BOH(MAH(1))
+```
+"""
 macro popoutasfield(args...)
 	block = Expr(:block)
 	for arg in args
@@ -141,9 +222,11 @@ end
 # @fielddata #
 """
 	@fielddata typename block
-Convenience macro to define custom widgets for each field of `typename`. This is mostly inteded to be used in combintation with [`StructBond`](@ref).
+Convenience macro to define custom widgets for each field of `typename`. This is
+mostly inteded to be used in combintation with [`StructBond`](@ref).
 
-Given for example the following structure `ASD`, one can create a nice widget to create instances of type `ASD` wih the following code:
+Given for example the following structure `ASD`, one can create a nice widget to
+create instances of type `ASD` wih the following code:
 ```
 begin
 Base.@kwdef struct ASD

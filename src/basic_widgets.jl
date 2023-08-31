@@ -52,7 +52,8 @@ Bonds.initial_value(s::Editable) = s.default
 Bonds.possible_values(s::Editable) = Bonds.InfinitePossibilities()
 Bonds.possible_values(s::Editable{Bool}) = (true, false)
 
-Bonds.validate_value(s::Editable, from_browser::Number) = true
+Bonds.validate_value(s::Editable, from_browser::Union{Real, Bool}) = true
+Bonds.validate_value(s::Editable, from_browser) = false
 
 ### Show - Bool ###
 # In case of Bool type, the prefix and suffix are used as strings to display for the 'true' and 'false' flags respectively

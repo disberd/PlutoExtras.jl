@@ -2,12 +2,31 @@ import Pluto: update_save_run!, update_run!, WorkspaceManager, ClientSession,
 ServerSession, Notebook, Cell, project_relative_path, SessionActions,
 load_notebook, Configuration, set_bond_values_reactive
 using PlutoExtras
+import PlutoExtras.AbstractPlutoDingetjes.Bonds
+using Test
 
 function noerror(cell; verbose=true)
     if cell.errored && verbose
         @show cell.output.body
     end
     !cell.errored
+end
+
+@testset "APD methods" begin
+    ed = Editable(3)
+    @test Base.get(ed) == 3
+    @test Bonds.initial_value(ed) == 3
+    @test Bonds.possible_values(ed) == Bonds.InfinitePossibilities()
+    @test Bonds.possible_values(Editable(true)) == (true, false)
+    @test Bonds.validate_value(ed, 5) === true
+    @test Bonds.validate_value(ed, 3im) === false
+
+    soe = StringOnEnter("asd")
+    @test Base.get(soe) == "asd"
+    @test Bonds.initial_value(soe) == "asd"
+    @test Bonds.possible_values(soe) == Bonds.InfinitePossibilities()
+    @test Bonds.validate_value(soe, 5) === false
+    @test Bonds.validate_value(soe, "lol") === true
 end
 
 

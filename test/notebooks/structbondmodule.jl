@@ -75,6 +75,31 @@ end
 # ╔═╡ cdc0a7ad-a3ac-4270-b707-35b1939da276
 asd
 
+# ╔═╡ fe891b4e-f440-4823-b43b-72572f6a6c12
+md"""
+## Default Type Widgets
+"""
+
+# ╔═╡ 86a80228-f495-43e8-b1d4-c93b7b52c8d8
+begin
+	@kwdef struct MAH
+		a::Int
+	end
+	@kwdef struct BOH
+		mah::MAH
+	end
+	
+	# This will make the default widget for an Int a Slider
+	@typeasfield Int = Slider(1:10)
+	# This will make the default widget for fields of type ASD a popout that wraps a StructBond{ASD}
+	@popoutasfield MAH
+	
+	@bind boh StructBond(BOH)
+end
+
+# ╔═╡ 2358f686-1950-40f9-9d5c-dac2d98f4c24
+boh
+
 # ╔═╡ 49516374-f625-4a84-ac5c-f92497d45025
 md"""
 # @NTBond
@@ -373,7 +398,10 @@ version = "17.4.0+2"
 # ╟─a8995224-83c6-4f82-b5a5-87a6f86fc7a0
 # ╠═9e3601f5-efc2-44e9-83d8-5b65ce7e9ccf
 # ╠═cdc0a7ad-a3ac-4270-b707-35b1939da276
-# ╠═49516374-f625-4a84-ac5c-f92497d45025
+# ╟─fe891b4e-f440-4823-b43b-72572f6a6c12
+# ╠═86a80228-f495-43e8-b1d4-c93b7b52c8d8
+# ╠═2358f686-1950-40f9-9d5c-dac2d98f4c24
+# ╟─49516374-f625-4a84-ac5c-f92497d45025
 # ╟─8cc53cd2-9114-4067-ab0b-37fd8cd79240
 # ╠═0db51d39-7c05-4e00-b951-7fe776a8e0f9
 # ╠═e2b79a58-e66e-4d40-8673-418823753b38

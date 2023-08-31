@@ -57,7 +57,8 @@ typedescription(T::Type) = string(Base.nameof(T))
 
 ### Bond ###
 
-# This function has to be overwritten if a custom show method for a Type is intended when the type is shown as a filed of a BondTable
+# This function has to be overwritten if a custom show method for a Type is
+# intended when the type is shown as a filed of a BondTable
 typeasfield(T::Type) = NotDefined()
 
 # Basic function that is called for extracting the bond for a given field of a struct
@@ -73,7 +74,7 @@ function fieldbond(s::Type, f::Symbol)
 	ft = fieldtype(s,f)
 	out = typeasfield(ft)
 	out isa NotDefined && error("`$(Mod).fieldbond` has no custom method for field ($f::$ft) of type $s and `$(Mod).typeasfield` has no custom method for type $ft.\n
-	Please add one or the other using `@addfieldsbond` or `@addtypeasfield`")
+	Please add one or the other using `@fieldsbond` or `@typeasfield`")
 	return out
 end
 
