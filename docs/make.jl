@@ -1,4 +1,5 @@
 using PlutoExtras
+using PlutoExtras.StructBondModule
 using Documenter
 
 DocMeta.setdocmeta!(PlutoExtras, :DocTestSetup, :(using PlutoExtras); recursive=true)
