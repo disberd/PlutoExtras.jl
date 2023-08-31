@@ -5,7 +5,7 @@ The StructBondModule submodule of PlutoExtras defines and exports functionality 
 !!! note
     The StructBondModule is currently not re-exported by PlutoExtras so it has to be explicitly used with `using PlutoExtras.StructBondModule`
 
-Open the [structbond test notebook static html](https://rawcdn.githack.com/disberd/PlutoExtras.jl/5b57bbb25276ff44cd79e93b72b8c504fd46a432/html_exports/test_bondstable.jl.html) to see the look of the widgets exported.\
+Open the [structbond test notebook static html](https://rawcdn.githack.com/disberd/PlutoExtras.jl/0e3153d29d3b112f93507c042a35b8161a3bb661/html_exports/test_bondstable.jl.html) to see the look of the widgets exported.\
 Or open the [related notebook](https://github.com/disberd/PlutoExtras.jl/blob/master/test/notebooks/structbondmodule.jl) directy in Pluto to check their functionality in action!
 !!! note
     The notebook must be run from the original folder (`test/notebooks`) within the `PlutoExtras` package folder to properly load the PlutoExtras package
