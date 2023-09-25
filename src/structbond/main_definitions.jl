@@ -129,8 +129,6 @@ function collect_reinterpret!(x::AbstractArray)
 		elseif el isa AbstractArray
 			# We do recursive processing
 			collect_reinterpret!(el)
-		else
-			# We do nothing
 		end
 	end
 	return x
