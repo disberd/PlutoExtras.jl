@@ -117,8 +117,28 @@ function Bonds.initial_value(t::StructBond{T}) where T
 	transformed = Bonds.initial_value(t.widget)
 	typeconstructor(T)(transformed)
 end
+
+# We have to parse the received array and collect reinterpretarrays as they are
+# likely the cause of the weird error in Issue #31
+collect_reinterpret!(@nospecialize(x)) = x
+function collect_reinterpret!(x::AbstractArray)
+	for i in eachindex(x)
+		el = x[i]
+		if el isa Base.ReinterpretArray
+			x[i] = collect(el)
+		elseif el isa AbstractArray
+			# We do recursive processing
+			collect_reinterpret!(el)
+		else
+			# We do nothing
+		end
+	end
+	return x
+end
+
 function Bonds.transform_value(t::StructBond{T}, from_js) where T
-	transformed = Bonds.transform_value(t.widget, from_js)
+	# We remove reinterpreted_arrays (See Issue #31)
+	transformed = Bonds.transform_value(t.widget, collect_reinterpret!(from_js))
 	typeconstructor(T)(transformed)
 end
 
