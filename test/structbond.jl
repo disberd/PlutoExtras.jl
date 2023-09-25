@@ -4,7 +4,7 @@ load_notebook, Configuration, set_bond_values_reactive
 using PlutoExtras
 using Markdown
 using PlutoExtras.StructBondModule
-using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield
+using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield, collect_reinterpret!
 import PlutoExtras.AbstractPlutoDingetjes.Bonds
 using Test
 
@@ -66,6 +66,20 @@ function noerror(cell; verbose=true)
     !cell.errored
 end
 
+@testset "collect_reinterpret!" begin
+    @test collect_reinterpret!(3) === 3   
+    re = collect(reinterpret(UInt8, [.5])) |> x -> reinterpret(Float64, x)
+    arr = [
+        0.2,
+        [1.0],
+        re,
+    ]
+    @test collect_reinterpret!(arr) == [
+        0.2,
+        [1.0],
+        [0.5],
+    ]
+end
 
 options = Configuration.from_flat_kwargs(; disable_writing_notebook_files=true)
 srcdir = normpath(@__DIR__, "./notebooks")
