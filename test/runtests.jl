@@ -1,4 +1,8 @@
 using SafeTestsets
+using Aqua
+using PlutoExtras
+
+Aqua.test_all(PlutoExtras)
 
 @safetestset "Basic Widgets" begin include("basics.jl") end
 @safetestset "LaTeX Equations" begin include("latex.jl") end

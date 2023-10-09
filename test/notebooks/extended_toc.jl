@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.27
+# v0.19.29
 
 #> custom_attrs = ["enable_hidden"]
 
@@ -10,7 +10,7 @@ using InteractiveUtils
 begin
 	using HypertextLiteral
 	using PlutoUI
-	using PlutoDevMacros.Script
+	using PlutoDevMacros.PlutoCombineHTL.WithTypes
 	using PlutoDevMacros
 end
 
@@ -163,7 +163,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 HypertextLiteral = "~0.9.4"
-PlutoDevMacros = "~0.5.0"
+PlutoDevMacros = "~0.6.0"
 PlutoUI = "~0.7.49"
 """
 
@@ -173,7 +173,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.0-beta2"
 manifest_format = "2.0"
-project_hash = "ff6960561c5ccdacc631ec88bb1ce8c97f73df95"
+project_hash = "8df05c84907ee1c13539c332821b80414e385894"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -205,6 +205,12 @@ version = "1.0.5+1"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.DocStringExtensions]]
+deps = ["LibGit2"]
+git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.9.3"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -325,10 +331,10 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.10.0"
 
 [[deps.PlutoDevMacros]]
-deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Pkg", "Random", "TOML"]
-git-tree-sha1 = "6ce1d9f7c078b493812161349c48735dee275466"
+deps = ["AbstractPlutoDingetjes", "DocStringExtensions", "HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Pkg", "Random", "TOML"]
+git-tree-sha1 = "06fa4aa7a8f2239eec99cf54eeddd34f3d4359be"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.5.8"
+version = "0.6.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -446,7 +452,7 @@ version = "17.4.0+2"
 # ╠═464fc674-5ed7-11ed-0aff-939456ebc5a8
 # ╠═e1d8a572-21ec-4db9-a640-f3521a16cb1f
 # ╠═d05d4e8c-bf50-4343-b6b5-9b77caa646cd
-# ╟─48540378-5b63-4c20-986b-75c08ceb24b7
+# ╠═48540378-5b63-4c20-986b-75c08ceb24b7
 # ╟─7dce5ffb-48ad-4ef4-9e13-f7a34794170a
 # ╟─4373ab10-d4e7-4e25-b7a8-da1fcf3dcb0c
 # ╠═77e467b9-c86c-4f13-a259-c38dfd80a3aa

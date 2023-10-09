@@ -1,4 +1,5 @@
 [deps]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Pluto = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
