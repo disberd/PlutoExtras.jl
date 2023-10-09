@@ -4,13 +4,16 @@ using PlutoDevMacros
 using PlutoDevMacros.PlutoCombineHTL.WithTypes
 using AbstractPlutoDingetjes.Bonds
 using AbstractPlutoDingetjes
-using Reexport
-@reexport using PlutoUI
+import PlutoUI
 
-# This is similar to `@reexport` but does not export the module name
-function re_export_without_modname(m::Module)
+# This is similar to `@reexport` but does not exports undefined names and can
+# also avoid exporting the module name
+function re_export(m::Module; modname = false)
     mod_name = nameof(m)
-    exprts = setdiff(names(m), (nameof(m),))
+    nms = names(m)
+    exprts = filter(nms) do n
+        isdefined(m, n) && (!modname || n != mod_name)
+    end
     eval(:(using .$mod_name))
     eval(:(export $(exprts...)))
 end
@@ -26,6 +29,7 @@ include("structbond/StructBondModule.jl")
 using .StructBondModule
 
 ## ReExports ##
-re_export_without_modname.((ExtendedToc, LaTeXEqModule))
+re_export.((ExtendedToc, LaTeXEqModule); modname = false)
+re_export(PlutoUI)
 
 end # module
