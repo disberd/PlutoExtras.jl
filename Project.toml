@@ -16,7 +16,7 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 [compat]
 AbstractPlutoDingetjes = "1"
 HypertextLiteral = "0.9"
-PlutoDevMacros = "0.5"
+PlutoDevMacros = "0.6"
 PlutoUI = "0.7.51"
 Reexport = "1"
 julia = "1.8"

@@ -1,6 +1,6 @@
 using HypertextLiteral
 using PlutoUI
-using PlutoDevMacros.Script
+using PlutoDevMacros.PlutoCombineHTL.WithTypes
 
 # Exports #
 export ExtendedTableOfContents, show_output_when_hidden
@@ -12,10 +12,9 @@ Since v0.7.51 PlutoUI directly supports the smooth scrolling library in the
 TableOfContents, so we just take it from there.
 =#
 
-_smooth_scroll = HTLScriptPart(@htl """
-<script>
+_smooth_scroll = PlutoScript("""
 // Load the library for consistent smooth scrolling
-const {default: scrollIntoView} = await import($(PlutoUI.TableOfContentsNotebook.smooth_scoll_lib_url))
+const {default: scrollIntoView} = await import('$(PlutoUI.TableOfContentsNotebook.smooth_scoll_lib_url)')
 
 function scroll_to(h, config = {
 			behavior: 'smooth', 
@@ -27,13 +26,10 @@ function scroll_to(h, config = {
 			scrollIntoView(h, config)
 	   )
 	}
-</script>
 """)
 
 ## Script - Basic ##
-_basics = HTLScript(
-	@htl("""
-	<script>
+_basics = PlutoScript("""
 	let cell = currentScript.closest('pluto-cell')
 	let pluto_actions = cell._internal_pluto_actions
 	let toc = document.querySelector('nav.plutoui-toc')
@@ -197,21 +193,16 @@ _basics = HTLScript(
 			propagate_state(child, state)
 		}
 	}
-	</script>
-	""")
-)
+""")
 
 ## Script - Floating UI ##
-_floating_ui = HTLScript(@htl("""
-<script>
+_floating_ui = PlutoScript("""
 	const floating_ui = await import('https://esm.sh/@floating-ui/dom')
 	// window.floating_ui = floating_ui
-</script>
-"""))
+""")
 
 ## Script - Modify Cell Attributes ##
-_modify_cell_attributes = HTLScript(@htl("""
-<script>
+_modify_cell_attributes = PlutoScript("""
 	function has_cell_attribute(cell_id, attr) {
 		const md = editor_state.notebook.cell_inputs[cell_id].metadata
 		return _.includes(md["custom_attrs"], attr)
@@ -258,13 +249,11 @@ _modify_cell_attributes = HTLScript(@htl("""
 		let cell = document.getElementById(cell_id)
 		force == 'toggle' ? cell.toggleAttribute(attr) : cell.toggleAttribute(attr, force)
 	}
-</script>
-"""))
+""")
 
 ## Script - Modify Notebook Attributes ##
-_modify_notebook_attributes = HTLScript(@htl("""
-<script>
-		function add_notebook_attributes(attrs) {
+_modify_notebook_attributes = PlutoScript("""
+	function add_notebook_attributes(attrs) {
 		pluto_actions.update_notebook((notebook) => {
 			let md = notebook.metadata
 			md["custom_attrs"] = _.union(md["custom_attrs"], attrs)
@@ -309,12 +298,10 @@ _modify_notebook_attributes = HTLScript(@htl("""
 	if (force_hide_enabled) {
 	 	toggle_notebook_attribute('hide-enabled',true)
 	}
-</script>
-"""))
+""")
 
 ## Script - Hide Cell Blocks ##
-_hide_cell_blocks = HTLScript(@htl("""
-<script>
+_hide_cell_blocks = PlutoScript("""
 	// For each from and to, we have to specify `pluto-cell[id]` in the part before the comm and just `[id]` in the part after the comma to ensure the specificity of the two comma-separated selectors is the same (the part after the comma has the addition of `~ pluto-cell`, so it has inherently +1 element specificity)
 	function hide_from_to_string(from_id, to_id) {
 		if (_.isEmpty(from_id) && _.isEmpty(to_id)) {return ''}
@@ -358,12 +345,11 @@ _hide_cell_blocks = HTLScript(@htl("""
 		}
 		style.innerHTML = hide_from_to_list_string(vector)
 	}
-</script>
-"""))
+""")
 
 ## Script - Mutation Observer ##
-_mutation_observer = HTLScript(@htl("""
-<script>
+_mutation_observer = PlutoScript(
+body = """
 	function toggle_state(name) {
 		return (e) => {
 			e.preventDefault()
@@ -493,14 +479,13 @@ _mutation_observer = HTLScript(@htl("""
 	})
 
 	observer.observe(toc, {childList: true})
-</script>
-"""),
-"observer.disconnect()"
-);
+""",
+invalidation = "observer.disconnect()"
+)
 
 ## Script - Move Entries Handler ##
-_move_entries_handler = HTLScript(@htl("""
-<script>
+_move_entries_handler = PlutoScript(;
+body = """
 	const { default: interact } = await import('https://esm.sh/interactjs')
 
 	// We have to enable dynamicDrop to have dropzone recomputed on dragmove
@@ -715,15 +700,14 @@ _move_entries_handler = HTLScript(@htl("""
 	      )
 	    }
 	})
-
-</script>
-"""), """
+""", 
+invalidation = """
 dragHandles.unset()
 """)
 
 ## Script - Header Manipulation ##
-_header_manipulation = HTLScript(@htl("""
-<script>
+_header_manipulation = PlutoScript(;
+body = """
 	const header = toc.querySelector('header')
 	const header_container = header.insertAdjacentElement('afterbegin', html`<span class='toc-header-container'>`)
 	
@@ -760,12 +744,10 @@ _header_manipulation = HTLScript(@htl("""
 			const dy = ref.getBoundingClientRect().y - y
 			window.scrollBy(0, dy)
 	})
-</script>
-"""))
+""")
 
 ## Script - Save to File ##
-_save_to_file = HTLScript(@htl("""
-<script>
+_save_to_file = PlutoScript("""
 	function save_to_file() {
 		const state = window.toc_state
 		for (const [k,v] of Object.entries(state)) {
@@ -776,8 +758,7 @@ _save_to_file = HTLScript(@htl("""
 			toc.classList.toggle('file-state-differs', stateDiffersFile(state))
 		}, 500)
 	}
-</script>
-"""))
+""")
 
 # Style #
 ## Style - Header ##
@@ -991,7 +972,7 @@ The `ExtendedTableOfContents` allow to re-order the cell groups identified by ea
 """
 ExtendedTableOfContents(;hide_preamble = true, force_hide_enabled = hide_preamble,kwargs...) = @htl("""
 $(TableOfContents(;kwargs...))
-$(combine_scripts([
+$(make_script([
 	"const hide_preamble = $hide_preamble",
 	"const force_hide_enabled = $force_hide_enabled",
 	_smooth_scroll,

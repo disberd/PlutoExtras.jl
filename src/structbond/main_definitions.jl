@@ -37,8 +37,7 @@ structbondtype(::Type{StructBond{T}}) where T = T
 ## Show - StructBond ##
 
 # This does not seem used, leaving here for the moment
-_basics_script = HTLScript(@htl("""
-<script>
+_basics_script = ScriptContent("""
 	const parent = currentScript.parentElement
 	const widget = currentScript.previousElementSibling
 
@@ -65,8 +64,7 @@ _basics_script = HTLScript(@htl("""
 		e.stopPropagation()
 		parent.dispatchEvent(new CustomEvent('input'))
 	}
-</script>
-"""))
+""")
 
 # Basic script part used for the show method
 _show(t::StructBond{T}) where T = @htl("""
@@ -288,8 +286,7 @@ popoutwrap(T::Type) = Popout(StructBond(T))
 popoutwrap(t::Union{StructBond, BondsList}) = Popout(t)
 
 ## Interact.js - Popout ##
-popup_interaction_handler = HTLScriptPart(@htl """
-<script>
+popup_interaction_handler = ScriptContent("""
 	// We use the interactjs library to provide drag and resize handling across devices
 	const { default: interact } = await import('https://esm.sh/interactjs')
 
@@ -329,7 +326,6 @@ popup_interaction_handler = HTLScriptPart(@htl """
 			contents.style.width = ''
 		  	contents.style.height = ''
 	  })
-</script>
 """)
 
 ## Show - Popout ##
@@ -419,8 +415,7 @@ Base.@kwdef struct BondTable
 end
 
 ## Interact.js - BondTable ##
-bondtable_interaction_handler = HTLScriptPart(@htl """
-<script>
+bondtable_interaction_handler = ScriptContent("""
 	// We use the interactjs library to provide drag and resize handling across devices
 	const { default: interact } = await import('https://esm.sh/interactjs')
 
@@ -464,7 +459,6 @@ bondtable_interaction_handler = HTLScriptPart(@htl """
 		  	container.style.height = ''
 		  	container.style.maxHeight = ''
 	  })
-</script>
 """)
 
 ## CSS - BondTable ##
