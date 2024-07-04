@@ -21,6 +21,8 @@ end
 export Editable, StringOnEnter # from basic_widgets.jl
 export ToggleReactiveBond # From within StructBondModule
 
+include("combine_htl/PlutoCombineHTL.jl")
+
 include("basic_widgets.jl")
 include("latex_equations.jl") 
 module ExtendedToc include("extended_toc.jl") end
