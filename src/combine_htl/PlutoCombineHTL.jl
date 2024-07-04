@@ -6,6 +6,7 @@ using HypertextLiteral: Result, Bypass, Reprint, Render
 using AbstractPlutoDingetjes: is_inside_pluto, AbstractPlutoDingetjes
 using AbstractPlutoDingetjes.Display
 using DocStringExtensions
+using Markdown
 
 export make_node, make_html, make_script, formatted_code
 
