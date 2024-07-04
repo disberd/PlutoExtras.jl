@@ -1,6 +1,6 @@
 module StructBondModule 
     import PlutoUI.Experimental: wrapped
-    using PlutoDevMacros.PlutoCombineHTL.WithTypes
+    using ..PlutoCombineHTL.WithTypes
     import AbstractPlutoDingetjes.Bonds
     import REPL: fielddoc
     using HypertextLiteral

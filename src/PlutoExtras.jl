@@ -1,7 +1,5 @@
 module PlutoExtras
 using HypertextLiteral
-using PlutoDevMacros
-using PlutoDevMacros.PlutoCombineHTL.WithTypes
 using AbstractPlutoDingetjes.Bonds
 using AbstractPlutoDingetjes
 import PlutoUI

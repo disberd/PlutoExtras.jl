@@ -1,6 +1,6 @@
 using HypertextLiteral
 using PlutoUI
-using PlutoDevMacros.PlutoCombineHTL.WithTypes
+using ..PlutoCombineHTL.WithTypes
 
 # Exports #
 export ExtendedTableOfContents, show_output_when_hidden
