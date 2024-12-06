@@ -5,6 +5,7 @@ module StructBondModule
     import REPL: fielddoc
     using HypertextLiteral
     using PlutoUI: combine
+    using ..PlutoExtras: cell_id_letters
 
     export BondTable, StructBond, @NTBond, @BondsList, Popout, @popoutasfield,
     @typeasfield, popoutwrap, @fieldbond, @fielddescription, @fielddata
