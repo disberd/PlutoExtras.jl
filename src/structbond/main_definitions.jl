@@ -404,13 +404,14 @@ Base.@kwdef struct BondTable
 	bonds::Array
 	description::Any
 	secret_key::String
-	function BondTable(v::Array; description = NotDefined(), secret_key = String(rand('a':'z', 10)))
+	collapsed::Union{Bool, Nothing}
+	function BondTable(v::Array; description = NotDefined(), secret_key = cell_id_letters(), collapsed = nothing)
 		for el in v
 			T = typeof(el)
 			valid = el isa BondsList || nameof(T) == :Bond && hasfield(T, :element) && hasfield(T, :defines)
 			valid || error("All the elements provided as input to a `BondTable` have to be bonds themselves (i.e. created with the `@bind` macro from Pluto)")
 		end
-		new(v, description, secret_key)
+		new(v, description, secret_key, collapsed)
 	end
 end
 
@@ -469,10 +470,10 @@ bondtable_style = @htl """
 """;
 
 ## Show - BondTable ##
-function show_bondtable(b::BondTable; description = b.description)
+function show_bondtable(b::BondTable; description = b.description, collapsed = b.collapsed)
 	desc = description isa NotDefined ? "BondTable" : description
 	@htl("""
-	<bondtable-container key='$(b.secret_key)'>
+	<bondtable-container key='$(b.secret_key)' class='collapsed'>
 		<bondtable-header>
 			<span class='table-help icon'></span>
 			<span class='description'>$desc</span>
@@ -483,19 +484,29 @@ function show_bondtable(b::BondTable; description = b.description)
 		</bondtable-contents>
 	</bondtable-container>
 	<script id='$(b.secret_key)'>
-		const container = currentScript.previousElementSibling
+		const container = currentScript.parentElement.querySelector('bondtable-container')
 		const header = container.firstElementChild
 		const contents = container.lastElementChild
 
 		const cell = container.closest('pluto-cell')
 
-		
+        // This is only used to leverage the pluto js functionality for persistency in JS
+        const return_element = this ?? html`<span class='script-return'></span>`
+
+        if (return_element.collapsed === undefined) {
+            return_element.collapsed = $collapsed ?? false
+        }
+
 		const help_btn = header.firstElementChild
 		const collapse_btn = header.lastElementChild
 
 		container.collapse = (force) => {
-			container.classList.toggle('collapsed', force)
+            return_element.collapsed = force ?? !return_element.collapsed
+			container.classList.toggle('collapsed', return_element.collapsed)
 		}
+        // Force the initial status
+        container.collapse(return_element.collapsed)
+
 		collapse_btn.onclick = e => container.collapse()
 
 		// Load the interact script
@@ -513,6 +524,8 @@ function show_bondtable(b::BondTable; description = b.description)
 			cell.scrollIntoView()
 		}
 		help_btn.onclick = container.jumpToCell
+
+        return return_element
 	</script>
 	$bondtable_style
 	""")
