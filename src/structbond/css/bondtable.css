@@ -28,7 +28,7 @@ bondtable-contents {
     overflow: auto;
 }
 bondtable-contents togglereactive-container.no-popout,
-bondtable-contents > *, 
+bondtable-contents > *,
 bondtable-contents struct-bond {
     display: contents
 }
@@ -70,6 +70,10 @@ bondtable-header > .description {
 bondtable-header > .icon {
     filter: var(--image-filters);
     cursor: pointer;
+}
+bondtable-header .table-help {
+    --size: 23px;
+    background-image: url("https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/cog-outline.svg");
 }
 bondtable-header .table-collapse {
     --size: 23px;
