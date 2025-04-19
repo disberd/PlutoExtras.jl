@@ -129,6 +129,12 @@ function typehtml(T::Type)
 		])
 		"""
 	end
+    togglereactive_container(inner_bond; description = typedescription(T), title = "This generates a struct of type $(nameof(T))")
+end
+
+## ToggleReactiveContainer ##
+# This is a helperfunction to create a togglereactive container around a bond with collapsible content
+function togglereactive_container(inner_bond; description, title)
 	ToggleReactiveBond(wrapped() do Child
 		@htl("""
 			$(Child(inner_bond))
@@ -137,7 +143,7 @@ function typehtml(T::Type)
 		const trc = currentScript.closest('togglereactive-container')
 		const header = trc.firstElementChild
 		const desc = header.querySelector('.description')
-		desc.setAttribute('title', "This generates a struct of type `$(nameof(T))`")
+		desc.setAttribute('title', $title)
 
 		// add the collapse button
 		const collapse_btn = html`<span class='collapse'>`
@@ -202,7 +208,7 @@ function typehtml(T::Type)
 			}
 		</style>
 		""")
-	end; description = typedescription(T))
+	end; description = description)
 end
 
 ### Constructor ###
