@@ -292,7 +292,6 @@ macro NTBond(desc, block)
 		Meta.isexpr(arg, :(=)) || error("Only expression of type `fieldname = fieldbond` or `fieldname = (fielddescription, fieldbond)` can be provided inside the block fed to @NTBond")
 		push!(fields, arg.args[1])
 	end
-	Mod = @__MODULE__
 	T = NamedTuple{Tuple(fields)}
 	out = _add_generic_field(T, block, [:fielddescription, :fieldbond])
 	# We add the generation of the StructBond
