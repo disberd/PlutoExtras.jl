@@ -1,15 +1,16 @@
-import Pluto: update_save_run!, update_run!, WorkspaceManager, ClientSession,
-ServerSession, Notebook, Cell, project_relative_path, SessionActions,
-load_notebook, Configuration, set_bond_values_reactive
-using PlutoExtras
-using Markdown
-using PlutoExtras.StructBondModule
-using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield, collect_reinterpret!
-import PlutoExtras.AbstractPlutoDingetjes.Bonds
-using Test
+@testsnippet setup_structbond begin
+    using PlutoExtras
+    using Markdown
+    using PlutoExtras.StructBondModule
+    using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield, collect_reinterpret!
+    import PlutoExtras.AbstractPlutoDingetjes.Bonds
+    using Test
+
+    include(joinpath(@__DIR__, "setup_helper.jl"))
+end
 
 
-@testset "APD methods and Coverage" begin
+@testitem "APD methods and Coverage" setup=[setup_structbond] begin
     tr = ToggleReactiveBond(Editable(3))
     @testset "Toggle Reactive" begin
         @test Bonds.validate_value(tr, 3) === true
@@ -59,14 +60,7 @@ using Test
     end
 end
 
-function noerror(cell; verbose=true)
-    if cell.errored && verbose
-        @show cell.output.body
-    end
-    !cell.errored
-end
-
-@testset "collect_reinterpret!" begin
+@testitem "collect_reinterpret!" setup=[setup_structbond] begin
     @test collect_reinterpret!(3) === 3   
     re = collect(reinterpret(UInt8, [.5])) |> x -> reinterpret(Float64, x)
     arr = [
@@ -81,22 +75,7 @@ end
     ]
 end
 
-options = Configuration.from_flat_kwargs(; disable_writing_notebook_files=true, workspace_use_distributed_stdlib = true)
-srcdir = normpath(@__DIR__, "./notebooks")
-eval_in_nb(sn, expr) = WorkspaceManager.eval_fetch_in_workspace(sn, expr)
-
-function set_bond_value_sn(sn)
-    (session, notebook) = sn
-    function set_bond_value(name, value, is_first_value=false)
-        notebook.bonds[name] = Dict("value" => value)
-        set_bond_values_reactive(; session, notebook, bound_sym_names=[name],
-            is_first_values=[is_first_value],
-            run_async=false,
-        )
-    end
-end
-
-@testset "Struct Bond notebook" begin
+@testitem "Struct Bond notebook" setup=[setup_structbond] begin
     ss = ServerSession(; options)
     path = joinpath(srcdir, "structbondmodule.jl")
     nb = SessionActions.open(ss, path; run_async=false)
