@@ -17,7 +17,6 @@ function re_export(m::Module; modname = false)
 end
 
 export Editable, StringOnEnter # from basic_widgets.jl
-export ToggleReactiveBond # From within StructBondModule
 
 include("helpers.jl")
 
@@ -31,6 +30,7 @@ include("structbond/StructBondModule.jl")
 using .StructBondModule
 
 ## ReExports ##
+re_export(StructBondModule)
 re_export.((ExtendedToc, LaTeXEqModule); modname = false)
 re_export(PlutoUI)
 

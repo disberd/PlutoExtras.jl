@@ -258,6 +258,7 @@ end
 
 """
 	@NTBond description block
+	@NTBond description block transform_function
 Convenience macro to create a [`StructBond`](@ref) wrapping a NamedTuple with field names provided in the second argument `block`.
 
 Useful when one wants a quick way of generating a bond that creates a NamedTuple. An example usage is given in the code below:
@@ -270,10 +271,29 @@ end
 ```
 which will create a `NamedTuple{(:a, :b, :c)}` and assign it to variable `nt`.
 
+When calling the macro with a third argument, this is interpreted as a function that is used to create a bond transformation using `PlutoUI.Experimental.transformed_value`.
+
+This means that the two expressions below yield the same result:
+```julia
+@NTBond "WoW" begin
+	a = ("Description", Slider(1:10))
+end x -> x.a + 2
+```
+and
+```julia
+PlutoUI.Experimental.transformed_value(x -> x.a + 2, @NTBond "WoW" begin
+	a = ("Description", Slider(1:10))
+end)
+```
+
 See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddata`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
 """
-macro NTBond(desc, block)
-	Meta.isexpr(block, [:let, :block]) || error("You can only give `let` or `begin` blocks to the `@NTBond` macro")
+macro NTBond(desc, args...)
+    return _NTBond(desc, args...)
+end
+
+function _NTBond(desc, block)
+    Meta.isexpr(block, [:let, :block]) || error("You can only give `let` or `begin` blocks to the `@NTBond` macro")
 	# We will return a let block at the end anyhow to avoid method redefinitino errors in Pluto. We already create the two blocks composing the let
 	bindings, block = if block.head == :let
 		block.args
@@ -292,12 +312,16 @@ macro NTBond(desc, block)
 		Meta.isexpr(arg, :(=)) || error("Only expression of type `fieldname = fieldbond` or `fieldname = (fielddescription, fieldbond)` can be provided inside the block fed to @NTBond")
 		push!(fields, arg.args[1])
 	end
-	Mod = @__MODULE__
 	T = NamedTuple{Tuple(fields)}
 	out = _add_generic_field(T, block, [:fielddescription, :fieldbond])
 	# We add the generation of the StructBond
 	push!(out.args, :($(StructBond)($T;description = $desc)))
 	Expr(:let, bindings, out)
+end
+
+function _NTBond(desc, block, tv)
+    expr = _NTBond(desc, block)
+    return :($(transformed_value)($(esc(tv)), $expr))
 end
 
 

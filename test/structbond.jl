@@ -1,15 +1,16 @@
-import Pluto: update_save_run!, update_run!, WorkspaceManager, ClientSession,
-ServerSession, Notebook, Cell, project_relative_path, SessionActions,
-load_notebook, Configuration, set_bond_values_reactive
-using PlutoExtras
-using Markdown
-using PlutoExtras.StructBondModule
-using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield, collect_reinterpret!
-import PlutoExtras.AbstractPlutoDingetjes.Bonds
-using Test
+@testsnippet setup_structbond begin
+    using PlutoExtras
+    using Markdown
+    using PlutoExtras.StructBondModule
+    using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield, collect_reinterpret!
+    import PlutoExtras.AbstractPlutoDingetjes.Bonds
+    using Test
+
+    include(joinpath(@__DIR__, "setup_helper.jl"))
+end
 
 
-@testset "APD methods and Coverage" begin
+@testitem "APD methods and Coverage" setup=[setup_structbond] begin
     tr = ToggleReactiveBond(Editable(3))
     @testset "Toggle Reactive" begin
         @test Bonds.validate_value(tr, 3) === true
@@ -59,14 +60,43 @@ using Test
     end
 end
 
-function noerror(cell; verbose=true)
-    if cell.errored && verbose
-        @show cell.output.body
-    end
-    !cell.errored
+@testitem "StructBondSelect" setup=[setup_structbond] begin
+    els = [
+        @NTBond "cos(arg)" begin
+            arg = Slider(range(0,1,100))
+        end nt -> cos(nt.arg)
+        @NTBond "atan(y,x)" begin
+            x = Slider(range(0,10; step = 0.1); default = 3, show_value=true)
+            y = Slider(range(0, 10; step = 0.1); default = 5, show_value=true)
+        end nt -> atan(nt.y, nt.x)
+        @NTBond "mah" begin
+            a = Slider(1:10)
+        end
+    ]
+sbs = StructBondSelect(els; default_idx = 2, selector_text = "Options:")
+@test sbs.selectors == ["cos(arg)", "atan(y,x)", "mah"]
+
+@test Bonds.initial_value(sbs) == Bonds.initial_value(els[2])
+
+sbs = StructBondSelect(els; default_idx = 3, selector_text = "Options:")
+@test Bonds.initial_value(sbs) == Bonds.initial_value(els[3])
+@test Bonds.validate_value(sbs, [[3, [3]]]) === true
+@test Bonds.transform_value(sbs, [[3, [[[3]]]]]) == (;a = 3)
+
+@test_throws "default_idx must be a positive integer" StructBondSelect(els; default_idx = 0, selector_text = "Options:")
+@test_throws "default_idx must be a positive integer" StructBondSelect(els; default_idx = 4, selector_text = "Options:")
+
+@test_throws "must be either a StructBond" StructBondSelect([1])
+
+custom_names = ["asd", "qwe", "zxc"]
+sbs_custom = StructBondSelect(els, custom_names; default_idx = 2, selector_text = "Options:")
+@test sbs_custom.selectors == custom_names
+
+sbs_custom = StructBondSelect([nm => el for (nm, el) in zip(custom_names, els)]; default_idx = 2, selector_text = "Options:")
+@test sbs_custom.selectors == custom_names
 end
 
-@testset "collect_reinterpret!" begin
+@testitem "collect_reinterpret!" setup=[setup_structbond] begin
     @test collect_reinterpret!(3) === 3   
     re = collect(reinterpret(UInt8, [.5])) |> x -> reinterpret(Float64, x)
     arr = [
@@ -81,22 +111,7 @@ end
     ]
 end
 
-options = Configuration.from_flat_kwargs(; disable_writing_notebook_files=true, workspace_use_distributed_stdlib = true)
-srcdir = normpath(@__DIR__, "./notebooks")
-eval_in_nb(sn, expr) = WorkspaceManager.eval_fetch_in_workspace(sn, expr)
-
-function set_bond_value_sn(sn)
-    (session, notebook) = sn
-    function set_bond_value(name, value, is_first_value=false)
-        notebook.bonds[name] = Dict("value" => value)
-        set_bond_values_reactive(; session, notebook, bound_sym_names=[name],
-            is_first_values=[is_first_value],
-            run_async=false,
-        )
-    end
-end
-
-@testset "Struct Bond notebook" begin
+@testitem "Struct Bond notebook" setup=[setup_structbond] begin
     ss = ServerSession(; options)
     path = joinpath(srcdir, "structbondmodule.jl")
     nb = SessionActions.open(ss, path; run_async=false)

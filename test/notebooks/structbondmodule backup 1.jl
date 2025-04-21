@@ -136,59 +136,6 @@ end
 # ╔═╡ e2b79a58-e66e-4d40-8673-418823753b38
 nt
 
-# ╔═╡ 466995a2-dfd4-4374-8339-bc0232039b27
-md"""
-## transformed_value
-"""
-
-# ╔═╡ 4cb128aa-7ad8-4d17-bced-36845703e6a8
-md"""
-`@NTBond` is also quite useful in combination with `transformed_value` from `PlutoUI.Experimental`. For this reason, the `@NTBond` macro supports an optional third argument which shall be a function that when provided is directly used to transform the value of the widget.
-"""
-
-# ╔═╡ 7855826e-ccaa-4c27-a060-f5ceb927bbe8
-@bind transformed_value_example @NTBond "Transformed!" begin
-	a = Slider(1:10)
-	b = Slider(1:10)
-end nt -> nt.a + nt.b
-
-# ╔═╡ 1d5573ee-872e-4dfb-a785-1ac9e836ad98
-transformed_value_example
-
-# ╔═╡ f65b3231-f2b2-45dc-b72e-1ad3107083fc
-md"""
-# StructBondSelect
-"""
-
-# ╔═╡ 67c0860b-b4c1-412d-870a-a4ce4987465e
-md"""
-Sometimes, one wants to create a more complex binding where the number of parameters to control a bond can vary depending on some other variable. The `StructBondSelect` can be of help in some of these cases, by providing a way to select out of a number of arbitrary `StructBonds` (which include `@NTBond`) by using a dropdown to select the one to be displayed and used for generating the `StructBondSelect` widget's output.
-
-This structure can be constructed with a vector of `StructBond` or `transformed_value(f, ::StructBond)` elements, and will take care of generating an appropriate widget to display and process only the selected one.
-
-The main signature of the constructor is the following:
-```julia
-StructBondSelect(els::Vector; description = "StructBondSelect", default_idx = 1, selector_text = "Selector")
-```
-
-The names to select upon will be taken from the `description` of the provided `StructBonds`, while the text displayed next to the _selector_ will default to `Selector` but can be customized with the `selector_text` kwarg to the constructor.
-The `description` kwarg can be used to customize the text in the widget container (similar to the same kwarg in `StructBond` and to `@NTBond`). Finally, the `default_idx` should be an integer and will select which of the provided `StructBond`s will be selected as default when instantiating the widget.
-"""
-
-# ╔═╡ bd5ec086-5156-4e7c-a70b-5ca9f089bb49
-sbs_bond = @bind sbs StructBondSelect([
-	@NTBond "cos(arg)" begin
-		arg = Slider(range(0,1,100))
-	end (nt -> cos(nt.arg)) # We need to wrap the function given to `@NTBond` in () to avoid parse problems when providing a function
-	@NTBond "atan(y,x)" begin
-		x = Slider(range(0,10; step = 0.1); default = 3, show_value=true)
-		y = Slider(range(0, 10; step = 0.1); default = 5, show_value=true)
-	end nt -> atan(nt.y, nt.x)
-]; default_idx = 2, selector_text = "Options:")
-
-# ╔═╡ 7853cc7f-4e58-44d1-8d3b-f8d4745564e6
-sbs
-
 # ╔═╡ 9d23382c-cf35-4b20-a46c-0f4e2de17fc7
 md"""
 # @BondsList
@@ -265,7 +212,6 @@ As an example, one can create a `BondsList` containing the two `StructBond` bond
 blc = @BondsList "Popout Container" begin
 	"Structure ASD" = Popout(asd_bond)
 	"NamedTuple" = Popout(nt_bond)
-	"StructBondSelect" = Popout(sbs_bond)
 end
 
 # ╔═╡ e7d67662-77b3-482a-b032-8db4afbc01a6
@@ -314,7 +260,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 
 [compat]
-PlutoDevMacros = "~0.9.0"
+PlutoDevMacros = "~0.7.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -323,7 +269,13 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.4"
 manifest_format = "2.0"
-project_hash = "9c51cf46a1e177639a0c248b9cdccbfd7b4d05d7"
+project_hash = "9088728c15a23247dcd792960c847dd5035deb53"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "0f748c81756f2e5e6854298f11ad8b2dfae6911a"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.3.0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -337,16 +289,16 @@ version = "1.11.0"
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 version = "1.11.0"
 
-[[deps.CodeTracking]]
-deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "062c5e1a5bf6ada13db96a4ae4749a4c2234f521"
-uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.9"
-
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 version = "1.11.0"
+
+[[deps.DocStringExtensions]]
+deps = ["LibGit2"]
+git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.9.3"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -357,16 +309,16 @@ version = "1.6.0"
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 version = "1.11.0"
 
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.5"
+
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 version = "1.11.0"
-
-[[deps.JuliaInterpreter]]
-deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "872cd273cb995ed873c58f196659e32f11f31543"
-uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.44"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -402,9 +354,10 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 version = "1.11.0"
 
 [[deps.MacroTools]]
-git-tree-sha1 = "1e0228a030642014fe5cfe68c2c0a818f9e3f522"
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.16"
+version = "0.5.13"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -436,10 +389,10 @@ version = "1.11.0"
     REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.PlutoDevMacros]]
-deps = ["JuliaInterpreter", "Logging", "MacroTools", "Pkg", "TOML"]
-git-tree-sha1 = "72f65885168722413c7b9a9debc504c7e7df7709"
+deps = ["AbstractPlutoDingetjes", "DocStringExtensions", "HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Pkg", "Random", "TOML"]
+git-tree-sha1 = "2944f76ac8c11c913a620da0a6b035e2fadf94c1"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.9.0"
+version = "0.7.2"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -464,6 +417,11 @@ version = "1.0.3"
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 version = "1.10.0"
+
+[[deps.Tricks]]
+git-tree-sha1 = "eae1bb484cd63b36999ee58be2de6c178105112f"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.8"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -507,14 +465,6 @@ version = "17.4.0+2"
 # ╟─8cc53cd2-9114-4067-ab0b-37fd8cd79240
 # ╠═0db51d39-7c05-4e00-b951-7fe776a8e0f9
 # ╠═e2b79a58-e66e-4d40-8673-418823753b38
-# ╟─466995a2-dfd4-4374-8339-bc0232039b27
-# ╟─4cb128aa-7ad8-4d17-bced-36845703e6a8
-# ╠═7855826e-ccaa-4c27-a060-f5ceb927bbe8
-# ╠═1d5573ee-872e-4dfb-a785-1ac9e836ad98
-# ╟─f65b3231-f2b2-45dc-b72e-1ad3107083fc
-# ╟─67c0860b-b4c1-412d-870a-a4ce4987465e
-# ╠═bd5ec086-5156-4e7c-a70b-5ca9f089bb49
-# ╠═7853cc7f-4e58-44d1-8d3b-f8d4745564e6
 # ╟─9d23382c-cf35-4b20-a46c-0f4e2de17fc7
 # ╟─959acb40-1fd6-43f5-a1a6-73a6ceaae1d7
 # ╠═4d611425-c8e3-4bc3-912b-8bc0465363bc

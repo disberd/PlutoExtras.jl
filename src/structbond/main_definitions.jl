@@ -137,6 +137,7 @@ function Bonds.transform_value(t::StructBond{T}, from_js) where T
 	transformed = Bonds.transform_value(t.widget, collect_reinterpret!(from_js))
 	typeconstructor(T)(transformed)
 end
+Bonds.validate_value(::StructBond, from_js) = true
 
 # BondWithDescription #
 struct BondWithDescription

@@ -37,6 +37,25 @@ The macro simply create a [`StructBond`](@ref) wrapping the desired NamedTuple t
 </video>
 ```
 
+## StructBondSelect
+Sometimes, one wants to create a more complex binding where the number of parameters to control a bond can vary depending on some other variable. The `StructBondSelect` can be of help in some of these cases, by providing a way to select out of a number of arbitrary `StructBonds` (which include `@NTBond`) by using a dropdown to select the one to be displayed and used for generating the `StructBondSelect` widget's output.
+
+This structure can be constructed with a vector of `StructBond` or `transformed_value(f, ::StructBond)` elements, and will take care of generating an appropriate widget to display and process only the selected one.
+
+The main signature of the constructor is the following:
+```julia
+StructBondSelect(els::Vector; description = "StructBondSelect", default_idx = 1, selector_text = "Selector")
+```
+
+The names to select upon will be taken from the `description` of the provided `StructBonds`, while the text displayed next to the _selector_ will default to `Selector` but can be customized with the `selector_text` kwarg to the constructor.
+The `description` kwarg can be used to customize the text in the widget container (similar to the same kwarg in `StructBond` and to `@NTBond`). Finally, the `default_idx` should be an integer and will select which of the provided `StructBond`s will be selected as default when instantiating the widget.
+
+```@raw html
+<video controls=true>
+<source src="https://private-user-images.githubusercontent.com/12846528/435671114-795c3da9-ede1-4f96-a971-038a8ce506c3.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDUyNDA0ODgsIm5iZiI6MTc0NTI0MDE4OCwicGF0aCI6Ii8xMjg0NjUyOC80MzU2NzExMTQtNzk1YzNkYTktZWRlMS00Zjk2LWE5NzEtMDM4YThjZTUwNmMzLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA0MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNDIxVDEyNTYyOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdmMWZmYjJhNTIyNGI5NDFmMDk3ODcxZWU2ZTE3Njk1MGYyZDk2MmQ5ZTI1NzEyNzJlZTZkNjUxMDhkNDI4ODYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.XXQ6NJLqc1MoBVQXY9MNageij2F0DhsEzvQpHSP9F4A" type="video/mp4">
+</video>
+```
+
 ## @BondsList
 In some cases, one does not want to have a single bond wrapping either a Structure or a NamedTuple because single independent bonds are more convenient.
 

@@ -1,15 +1,17 @@
-using Test
-using PlutoExtras.PlutoCombineHTL.WithTypes
-using PlutoExtras.PlutoCombineHTL: LOCAL_MODULE_URL
-using PlutoExtras.HypertextLiteral
-using PlutoExtras.PlutoCombineHTL: shouldskip, children, print_html,
-script_id, inner_node, plutodefault, haslisteners, is_inside_pluto, hasreturn,
-add_pluto_compat, hasinvalidation, displaylocation, returned_element, to_string,
-formatted_contents
-import PlutoExtras
-using PlutoExtras.PlutoCombineHTL.AbstractPlutoDingetjes.Display
+@testsnippet setup_combinehtl begin
+    using Test
+    using PlutoExtras.PlutoCombineHTL.WithTypes
+    using PlutoExtras.PlutoCombineHTL: LOCAL_MODULE_URL
+    using PlutoExtras.HypertextLiteral
+    using PlutoExtras.PlutoCombineHTL: shouldskip, children, print_html,
+    script_id, inner_node, plutodefault, haslisteners, is_inside_pluto, hasreturn,
+    add_pluto_compat, hasinvalidation, displaylocation, returned_element, to_string,
+    formatted_contents
+    import PlutoExtras
+    using PlutoExtras.PlutoCombineHTL.AbstractPlutoDingetjes.Display
+end
 
-@testset "make_script" begin
+@testitem "make_script" setup=[setup_combinehtl] begin
     ds = make_script("test")
     @test make_script(ds) === ds
     @test ds isa DualScript
@@ -131,7 +133,7 @@ using PlutoExtras.PlutoCombineHTL.AbstractPlutoDingetjes.Display
     @test pts.el isa DualScript
 end
 
-@testset "make_node" begin
+@testitem "make_node" setup=[setup_combinehtl] begin
     dn = make_node()
     @test dn isa DualNode
     @test shouldskip(dn, InsidePluto()) && shouldskip(dn, OutsidePluto())
@@ -216,7 +218,7 @@ end
     @test make_node(:both, "asd", "lol") === make_node("asd", "lol")
 end
 
-@testset "Other Helpers" begin
+@testitem "Other Helpers" setup=[setup_combinehtl] begin
     @test shouldskip(3) === false
     s = make_html(PlutoScript())
     @test s isa ShowWithPrintHTML
@@ -316,7 +318,7 @@ end
     @test_throws "You can't wrap object" ShowWithPrintHTML(PrintToScript(3))
 end
 
-@testset "Show methods" begin
+@testitem "Show methods" setup=[setup_combinehtl] tags=[:before] begin
     ps = PlutoScript("asd", "lol")
     s = to_string(ps, MIME"text/javascript"())
     hs = to_string(ps, MIME"text/html"())
@@ -501,28 +503,3 @@ end
     @test contains(s_in, "published object on Pluto")
     @test s_out === """["asd", "lol"]""" 
 end
-
-# import Pluto: update_save_run!, update_run!, WorkspaceManager, ClientSession,
-# ServerSession, Notebook, Cell, project_relative_path, SessionActions,
-# load_notebook, Configuration
-
-# function noerror(cell; verbose=true)
-#     if cell.errored && verbose
-#         @show cell.output.body
-#     end
-#     !cell.errored
-# end
-
-# options = Configuration.from_flat_kwargs(; disable_writing_notebook_files=true, workspace_use_distributed_stdlib = true)
-# srcdir = normpath(@__DIR__, "./notebooks")
-# eval_in_nb(sn, expr) = WorkspaceManager.eval_fetch_in_workspace(sn, expr)
-
-# @testset "Script test notebook" begin
-#     ss = ServerSession(; options)
-#     path = joinpath(srcdir, "Script.jl")
-#     nb = SessionActions.open(ss, path; run_async=false)
-#     for cell in nb.cells
-#         @test noerror(cell)
-#     end
-#     SessionActions.shutdown(ss, nb)
-# end
