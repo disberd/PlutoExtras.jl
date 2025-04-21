@@ -1,7 +1,8 @@
 # Valid elements for StructBondSelect
 
-valid_structbondselect_el(el::StructBond) = true
-valid_structbondselect_el(el::TransformedWidget{<:StructBond}) = true
+valid_structbondselect_el(::StructBond) = true
+valid_structbondselect_el(::TransformedWidget{<:StructBond}) = true
+valid_structbondselect_el(::Any) = false
 
 extract_description(el::StructBond) = el.description
 extract_description(el::TransformedWidget{<:StructBond}) = el.x.description
