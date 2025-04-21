@@ -4,7 +4,7 @@ module StructBondModule
     import AbstractPlutoDingetjes.Bonds
     import REPL: fielddoc
     using HypertextLiteral
-    using PlutoUI: combine, Select, Experimental.TransformedValueNotebook.TransformedWidget
+    using PlutoUI: combine, Select, Experimental.TransformedValueNotebook.TransformedWidget, Experimental.transformed_value
     using ..PlutoExtras: cell_id_letters
 
     export BondTable, StructBond, @NTBond, @BondsList, Popout, @popoutasfield,

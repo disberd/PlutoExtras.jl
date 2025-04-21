@@ -18,7 +18,6 @@ structbond-select > .selector {
 
 structbond-select > .selector .description {
   color: var(--pluto-output-color, #404040);
-  font-size: 14px;
 }
 
 structbond-select >struct-bond>togglereactive-container>togglereactive-header {
@@ -31,11 +30,17 @@ structbond-select > .selector select {
     border-radius: 6px;
     background-color: var(--overlay-button-bg);
     color: var(--pluto-output-color, #404040);
-    font-size: 14px;
     font-family: inherit;
     cursor: pointer;
     outline: none;
     transition: border-color 0.2s;
+    text-align: center;
+    
+    /* Size constraints */
+    max-width: 50px; 
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
     
     /* Custom arrow styling */
     appearance: none;
@@ -73,4 +78,32 @@ structbond-select > .selector select:focus {
     structbond-select > .selector select:focus {
         border-color: #7d7d7d;
     }
+}
+
+/* Add styling for dropdown options */
+structbond-select > .selector select option {
+    text-align: center;
+}
+
+togglereactive-container.structbond-select togglereactive-header:before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  top: 1px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: -1;
+  background: #c8edd5;  
+}
+
+togglereactive-container.structbond-select togglereactive-header {
+  position: relative;
+  z-index: 10;
+}
+
+@media (prefers-color-scheme: dark) {
+  togglereactive-container.structbond-select togglereactive-header:before {
+    background: #26582e;  
+  }
 }

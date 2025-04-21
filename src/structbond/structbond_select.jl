@@ -7,12 +7,34 @@ extract_description(el::StructBond) = el.description
 extract_description(el::TransformedWidget{<:StructBond}) = el.x.description
 
 """
-    StructBondSelect(els::Vector{<:StructBond})
 
-A bond that displays a dropdown menu with the descriptions of the given StructBonds.
-When the user selects one of the options, the corresponding StructBond is displayed.
+A widget to select one subwidget out of an array of provided elements, which can be either `StructBond` or the resulting form `transformed_value(f, ::StructBond)`.
 
-See also: [`StructBond`](@ref)
+This will show a selection dropdown to choose the subwidget to display and use for generating the StructBondSelect output when coupled with `@bind`.
+
+See the extended help below for a GIF example or the [docs page](https://disberd.github.io/PlutoExtras.jl/stable/structbond/#StructBondSelect) for a video one.
+
+## Constructor
+
+```julia
+StructBondSelect(els::Vector[, selectors::Vector{String}]; description = "StructBondSelect", default_idx = 1, selector_text = "Selector")
+```
+
+### Arguments
+- `els`: A vector of `StructBond` or `transformed_value(f, ::StructBond)` elements.
+- `selectors`: A vector of strings to be used as the names to select upon. If not provided, the names will be taken from the `description` of the provided `StructBond` elements.
+
+### Keyword Arguments
+- `description`: A string to be used as the description of the widget, defaults to `"StructBondSelect"`.
+- `default_idx`: The index of the element to be selected by default for display/output, defaults to `1`.
+- `selector_text`: The text to be displayed next to the selector dropdown, defaults to `"Selector"`.
+
+# Extended Help
+
+See this image for a visual example:
+![structbondselect-example](https://private-user-images.githubusercontent.com/12846528/435671705-91ff7e4a-2b4c-4688-8f2b-ea53a622dd04.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDUyNDAzMTgsIm5iZiI6MTc0NTI0MDAxOCwicGF0aCI6Ii8xMjg0NjUyOC80MzU2NzE3MDUtOTFmZjdlNGEtMmI0Yy00Njg4LThmMmItZWE1M2E2MjJkZDA0LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA0MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNDIxVDEyNTMzOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTYwMmI1ZTYyNGQ1NDMyZGNlZTE3NzljMjJlNWQyOTU5ODUyMDdiODkzYWQxNDRmNzEwZjYxZmEzNTgwZDUyYmEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.L9eC42c4-Gz0tpjzGgF95LhOvcrGAEPOkJ71HhiICrs)
+
+See also: [`StructBond`](@ref), [`@NTBond`](@ref)
 """
 struct StructBondSelect
 	els::Vector
@@ -23,8 +45,9 @@ struct StructBondSelect
 end
 
 
-function StructBondSelect(els::Vector, selectors::Vector{String}; default_idx = 1, description = "StructBondSelect", selector_text = "Selector")
+function StructBondSelect(els::Vector, selectors::Vector{String}; default_idx::Int = 1, description = "StructBondSelect", selector_text = "Selector")
     all(valid_structbondselect_el, els) || throw(ArgumentError("All elements in els must be either a StructBond or a TransformedWidget{StructBond} (obtained from a StructBond using `PlutoUI.Experimental.transformed_value`)"))
+    default_idx > 0 && default_idx <= length(els) || throw(ArgumentError("default_idx must be a positive integer less than or equal to the number of `StructBond` elements provided as input."))
     StructBondSelect(els, selectors, selector_text, default_idx, description)
 end
 
@@ -42,7 +65,7 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
     <structbond-select>
         <span class="selector">
             <span class="description">$(sb.selector_text)</span>
-            $(Select(sb.selectors))
+            $(Select(sb.selectors, default = sb.selectors[sb.default_idx]))
         </span>
         $([el for el in sb.els])
         <script>
@@ -60,8 +83,13 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
                 parent.dispatchEvent(new CustomEvent("input"))
             }
 
+            function get_select_value() {
+                const value = get_input_value(select)
+                return parseInt(value.substring(10))
+            }
+
             const change_selection = (value, trigger_event = true) => {
-                set_input_value(select, value)
+                set_input_value(select, `puiselect-\${value}`)
                 const bonds = parent.querySelectorAll("struct-bond")
                 for (let i = 0; i < bonds.length; i++) {
                     if (i != value - 1) {
@@ -76,11 +104,11 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
                 }
             }
 
-            change_selection(get_input_value(select), false)
+            change_selection(get_select_value(), false)
 
             Object.defineProperty(parent, "value", {
                 get: () => {
-                    const index = get_input_value(select)
+                    const index = get_select_value()
                     const value = get_input_value(selected)
                     return [index, value]
                 },
@@ -100,15 +128,9 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
                 })
             }
 
-            parent.addEventListener("input", (e) => {
-                console.log("input event ", e)
-            })
-
-
             select.addEventListener("input", (e) => {
-                const value = get_input_value(select)
                 e.stopPropagation()
-                change_selection(value)
+                change_selection(get_select_value())
             })
         </script>
         <style>
@@ -116,19 +138,17 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
         </style>
     </structbond-select>
     """)
-    show(io, mime, togglereactive_container(inner_bond; description = sb.description, title = "Use the selector to choose which StructBond to display and use."))
+    show(io, mime, togglereactive_container(inner_bond; description = sb.description, title = "Use the selector to choose which StructBond to display and use.", classes = ["structbond-select"]))
 end
 
 Bonds.initial_value(sbc::StructBondSelect) = Bonds.initial_value(sbc.els[sbc.default_idx])
 
 function Bonds.validate_value(sbc::StructBondSelect, from_js)
-	index, value = from_js |> first
-	idx = parse(Int, index)
+	idx, value = from_js |> first
 	idx <= length(sbc.els) && Bonds.validate_value(sbc.els[idx], value)
 end
 
 function Bonds.transform_value(sbc::StructBondSelect, from_js)
-	index, value = from_js |> first
-	idx = parse(Int, index)
+	idx, value = from_js |> first
 	Bonds.transform_value(sbc.els[idx], value)
 end

@@ -3,8 +3,9 @@ Base.@kwdef struct ToggleReactiveBond
     element::Any
     description::String
     secret_key::String=String(rand('a':'z', 10))
+    classes::Vector{String}=String[]
 end
-ToggleReactiveBond(element; description = "") = ToggleReactiveBond(;element, description)
+ToggleReactiveBond(element; description = "", classes = String[]) = ToggleReactiveBond(;element, description, classes)
 
 # AbstractPlutoDingetjes Methods #
 function Bonds.initial_value(r::ToggleReactiveBond)
@@ -22,7 +23,7 @@ end
 
 # Show Method #
 Base.show(io::IO, mime::MIME"text/html", r::ToggleReactiveBond) = show(io, mime, @htl("""
-<togglereactive-container>
+<togglereactive-container class=$(r.classes)>
 	<togglereactive-header>
 		<span class='description'>$(r.description)</span>
 		<input type='checkbox' class='toggle' checked>

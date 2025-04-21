@@ -134,7 +134,7 @@ end
 
 ## ToggleReactiveContainer ##
 # This is a helperfunction to create a togglereactive container around a bond with collapsible content
-function togglereactive_container(inner_bond; description, title)
+function togglereactive_container(inner_bond; description, title, classes = String[])
 	ToggleReactiveBond(wrapped() do Child
 		@htl("""
 			$(Child(inner_bond))
@@ -208,7 +208,7 @@ function togglereactive_container(inner_bond; description, title)
 			}
 		</style>
 		""")
-	end; description = description)
+	end; description, classes)
 end
 
 ### Constructor ###
