@@ -294,6 +294,7 @@ end
 
 function _NTBond(desc, block)
     Meta.isexpr(block, [:let, :block]) || error("You can only give `let` or `begin` blocks to the `@NTBond` macro")
+    desc = esc(desc)
 	# We will return a let block at the end anyhow to avoid method redefinitino errors in Pluto. We already create the two blocks composing the let
 	bindings, block = if block.head == :let
 		block.args
@@ -314,8 +315,18 @@ function _NTBond(desc, block)
 	end
 	T = NamedTuple{Tuple(fields)}
 	out = _add_generic_field(T, block, [:fielddescription, :fieldbond])
+    # We try to extract the string and html description from the first argument
+    push!(out.args, :((string_desc, html_desc) = if $desc isa AbstractString
+        $desc, $desc # We use the string for also for HTML
+    elseif $desc isa Tuple{AbstractString, Any}
+        $desc # we already have a tuple so we simply slit the two elements
+    else
+        "No String Description Provided", $desc # Fallback default for the string name
+    end))
+    # We push an expression that adds a method for the fielddescription
+    push!(out.args, :($(@__MODULE__).typedescription(::Type{$T}) = html_desc))
 	# We add the generation of the StructBond
-	push!(out.args, :($(StructBond)($T;description = $desc)))
+	push!(out.args, :($(StructBond)($T;description = string_desc)))
 	Expr(:let, bindings, out)
 end
 

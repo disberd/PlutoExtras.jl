@@ -1,4 +1,4 @@
-togglereactive-header > .toggle {
+togglereactive-header>.toggle {
     cursor: pointer;
     --size: 15px;
     position: relative;
@@ -8,13 +8,15 @@ togglereactive-header > .toggle {
     background: #c6c6c6;
     outline: none;
     border-radius: calc(var(--size)/2);
-    box-shadow: inset 0 0 calc(var(--size)/8) rgba(0,0,0,.2);
+    box-shadow: inset 0 0 calc(var(--size)/8) rgba(0, 0, 0, .2);
     margin: 0 10px;
 }
-togglereactive-header > .toggle:checked {
+
+togglereactive-header>.toggle:checked {
     background: #4BD865;
 }
-togglereactive-header > .toggle:before {
+
+togglereactive-header>.toggle:before {
     content: '';
     position: absolute;
     width: var(--size);
@@ -24,9 +26,72 @@ togglereactive-header > .toggle:before {
     left: 0px;
     background: #fff;
     transform: scale(1.1);
-    box-shadow: 0 calc(var(--size)/20) calc(var(--size)/8) rgba(0,0,0,.2);
+    box-shadow: 0 calc(var(--size)/20) calc(var(--size)/8) rgba(0, 0, 0, .2);
     transition: .1s;
 }
-togglereactive-header > .toggle:checked:before {
+
+togglereactive-header>.toggle:checked:before {
     left: var(--size)
+}
+
+togglereactive-container.collapsible field-html {
+    display: contents;
+}
+
+togglereactive-container.collapsible {
+    display: grid;
+    grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
+    grid-auto-rows: fit-content(40px);
+    justify-items: center;
+    align-items: center;
+    row-gap: 5px;
+    /* The flex below is needed in some weird cases where the bond is display flex and the child becomes small. */
+    flex: 1;
+}
+
+togglereactive-container.collapsible>togglereactive-header {
+    grid-column: 1 / -1;
+    display: flex;
+}
+
+.collapse-btn {
+    display: none;
+}
+
+togglereactive-container.collapsible>togglereactive-header>.collapse-btn {
+    --size: 17px;
+    display: block;
+    align-self: stretch;
+    background-size: var(--size) var(--size);
+    background-repeat: no-repeat;
+    background-position: center;
+    width: var(--size);
+    filter: var(--image-filters);
+    background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
+    cursor: pointer;
+}
+
+togglereactive-container.collapsible.collapsed>togglereactive-header>.collapse-btn {
+    background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
+}
+
+togglereactive-container.collapsible>togglereactive-header {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+togglereactive-container.collapsible>togglereactive-header>.description {
+    text-align: center;
+    flex-grow: 1;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+togglereactive-container.collapsible>togglereactive-header>.toggle {
+    align-self: center
+}
+
+togglereactive-container.collapsible.collapsed togglereactive-header+* {
+    display: none !important;
 }

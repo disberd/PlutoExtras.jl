@@ -43,13 +43,14 @@ struct StructBondSelect
     selector_text::String
     default_idx::Int
     description::String
+    description_html
 end
 
 
-function StructBondSelect(els::Vector, selectors::Vector{String}; default_idx::Int = 1, description = "StructBondSelect", selector_text = "Selector")
+function StructBondSelect(els::Vector, selectors::Vector{String}; default_idx::Int = 1, description = "StructBondSelect", selector_text = "Selector", description_html = description)
     all(valid_structbondselect_el, els) || throw(ArgumentError("All elements in els must be either a StructBond or a TransformedWidget{StructBond} (obtained from a StructBond using `PlutoUI.Experimental.transformed_value`)"))
     default_idx > 0 && default_idx <= length(els) || throw(ArgumentError("default_idx must be a positive integer less than or equal to the number of `StructBond` elements provided as input."))
-    StructBondSelect(els, selectors, selector_text, default_idx, description)
+    StructBondSelect(els, selectors, selector_text, default_idx, description, description_html)
 end
 
 function StructBondSelect(els::Vector; kwargs...)
@@ -139,7 +140,7 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
         </style>
     </structbond-select>
     """)
-    show(io, mime, togglereactive_container(inner_bond; description = sb.description, title = "Use the selector to choose which StructBond to display and use.", classes = ["structbond-select"]))
+    show(io, mime, collapsible_togglereactive_container(inner_bond; description = sb.description, description_html = sb.description_html, title = "Use the selector to choose which StructBond to display and use.", classes = ["structbond-select"]))
 end
 
 Bonds.initial_value(sbc::StructBondSelect) = Bonds.initial_value(sbc.els[sbc.default_idx])
