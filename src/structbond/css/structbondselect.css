@@ -8,7 +8,7 @@ structbond-select > struct-bond.hidden {
 
 structbond-select,
 structbond-select > struct-bond,
-structbond-select togglereactive-container {
+structbond-select togglereactive-container.collapsible {
   display: contents;
 }
 
@@ -20,7 +20,7 @@ structbond-select > .selector .description {
   color: var(--pluto-output-color, #404040);
 }
 
-structbond-select >struct-bond>togglereactive-container>togglereactive-header {
+structbond-select >struct-bond>togglereactive-container.collapsible>togglereactive-header {
   display: none;
 }
 

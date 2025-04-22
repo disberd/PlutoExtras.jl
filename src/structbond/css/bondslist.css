@@ -86,6 +86,6 @@ bondslist-container {
   align-items: center;
   row-gap: 5px;
 }
-bondstable-container bondslist-container {
+bondtable-container bondslist-container {
   display: contents;
 }

@@ -9,7 +9,7 @@ module StructBondModule
 
     export BondTable, StructBond, @NTBond, @BondsList, Popout, @popoutasfield,
     @typeasfield, popoutwrap, @fieldbond, @fielddescription, @fielddata
-    export StructBondSelect
+    export StructBondSelect, SelectHTML
     export ToggleReactiveBond
 
     const CSS_Sheets = map(readdir(joinpath(@__DIR__, "css"))) do file
@@ -21,6 +21,7 @@ module StructBondModule
     include("toggle_reactive.jl")
     include("basics.jl")
     include("main_definitions.jl")
+    include("select_html.jl")
     include("structbond_select.jl")
     include("macro.jl")
 end

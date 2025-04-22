@@ -25,10 +25,10 @@ See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref),
 """
 Base.@kwdef struct StructBond{T}
 	widget::Any
-	description::Any
+	description::String
 	secret_key::String=String(rand('a':'z', 10))
 end
-StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T), description)
+StructBond(::Type{T}; description = string(nameof(T))) where T = StructBond{T}(;widget = typehtml(T), description)
 
 ## structbondtype ##
 structbondtype(::StructBond{T}) where T = T
@@ -77,7 +77,6 @@ _show(t::StructBond{T}) where T = @htl("""
 	
 		// Overwrite the description
 		const desc = widget.querySelector('.description')
-		desc.innerHTML = $(t.description)
 	
 		// Set-Get bond
 	

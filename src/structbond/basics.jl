@@ -129,12 +129,12 @@ function typehtml(T::Type)
 		])
 		"""
 	end
-    togglereactive_container(inner_bond; description = typedescription(T), title = "This generates a struct of type $(nameof(T))")
+    collapsible_togglereactive_container(inner_bond; description_html = typedescription(T), title = "This generates a struct of type $(nameof(T))")
 end
 
 ## ToggleReactiveContainer ##
 # This is a helperfunction to create a togglereactive container around a bond with collapsible content
-function togglereactive_container(inner_bond; description, title, classes = String[])
+function collapsible_togglereactive_container(inner_bond; description = "", description_html, title, classes = String[])
 	ToggleReactiveBond(wrapped() do Child
 		@htl("""
 			$(Child(inner_bond))
@@ -144,71 +144,9 @@ function togglereactive_container(inner_bond; description, title, classes = Stri
 		const header = trc.firstElementChild
 		const desc = header.querySelector('.description')
 		desc.setAttribute('title', $title)
-
-		// add the collapse button
-		const collapse_btn = html`<span class='collapse'>`
-		header.insertAdjacentElement('afterbegin', collapse_btn)
-
-		trc.collapse = () => {
-  			trc.classList.toggle('collapsed')
-		}
-
-		collapse_btn.onclick = (e) => trc.collapse()
-		
 	</script>
-		<style>
-			togglereactive-container field-html {
-				display: contents;
-			}
-			togglereactive-container {
-				display: grid;
-				grid-template-columns: 1fr minmax(min(50px, 100%), .4fr);
-				grid-auto-rows: fit-content(40px);
-				justify-items: center;
-				align-items: center;
-				row-gap: 5px;
-				/* The flex below is needed in some weird cases where the bond is display flex and the child becomes small. */
-				flex: 1;
-			}
-			togglereactive-header {
-				grid-column: 1 / -1;
-				display: flex;
-			}
-			togglereactive-header > .collapse {
-				--size: 17px;
-			    display: block;
-			    align-self: stretch;
-			    background-size: var(--size) var(--size);
-			    background-repeat: no-repeat;
-			    background-position: center;
-			    width: var(--size);
-			    filter: var(--image-filters);
-				background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-down.svg);
-				cursor: pointer;
-			}
-			togglereactive-container.collapsed > togglereactive-header > .collapse {
-				background-image: url(https://cdn.jsdelivr.net/gh/ionic-team/ionicons@5.5.1/src/svg/chevron-forward.svg);
-			}
-			togglereactive-header {
-				display: flex;
-				align-items: stretch;
-				width: 100%;
-			}
-			togglereactive-header > .description {
-				text-align: center;
-				flex-grow: 1;
-				font-size: 18px;
-				font-weight: 600;
-			}
-			togglereactive-header > .toggle {
-				align-self: center
-			}
-			togglereactive-container.collapsed togglereactive-header + * {
-				display: none !important;
-			}
-		</style>
 		""")
-	end; description, classes)
+	end; description, description_html, classes = String["collapsible", classes...])
 end
 
 ### Constructor ###
