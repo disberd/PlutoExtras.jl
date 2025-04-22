@@ -2,7 +2,7 @@
 
 This file contains the changelog for the PlutoExtras package. It follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
-## [Unreleased]
+## [0.7.15] - 2025-04-22
 Changelog was introduced in this version. Only changes w.r.t. version v0.7.14 are listed
 
 ### Added
