@@ -27,9 +27,7 @@ function getRow(el) {
 function get_link_id(el) {
     const row = getRow(el)
     if (_.isNil(row)) { return null }
-    const a = row.querySelector('a')
-    console.log('a: ', a)
-    return a.href.slice(-36) // extract the last 36 characters, corresponding to the cell id
+    return row.linkedHeadingId
 }
 
 function getHeadingLevel(row) {
@@ -48,7 +46,7 @@ function generateChecker(selector) {
         case 'function':
             return selector
         default:
-            console.error(`The type (\${typeof selector}) of the provided argument is not valid`)
+            console.error(`The type (${typeof selector}) of the provided argument is not valid`)
     }
 }
 
@@ -123,7 +121,7 @@ function getBlockIds(el) {
 
     return editor_state.notebook.cell_order.slice(start, end < 0 ? Infinity : end)
 }
-    
+
 window.toc_utils = {
     getNextSibling,
     getPreviousSibling,
@@ -164,7 +162,7 @@ function set_state(div, state, value, init = false) {
     }
 }
 function propagate_state(div, state) {
-    let new_state = `parent-\${state}`
+    let new_state = `parent-${state}`
     div.classList.toggle(new_state, false)
     // Check the parents for the state
     for (const parent of div.allParents) {
@@ -282,15 +280,15 @@ if (force_hide_enabled) {
 function hide_from_to_string(from_id, to_id) {
     if (_.isEmpty(from_id) && _.isEmpty(to_id)) {return ''}
     
-    const from_preselector = _.isEmpty(from_id) ? '' : `pluto-cell[id='\${from_id}'], pluto-notebook[hide-enabled] [id='\${from_id}'] ~ `
-    const to_style = _.isEmpty(to_id) ? '' : `pluto-notebook[hide-enabled] pluto-cell[id='\${to_id}'], pluto-notebook[hide-enabled] [id='\${to_id}'] ~ pluto-cell {
+    const from_preselector = _.isEmpty(from_id) ? '' : `pluto-cell[id='${from_id}'], pluto-notebook[hide-enabled] [id='${from_id}'] ~ `
+    const to_style = _.isEmpty(to_id) ? '' : `pluto-notebook[hide-enabled] pluto-cell[id='${to_id}'], pluto-notebook[hide-enabled] [id='${to_id}'] ~ pluto-cell {
     display: block;
 }
      `
-    const style_string = 	`pluto-notebook[hide-enabled] \${from_preselector}pluto-cell {
+    const style_string = 	`pluto-notebook[hide-enabled] ${from_preselector}pluto-cell {
     display: none;
 }
-\${to_style}
+${to_style}
  `
     return style_string
 }
@@ -301,9 +299,9 @@ function hide_from_to_list_string(vector) {
         const from = lims[0]
         const to = lims[1]
         
-        out = `\${out}\t\${hide_from_to_string(from,to)}`
+        out = `${out}\t${hide_from_to_string(from,to)}`
     }
-    out = `\${out}\tpluto-cell[always-show] {
+    out = `${out}\tpluto-cell[always-show] {
           display: block !important;
       }
   `
@@ -311,7 +309,7 @@ function hide_from_to_list_string(vector) {
 }
 function hide_from_to_list(vector) {
     const str = hide_from_to_list_string(vector)
-    return html`<style>\${str}</style>`
+    return html`<style>${str}</style>`
 }
 function hide_list_style(vector) {
     let style = document.getElementById('hide-cells-style')
@@ -378,6 +376,20 @@ function repositionTooltip(e) {
 
 function process_row(div, history, old_state, new_state) {
 
+    // We find all the mainHeadings and tocRows to find matching pairs
+
+    // Try the original selector first
+    const tocRows = Array.from(toc.querySelectorAll('section div.toc-row'))
+
+    const mainHeadings = Array.from(document.querySelectorAll('main h1, main h2, main h3, main h4, main h5, main h6'))
+
+    const headingIdx = tocRows.indexOf(div)
+
+    const correspondingHeading = mainHeadings[headingIdx]
+
+    div.linkedHeading = correspondingHeading
+    div.linkedHeadingId = correspondingHeading.closest('pluto-cell').id
+
     // We add the separator
     div.insertAdjacentElement('beforebegin', html`<div class='toc-row-separator'></div>`)
     // If we are just processing the first element (so the last row) we also add a separator at the bottom
@@ -409,8 +421,8 @@ function process_row(div, history, old_state, new_state) {
         history[i] = [] // empty array
     }
     const collapse_span = a.insertAdjacentElement('afterbegin', html`<span class='toc-icon toc-collapse'>`)
-    let hide_style = `--height: \${a.clientHeight}px`
-    const hide_container = div.insertAdjacentElement('afterbegin', html`<span class='toc-hide-container' style='\${hide_style}'>`)
+    let hide_style = `--height: ${a.clientHeight}px`
+    const hide_container = div.insertAdjacentElement('afterbegin', html`<span class='toc-hide-container' style='${hide_style}'>`)
     const hide_span = hide_container.insertAdjacentElement('afterbegin', html`<span class='toc-icon toc-hide'>`)
     hide_span.addEventListener('click', (e) => {
         toggle_state('hidden')(e)
@@ -422,7 +434,6 @@ function process_row(div, history, old_state, new_state) {
         propagate_parent(div)
         collapse_span.addEventListener('click', toggle_state('collapsed'))
     }
-    console.log('id: ', id)
     let md = editor_state.notebook.cell_inputs[id].metadata
     let collapsed = old_state[id]?.collapsed ??  _.includes(md['custom_attrs'], 'toc-collapsed')
     let hidden = old_state[id]?.hidden ?? _.includes(md['custom_attrs'], 'toc-hidden')
@@ -433,7 +444,9 @@ function process_row(div, history, old_state, new_state) {
 }
 
 const observer = new MutationObserver(() => {
+    console.log('=== ExtendedTableOfContents MutationObserver triggered ===')
     const rows = toc.querySelectorAll('section div.toc-row')
+
     let old_state = window.toc_state ?? {}
     let new_state = {}
     let history = {
@@ -477,7 +490,22 @@ const window_events = {
     keyup: dragEnabler,
 }
 
-addScriptEventListeners(window, window_events)
+// Function to add all event listeners from an events object
+function addWindowEventListeners(events) {
+    for (const [eventType, handler] of Object.entries(events)) {
+        window.addEventListener(eventType, handler)
+    }
+}
+
+// Function to remove all event listeners from an events object
+function removeWindowEventListeners(events) {
+    for (const [eventType, handler] of Object.entries(events)) {
+        window.removeEventListener(eventType, handler)
+    }
+}
+
+// Add event listeners directly
+addWindowEventListeners(window_events)
 
 // Interact.js part
 
@@ -728,4 +756,6 @@ cell.toggleAttribute('always-show', true)
 invalidation.then(() => {
     observer.disconnect()
     dragHandles.unset()
+    // Clean up event listeners
+    removeWindowEventListeners(window_events)
 })
