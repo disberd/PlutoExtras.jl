@@ -359,16 +359,28 @@ function update_hidden(e) {
 
 // Reposition the hide_container using the floating-ui library
 function repositionTooltip(e) {
-    const { computePosition } = floating_ui
+    const { computePosition, offset } = floating_ui
     const ref = e.target
     const tooltip = ref.querySelector('.toc-hide-container')
     if (_.isNil(tooltip)) {
         console.warn("Something went wrong, no tooltip found")
         return
     }
+    
+    // Get the scroll container - this is crucial for proper offset calculation
+    const scrollContainer = document.querySelector('main') || document.documentElement
+    const scrollTop = scrollContainer.scrollTop || window.pageYOffset
+    
     computePosition(ref, tooltip, {
         placement: "left",
         strategy: "fixed",
+        middleware: [
+            offset({
+                mainAxis: 0,        // No offset along the main axis (left/right)
+                crossAxis: -scrollTop, // Compensate for vertical scroll
+                alignmentAxis: 0    // No alignment offset
+            })
+        ]
     }).then(pos => {
         tooltip.style.top = pos.y + "px"
     })
@@ -713,9 +725,22 @@ header.addEventListener('click', e => {
 })
 
 header.addEventListener('mouseenter', (e) => {
-    floating_ui.computePosition(header, header_container, {
+    const { computePosition, offset } = floating_ui
+    
+    // Get the scroll container - this is crucial for proper offset calculation
+    const scrollContainer = document.querySelector('main') || document.documentElement
+    const scrollTop = scrollContainer.scrollTop || window.pageYOffset
+    
+    computePosition(header, header_container, {
         placement: "left",
         strategy: "fixed",
+        middleware: [
+            offset({
+                mainAxis: 0,        // No offset along the main axis (left/right)
+                crossAxis: -scrollTop, // Compensate for vertical scroll
+                alignmentAxis: 0    // No alignment offset
+            })
+        ]
     }).then(pos => {
         header_container.style.top = pos.y + "px"
         // header_container.style.left = pos.x + "px"
