@@ -21,6 +21,7 @@ end
 # ╔═╡ 8db82e94-5c81-4c52-9228-7e22395fb68f
 begin
 	using PlutoDevMacros
+	using LaTeXStrings
 end
 
 # ╔═╡ 949ac1ef-c502-4e28-81ff-f99b0d19aa03
@@ -47,6 +48,9 @@ ExtendedTableOfContents()
 # }
 # </style>
 # """
+
+# ╔═╡ bd1d37a7-1e02-408c-9e9a-b493bc3b26a7
+L"f(x) = 3"
 
 # ╔═╡ 4843983c-df64-4b94-8634-7a10d9423a70
 md"""
@@ -147,13 +151,27 @@ md"""
 """
 
 # ╔═╡ 7855826e-ccaa-4c27-a060-f5ceb927bbe8
-@bind transformed_value_example @NTBond "Transformed!" begin
+@bind transformed_value_example @NTBond md"Transformed!" begin
 	a = Slider(1:10)
 	b = Slider(1:10)
 end nt -> nt.a + nt.b
 
 # ╔═╡ 1d5573ee-872e-4dfb-a785-1ac9e836ad98
 transformed_value_example
+
+# ╔═╡ 8eb18c7f-bb4d-4cdc-9e30-d561f9099800
+md"""
+## Markdown math in description
+"""
+
+# ╔═╡ 36faf18c-11c3-4012-a996-55c7cdae71a8
+@bind atanval @NTBond md"This is math!: ``\;atan(x,y) + 3``" begin
+	x = (md"``x``", Slider(1:10))
+	y = (md"``y``", Slider(1:10))
+end nt -> atan(nt.x, nt.y) + 3
+
+# ╔═╡ 27977526-75dc-44c3-9976-c22e8cbd94da
+atanval
 
 # ╔═╡ f65b3231-f2b2-45dc-b72e-1ad3107083fc
 md"""
@@ -311,9 +329,11 @@ alt
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 
 [compat]
+LaTeXStrings = "~1.4.0"
 PlutoDevMacros = "~0.9.1"
 """
 
@@ -323,7 +343,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.12.0-rc2"
 manifest_format = "2.0"
-project_hash = "c7b253bb88d1de8da4b52d0d2262ffd2282948e8"
+project_hash = "11800ebf5b54db0d4fffa3305d79ef89c399c1f8"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -372,6 +392,11 @@ version = "0.10.5"
 deps = ["StyledStrings"]
 uuid = "ac6e5ff7-fb65-4e79-a425-ec3bc9c03011"
 version = "1.12.0"
+
+[[deps.LaTeXStrings]]
+git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
+uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+version = "1.4.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -505,6 +530,7 @@ version = "17.5.0+2"
 # ╠═949ac1ef-c502-4e28-81ff-f99b0d19aa03
 # ╠═707175a9-d356-43cf-8038-620ebc401c93
 # ╠═cbfc6eec-8991-4a9c-ada0-295c8052854d
+# ╠═bd1d37a7-1e02-408c-9e9a-b493bc3b26a7
 # ╟─4843983c-df64-4b94-8634-7a10d9423a70
 # ╟─a8995224-83c6-4f82-b5a5-87a6f86fc7a0
 # ╠═9e3601f5-efc2-44e9-83d8-5b65ce7e9ccf
@@ -520,6 +546,9 @@ version = "17.5.0+2"
 # ╟─4cb128aa-7ad8-4d17-bced-36845703e6a8
 # ╠═7855826e-ccaa-4c27-a060-f5ceb927bbe8
 # ╠═1d5573ee-872e-4dfb-a785-1ac9e836ad98
+# ╟─8eb18c7f-bb4d-4cdc-9e30-d561f9099800
+# ╠═36faf18c-11c3-4012-a996-55c7cdae71a8
+# ╠═27977526-75dc-44c3-9976-c22e8cbd94da
 # ╟─f65b3231-f2b2-45dc-b72e-1ad3107083fc
 # ╟─67c0860b-b4c1-412d-870a-a4ce4987465e
 # ╠═bd5ec086-5156-4e7c-a70b-5ca9f089bb49
