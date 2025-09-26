@@ -1,4 +1,49 @@
 # Helper Functions #
+##### Functions copied from MacroTools.jl ####
+walk(x, inner, outer) = outer(x)
+walk(x::Expr, inner, outer) = outer(Expr(x.head, map(inner, x.args)...))
+prewalk(f, x)  = walk(f(x), x -> prewalk(f, x), identity)
+##### End of MacroTools.jl functions ####
+
+# This traverse the expression and eventually replaces all single underscores with the provided alternative value
+function replace_single_underscore(ex::Expr, newval::Symbol)
+    changed = Ref(false)
+    newex = prewalk(ex) do x
+        if x === :_
+            changed[] = true
+            return newval
+        else
+            return x
+        end
+    end
+    return newex, changed[]
+end
+
+# This will take an expression and check if it contains single underscores identifiers. If it does, it assumes it has to translate this into an anonymous function with a single argument that will go in place of the underscore
+make_function(x) = x
+function make_function(ex::Expr)
+    Meta.isexpr(ex, :(->)) && return ex
+    newsym = gensym()
+    newex, changed = replace_single_underscore(ex, newsym)
+    if changed
+        return Expr(:(->), newsym, Expr(:block, newex))
+    else
+        return ex
+    end
+end
+
+# This function will try parsing the fieldbond expression to eventually deal with `@tv`
+process_fieldbond_expression(x) = x
+function process_fieldbond_expression(ex::Expr)
+    Meta.isexpr(ex, :macrocall) || return ex
+    args = filter(x -> !(x isa LineNumberNode), ex.args)
+    macro_name = args[1]
+    macro_name == Symbol("@tv") || return ex
+    length(args) == 3 || throw(ArgumentError("The @tv decorator has to be called with two arguments after it.\nThe first must be the transforming function and the second the widget"))
+    _, func, widget = args
+    return :($(transformed_value)($(make_function(func)), $widget))
+end
+
 # Generic function for the convenience macros to add methods for the field functions
 function _add_generic_field(s, block, fnames)
 	if !Meta.isexpr(block, [:block, :let])
@@ -18,6 +63,9 @@ function _add_generic_field(s, block, fnames)
 		# If the value is not already a tuple or vect or expressions, we wrap it in a tuple
 		values = Meta.isexpr(value, [:vect, :tuple]) ? value.args : (value,)
 		for (fname,val) in zip(reverse(fnames), reverse(values))
+            if fname == :fieldbond
+                val = process_fieldbond_expression(val)
+            end
 			# Push the expression to overload the method
 			push!(out.args, esc(:($Mod.$fname(::Type{$s}, ::Val{$symbol}) = $val)))
 		end
@@ -332,7 +380,7 @@ end
 
 function _NTBond(desc, block, tv)
     expr = _NTBond(desc, block)
-    return :($(transformed_value)($(esc(tv)), $expr))
+    return :($(transformed_value)($(esc(make_function(tv))), $expr))
 end
 
 

@@ -10,6 +10,7 @@ This file contains the changelog for the PlutoExtras package. It follows the [Ke
 
 ### Added
 - Added possibility of providing any valid object with a `MIME"text/html"` representation as description of the `@NTBond` macro.
+- Added the possibility of simplifying application of `PlutoUI.Experimental.transformed_value` to the fields of an `@NTBond` using the `@tv` decorator (see the example notebook for details).
 
 ### Changed
 - Changed the hiding behavior of the `Popout` container so that it stays displayed if the mouse is hovering over its contents even if not popped out

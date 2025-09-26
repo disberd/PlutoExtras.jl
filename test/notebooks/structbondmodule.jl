@@ -151,10 +151,34 @@ md"""
 @bind transformed_value_example @NTBond md"Transformed!" begin
 	a = Slider(1:10)
 	b = Slider(1:10)
-end nt -> nt.a + nt.b
+end _.a + _.b # This function is replaced within the macro to be `nt -> nt.a + nt.b`, which could have also been provided as anonymous function directly
 
 # ╔═╡ 1d5573ee-872e-4dfb-a785-1ac9e836ad98
 transformed_value_example
+
+# ╔═╡ 5bb22f07-fbea-44ab-9783-9ca16e0da11e
+md"""
+### Transform only a few fields
+"""
+
+# ╔═╡ 134d6033-2f08-4f49-9829-6a023b368a70
+md"""
+A similar approach can also be achieved on a field by field basis by using the `@tv` decorator (which is not a macro per-se but is directly processed during the macro expansion of `@NTBond`).
+
+`@tv` is a shorthand for transformed_value and it expects two arguments after it, the first being the function to process the value returned by the widget, and the second being the widget itself.
+
+This can be used to be a bit less verbose when one is interested in only transforming one of many fields as below:
+"""
+
+# ╔═╡ 02e58012-5af6-4b91-a9a4-09c9dc038f11
+@bind transform_single_field @NTBond "Field Level Transformed Value" begin
+	a = ("Angle [°]", @tv deg2rad Slider(0:90; default = 60, show_value=true)) # This transforms the angle into radians
+	b = Slider(1:10)
+	c = Slider(1:10)
+end
+
+# ╔═╡ e102613f-244c-4b49-9837-535bf047a14a
+transform_single_field
 
 # ╔═╡ 8eb18c7f-bb4d-4cdc-9e30-d561f9099800
 md"""
@@ -166,11 +190,14 @@ md"""
 The description of an `@NTBond` can now be provided as anything that has a valid `MIME"text/html"` representation. This includes markdown with math inside!
 """
 
+# ╔═╡ bb04ac12-20a0-467a-af1a-c298301e4838
+markdown_function = nt -> atan(nt.x, nt.y) + 3
+
 # ╔═╡ 36faf18c-11c3-4012-a996-55c7cdae71a8
 math_ntbond = @bind atanval @NTBond md"This is math!: ``\;atan(x,y) + 3``" begin
-	x = (md"``x``", Slider(1:10))
-	y = (md"``y``", Slider(1:10))
-end nt -> atan(nt.x, nt.y) + 3
+	x = (md"``x``", Slider(1:10; show_value=true))
+	y = (md"``y``", Slider(1:10; show_value=true))
+end markdown_function # We can also directly use functions in the caller scope to transform the value
 
 # ╔═╡ 27977526-75dc-44c3-9976-c22e8cbd94da
 atanval
@@ -570,8 +597,13 @@ version = "17.5.0+2"
 # ╟─4cb128aa-7ad8-4d17-bced-36845703e6a8
 # ╠═7855826e-ccaa-4c27-a060-f5ceb927bbe8
 # ╠═1d5573ee-872e-4dfb-a785-1ac9e836ad98
+# ╟─5bb22f07-fbea-44ab-9783-9ca16e0da11e
+# ╟─134d6033-2f08-4f49-9829-6a023b368a70
+# ╠═02e58012-5af6-4b91-a9a4-09c9dc038f11
+# ╠═e102613f-244c-4b49-9837-535bf047a14a
 # ╟─8eb18c7f-bb4d-4cdc-9e30-d561f9099800
 # ╟─052b8bbd-acca-4c00-a5de-0c717ed068e3
+# ╠═bb04ac12-20a0-467a-af1a-c298301e4838
 # ╠═36faf18c-11c3-4012-a996-55c7cdae71a8
 # ╠═27977526-75dc-44c3-9976-c22e8cbd94da
 # ╟─da3ae348-083d-4a7d-aabd-d0bc25b3ca17
