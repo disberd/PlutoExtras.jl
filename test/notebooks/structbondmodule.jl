@@ -49,9 +49,6 @@ ExtendedTableOfContents()
 # </style>
 # """
 
-# ╔═╡ bd1d37a7-1e02-408c-9e9a-b493bc3b26a7
-L"f(x) = 3"
-
 # ╔═╡ 4843983c-df64-4b94-8634-7a10d9423a70
 md"""
 # StructBond
@@ -164,14 +161,42 @@ md"""
 ## Markdown math in description
 """
 
+# ╔═╡ 052b8bbd-acca-4c00-a5de-0c717ed068e3
+md"""
+The description of an `@NTBond` can now be provided as anything that has a valid `MIME"text/html"` representation. This includes markdown with math inside!
+"""
+
 # ╔═╡ 36faf18c-11c3-4012-a996-55c7cdae71a8
-@bind atanval @NTBond md"This is math!: ``\;atan(x,y) + 3``" begin
+math_ntbond = @bind atanval @NTBond md"This is math!: ``\;atan(x,y) + 3``" begin
 	x = (md"``x``", Slider(1:10))
 	y = (md"``y``", Slider(1:10))
 end nt -> atan(nt.x, nt.y) + 3
 
 # ╔═╡ 27977526-75dc-44c3-9976-c22e8cbd94da
 atanval
+
+# ╔═╡ da3ae348-083d-4a7d-aabd-d0bc25b3ca17
+md"""
+## Custom HTML description
+"""
+
+# ╔═╡ 3c2c257e-bbee-4a04-b3ba-68f2382fce87
+@NTBond(md"asd", begin a = Slider(1:10) end).description
+
+# ╔═╡ c43c8a65-3f94-45f9-b633-71cade09b666
+md"""
+When providing a description that is not a string, by default the description field inside of the resulting `StructBond` is set to `"No String Description Provided"`.
+
+If for some reason one wants to customize the string description, a tuple with `(string_description, html_description)` can be provided
+"""
+
+# ╔═╡ cf807cb3-5d75-4040-bfd1-05fe70d26e89
+tuple_description_ntbond = @NTBond ("Plain description", html"<span>HTML Description</span>") begin
+	a = Slider(1:10)
+end
+
+# ╔═╡ 564968fe-0a68-48bc-9e11-c7732e2bae04
+tuple_description_ntbond.description
 
 # ╔═╡ f65b3231-f2b2-45dc-b72e-1ad3107083fc
 md"""
@@ -530,7 +555,6 @@ version = "17.5.0+2"
 # ╠═949ac1ef-c502-4e28-81ff-f99b0d19aa03
 # ╠═707175a9-d356-43cf-8038-620ebc401c93
 # ╠═cbfc6eec-8991-4a9c-ada0-295c8052854d
-# ╠═bd1d37a7-1e02-408c-9e9a-b493bc3b26a7
 # ╟─4843983c-df64-4b94-8634-7a10d9423a70
 # ╟─a8995224-83c6-4f82-b5a5-87a6f86fc7a0
 # ╠═9e3601f5-efc2-44e9-83d8-5b65ce7e9ccf
@@ -547,8 +571,14 @@ version = "17.5.0+2"
 # ╠═7855826e-ccaa-4c27-a060-f5ceb927bbe8
 # ╠═1d5573ee-872e-4dfb-a785-1ac9e836ad98
 # ╟─8eb18c7f-bb4d-4cdc-9e30-d561f9099800
+# ╟─052b8bbd-acca-4c00-a5de-0c717ed068e3
 # ╠═36faf18c-11c3-4012-a996-55c7cdae71a8
 # ╠═27977526-75dc-44c3-9976-c22e8cbd94da
+# ╟─da3ae348-083d-4a7d-aabd-d0bc25b3ca17
+# ╠═3c2c257e-bbee-4a04-b3ba-68f2382fce87
+# ╟─c43c8a65-3f94-45f9-b633-71cade09b666
+# ╠═cf807cb3-5d75-4040-bfd1-05fe70d26e89
+# ╠═564968fe-0a68-48bc-9e11-c7732e2bae04
 # ╟─f65b3231-f2b2-45dc-b72e-1ad3107083fc
 # ╟─67c0860b-b4c1-412d-870a-a4ce4987465e
 # ╠═bd5ec086-5156-4e7c-a70b-5ca9f089bb49
