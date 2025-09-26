@@ -36,36 +36,6 @@ structbondtype(::Type{StructBond{T}}) where T = T
 
 ## Show - StructBond ##
 
-# This does not seem used, leaving here for the moment
-_basics_script = ScriptContent("""
-	const parent = currentScript.parentElement
-	const widget = currentScript.previousElementSibling
-
-	// Overwrite the description
-	const desc = widget.querySelector('.description')
-	desc.innerHTML = 
-
-	// Set-Get bond
-
-	const set_input_value = setBoundElementValueLikePluto
-	const get_input_value = getBoundElementValueLikePluto
-
-	Object.defineProperty(parent, 'value', {
-		get: () => get_input_value(widget),
-		set: (newval) => {
-			set_input_value(widget, newval)
-		},
-		configurable: true,
-	});
-
-	const old_oninput = widget.oninput ?? function(e) {}
-	widget.oninput = (e) => {
-		old_oninput(e)
-		e.stopPropagation()
-		parent.dispatchEvent(new CustomEvent('input'))
-	}
-""")
-
 # Basic script part used for the show method
 _show(t::StructBond{T}) where T = @htl("""
 <struct-bond class='$T'>
@@ -337,7 +307,7 @@ _show_popout(p::Popout) = wrapped() do Child
 </popout-container>
 <script id='$(p.secret_key)'>
 	// Load the floating-ui and interact libraries
-	window.floating_ui = await import('https://esm.sh/@floating-ui/dom')
+	window.floating_ui = await import('https://esm.sh/@floating-ui/dom@1.7.4')
 
 	const { computePosition, autoPlacement } = floating_ui
 	
@@ -349,12 +319,18 @@ _show_popout(p::Popout) = wrapped() do Child
 	$popup_interaction_handler
 
 	function positionContents() {
+        // Deal with scrolling
+        const scrollContainer = document.querySelector('main') || document.documentElement
+        const scrollTop = scrollContainer.scrollTop || window.pageYOffset
+
 		computePosition(header, contents, {
 			strategy: "fixed",
-			middleware: [autoPlacement()],
+			middleware: [
+                autoPlacement(),
+            ],
 		}).then((pos) => {
 			contents.style.left = pos.x + "px"
-			contents.style.top = pos.y + "px"
+			contents.style.top = pos.y - scrollTop + "px"
 		})
 	}
 
