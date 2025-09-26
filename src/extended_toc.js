@@ -178,7 +178,7 @@ function propagate_state(div, state) {
 }
 
 // Floating UI functionality
-const floating_ui = await import('https://esm.sh/@floating-ui/dom')
+const floating_ui = await import('https://esm.sh/@floating-ui/dom@1.7.4')
 
 // Cell attributes modification
 function has_cell_attribute(cell_id, attr) {
