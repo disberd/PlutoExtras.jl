@@ -341,14 +341,32 @@ _show_popout(p::Popout) = wrapped() do Child
 
 	header.onclick = (e) => {container.popout()}
 
-	contents.onmouseenter = (e) => container.classList.toggle('contents-hover', true)
-	contents.onmouseleave = (e) => container.classList.toggle('contents-hover', false)
+	// Create a reusable debounced class removal function
+	const createDebouncedClassRemover = (container, className, delay) => {
+		return _.debounce(() => {
+			container.classList.toggle(className, false)
+		}, delay)
+	}
+
+	const debouncedRemoveContentsHover = createDebouncedClassRemover(container, 'contents-hover', 300)
+	const debouncedRemoveHeaderHover = createDebouncedClassRemover(container, 'header-hover', 300)
+
+	contents.onmouseenter = (e) => {
+		container.classList.toggle('contents-hover', true)
+		debouncedRemoveContentsHover.cancel()
+	}
+	contents.onmouseleave = (e) => {
+		debouncedRemoveContentsHover()
+	}
 
 	header.onmouseenter = (e) => {
 		container.classList.toggle('header-hover', true)
 		container.classList.contains('popped') ? null : positionContents()
+		debouncedRemoveHeaderHover.cancel()
 	}
-	header.onmouseleave = (e) => container.classList.toggle('header-hover', false)
+	header.onmouseleave = (e) => {
+		debouncedRemoveHeaderHover()
+	}
 </script>
 <style>
 	$(CSS_Sheets.popout)
