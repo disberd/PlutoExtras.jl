@@ -86,6 +86,7 @@ end
     @test cs isa CombinedScripts
     @test CombinedScripts(cs) === cs
     @test make_script(cs) === cs
+    @test script_id(cs, InsidePluto()) isa String
     @test children(CombinedScripts(ds)) == children(make_script([ds]))
 
     @test isempty(children(make_script([PlutoScript("asd")]))) === false
@@ -125,12 +126,13 @@ end
     pts = PrintToScript(3)
     @test make_script(pts) === pts
     @test make_node(pts) isa CombinedScripts
-
+    
     @test PrintToScript(pts) === pts
     @test_throws "You can't wrap" PrintToScript(PlutoNode("asd"))
-
+    
     pts = PrintToScript("asd")
     @test pts.el isa DualScript
+    @test script_id(pts, InsidePluto()) isa String
 end
 
 @testitem "make_node" setup=[setup_combinehtl] begin
