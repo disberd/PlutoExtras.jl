@@ -55,19 +55,16 @@ jobs:
           else
             echo "✗ GIF missing, generating: $gif_file"
             
-             # Generate GIF from video with high-quality settings
-             # -vf "fps=15,scale=800:-1:flags=lanczos,palettegen" creates a high-quality palette
-             # -c:v gif uses GIF codec
-             # -loop 0 makes it loop infinitely
-             # Using palettegen and paletteuse for better color quality and reduced dithering
+             # Generate GIF from video with ScreenToGif-like settings
+             # Using Sierra 2 Lite dithering and global color table for better quality
              ffmpeg -i "$video_file" \
-               -vf "fps=15,scale=800:-1:flags=lanczos,palettegen=stats_mode=diff" \
+               -vf "fps=15,scale=640:-1:flags=lanczos,palettegen=stats_mode=diff" \
                -y \
                palette.png
              
              ffmpeg -i "$video_file" \
                -i palette.png \
-               -lavfi "fps=15,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=3" \
+               -lavfi "fps=15,scale=640:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=sierra2_4a" \
                -loop 0 \
                -y \
                "$gif_file"
