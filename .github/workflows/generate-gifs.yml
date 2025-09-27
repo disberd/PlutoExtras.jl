@@ -55,16 +55,25 @@ jobs:
           else
             echo "✗ GIF missing, generating: $gif_file"
             
-            # Generate GIF from video with optimized settings
-            # -vf "fps=10,scale=640:-1:flags=lanczos" sets 10fps and scales width to 640px while maintaining aspect ratio
-            # -c:v gif uses GIF codec
-            # -loop 0 makes it loop infinitely
-            ffmpeg -i "$video_file" \
-              -vf "fps=10,scale=640:-1:flags=lanczos" \
-              -c:v gif \
-              -loop 0 \
-              -y \
-              "$gif_file"
+             # Generate GIF from video with high-quality settings
+             # -vf "fps=15,scale=800:-1:flags=lanczos,palettegen" creates a high-quality palette
+             # -c:v gif uses GIF codec
+             # -loop 0 makes it loop infinitely
+             # Using palettegen and paletteuse for better color quality and reduced dithering
+             ffmpeg -i "$video_file" \
+               -vf "fps=15,scale=800:-1:flags=lanczos,palettegen=stats_mode=diff" \
+               -y \
+               palette.png
+             
+             ffmpeg -i "$video_file" \
+               -i palette.png \
+               -lavfi "fps=15,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=3" \
+               -loop 0 \
+               -y \
+               "$gif_file"
+             
+             # Clean up temporary palette file
+             rm -f palette.png
             
             if [ $? -eq 0 ]; then
               echo "✓ Successfully generated: $gif_file"
