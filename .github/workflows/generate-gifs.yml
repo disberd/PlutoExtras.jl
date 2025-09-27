@@ -1,0 +1,99 @@
+name: Generate GIFs from Videos
+
+on:
+  push:
+    branches: [ assets ]
+  pull_request:
+    branches: [ assets ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  generate-gifs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Fetch full history for better change detection
+    
+    - name: Setup FFmpeg
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+    
+    - name: Check for videos and generate missing GIFs
+      run: |
+        echo "Checking for videos in the videos/ folder..."
+        
+        # Create gifs directory if it doesn't exist
+        mkdir -p gifs
+        
+        # Find all video files in the videos folder
+        video_files=$(find videos -type f \( -name "*.mp4" -o -name "*.avi" -o -name "*.mov" -o -name "*.mkv" -o -name "*.webm" \) 2>/dev/null || true)
+        
+        if [ -z "$video_files" ]; then
+          echo "No video files found in videos/ folder"
+          exit 0
+        fi
+        
+        echo "Found video files:"
+        echo "$video_files"
+        
+        # Process each video file
+        for video_file in $video_files; do
+          # Get the base name without extension
+          base_name=$(basename "$video_file" | sed 's/\.[^.]*$//')
+          gif_file="gifs/${base_name}.gif"
+          
+          echo "Processing: $video_file"
+          echo "Expected GIF: $gif_file"
+          
+          # Check if corresponding GIF exists
+          if [ -f "$gif_file" ]; then
+            echo "✓ GIF already exists: $gif_file"
+          else
+            echo "✗ GIF missing, generating: $gif_file"
+            
+            # Generate GIF from video with optimized settings
+            # -vf "fps=10,scale=640:-1:flags=lanczos" sets 10fps and scales width to 640px while maintaining aspect ratio
+            # -c:v gif uses GIF codec
+            # -loop 0 makes it loop infinitely
+            ffmpeg -i "$video_file" \
+              -vf "fps=10,scale=640:-1:flags=lanczos" \
+              -c:v gif \
+              -loop 0 \
+              -y \
+              "$gif_file"
+            
+            if [ $? -eq 0 ]; then
+              echo "✓ Successfully generated: $gif_file"
+            else
+              echo "✗ Failed to generate: $gif_file"
+              exit 1
+            fi
+          fi
+        done
+        
+        echo "GIF generation check completed!"
+    
+    - name: Check for changes
+      id: verify-changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "Generated files:"
+          git status --porcelain
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
+        fi
+    
+    - name: Commit and push changes
+      if: steps.verify-changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add gifs/
+        git commit -m "Auto-generate missing GIFs from videos [skip ci]"
+        git push
