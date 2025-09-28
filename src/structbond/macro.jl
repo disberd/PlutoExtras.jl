@@ -334,7 +334,32 @@ PlutoUI.Experimental.transformed_value(x -> x.a + 2, @NTBond "WoW" begin
 end)
 ```
 
-See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddata`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+!!! note
+    The synthax accepting a function to transformed the resulting NamedTuple also has a convenience shorthand where `_` can be used to represent the original bond value.
+
+    The above example could then also be written as:
+    ```julia
+    @NTBond "WoW" begin
+        a = ("Description", Slider(1:10))
+    end _.a + 2
+    ```
+
+See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref)
+
+# Extended Help
+## transform single fields
+Since version 0.7.16, the `@NTBond` macro supports a convenience decorator to transform a single field. This is done by using the `@tv` decorator, which is a shorthand for `PlutoUI.Experimental.transformed_value`.
+
+`@tv` is not a macro actually defined within PlutoExtras, but is directly parsed during the macro expansion of `@NTBond`. See the image below for an example of how to use it:
+
+![@tv decorator](https://raw.githubusercontent.com/disberd/PlutoExtras.jl/assets/imgs/ntbond_transform_fieldbond.png)
+
+## Markdown math in description
+Since version 0.7.16, the `@NTBond` macro supports providing a description as anything that has a valid `MIME"text/html"` representation. This includes markdown with math inside!
+
+See the image below for an example of how to use it:
+
+![@NTBond with math (using markdown) in description](https://raw.githubusercontent.com/disberd/PlutoExtras.jl/assets/imgs/ntbond_markdown_description.png)
 """
 macro NTBond(desc, args...)
     return _NTBond(desc, args...)

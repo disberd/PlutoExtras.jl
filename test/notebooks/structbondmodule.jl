@@ -170,11 +170,15 @@ A similar approach can also be achieved on a field by field basis by using the `
 This can be used to be a bit less verbose when one is interested in only transforming one of many fields as below:
 """
 
+# ╔═╡ 5438e9e7-c0f7-4523-8682-ffb822359d50
+simple_slider = Slider(1:10);
+
 # ╔═╡ 02e58012-5af6-4b91-a9a4-09c9dc038f11
 @bind transform_single_field @NTBond "Field Level Transformed Value" begin
 	a = ("Angle [°]", @tv deg2rad Slider(0:90; default = 60, show_value=true)) # This transforms the angle into radians
-	b = Slider(1:10)
-	c = Slider(1:10)
+	b = @tv x -> x + 3 simple_slider # You can either use the full anonymous function synthax, or the convenience form where _ is automatically interpreted as the variable of the anonymous function like below
+	c = @tv _^2 Slider(1:10; default = 3) # First argument transformed to the anon func x -> x^2
+	d = Slider(1:10)
 end
 
 # ╔═╡ e102613f-244c-4b49-9837-535bf047a14a
@@ -599,6 +603,7 @@ version = "17.5.0+2"
 # ╠═1d5573ee-872e-4dfb-a785-1ac9e836ad98
 # ╟─5bb22f07-fbea-44ab-9783-9ca16e0da11e
 # ╟─134d6033-2f08-4f49-9829-6a023b368a70
+# ╠═5438e9e7-c0f7-4523-8682-ffb822359d50
 # ╠═02e58012-5af6-4b91-a9a4-09c9dc038f11
 # ╠═e102613f-244c-4b49-9837-535bf047a14a
 # ╟─8eb18c7f-bb4d-4cdc-9e30-d561f9099800
