@@ -275,50 +275,6 @@ if (force_hide_enabled) {
     toggle_notebook_attribute('hide-enabled',true)
 }
 
-// Hide cell blocks functionality
-// For each from and to, we have to specify `pluto-cell[id]` in the part before the comm and just `[id]` in the part after the comma to ensure the specificity of the two comma-separated selectors is the same (the part after the comma has the addition of `~ pluto-cell`, so it has inherently +1 element specificity)
-function hide_from_to_string(from_id, to_id) {
-    if (_.isEmpty(from_id) && _.isEmpty(to_id)) {return ''}
-    
-    const from_preselector = _.isEmpty(from_id) ? '' : `pluto-cell[id='${from_id}'], pluto-notebook[hide-enabled] [id='${from_id}'] ~ `
-    const to_style = _.isEmpty(to_id) ? '' : `pluto-notebook[hide-enabled] pluto-cell[id='${to_id}'], pluto-notebook[hide-enabled] [id='${to_id}'] ~ pluto-cell {
-    display: block;
-}
-     `
-    const style_string = 	`pluto-notebook[hide-enabled] ${from_preselector}pluto-cell {
-    display: none;
-}
-${to_style}
- `
-    return style_string
-}
-
-function hide_from_to_list_string(vector) {
-    let out = ``
-    for (const lims of vector) {
-        const from = lims[0]
-        const to = lims[1]
-        
-        out = `${out}\t${hide_from_to_string(from,to)}`
-    }
-    out = `${out}\tpluto-cell[always-show] {
-          display: block !important;
-      }
-  `
-    return out
-}
-function hide_from_to_list(vector) {
-    const str = hide_from_to_list_string(vector)
-    return html`<style>${str}</style>`
-}
-function hide_list_style(vector) {
-    let style = document.getElementById('hide-cells-style')
-    if (style == null) {
-          style = document.head.appendChild(html`<style id='hide-cells-style'></style>`)
-    }
-    style.innerHTML = hide_from_to_list_string(vector)
-}
-
 // Mutation observer functionality
 function toggle_state(name) {
     return (e) => {
@@ -330,31 +286,62 @@ function toggle_state(name) {
     }
 }
 
-function update_hidden(e) {
-    let new_hide = []
+// This function will return a vector of cells indices (intended to index the list of cells in their order as return by `document.querySelectorAll('pluto-cell')`) to identify start and end index of cells to hide because their corresponding ToC row is hidden
+function tocrows_hidden_indices() {
+    let hidden_start_stop_idxs = [] // This will track the start and end index of cells to hide because their corresponding ToC row is hidden. The cell at the end idx should already be considered as `shown`
+    let current_hidden_status = false // This signals whether the current is hidden or not
     if (hide_preamble) {
-        new_hide.push(['', get_link_id(toc.querySelector('div.toc-row'))])
+        hidden_start_stop_idxs.push(-1)
+        current_hidden_status = true
     }
-    let tracking_hidden = null
-    let divs = toc.querySelectorAll('div.toc-row')
+    const divs = toc.querySelectorAll('div.toc-row')
+    const cells = document.querySelectorAll('pluto-cell')
+    let running_idx = 0 // This will track the index of the main cell
     for (const div of divs) {
-        if (tracking_hidden != null) {
-            const hidden = div.classList.contains('hidden') || div.classList.contains('parent-hidden')
-            if (!hidden) {
-                new_hide.push([tracking_hidden, get_link_id(div)])	
-                tracking_hidden = null
-            }
-        } else {
-            const hidden = div.classList.contains('hidden')
-            if (hidden) {
-                tracking_hidden = get_link_id(div)
-            }
+        const hidden = div.classList.contains('hidden') || div.classList.contains('parent-hidden')
+        const linked_cell_id = get_link_id(div)
+        // We iterate through the main cells till we find the one with the linked cell id
+        while (running_idx < cells.length && cells[running_idx].id !== linked_cell_id) {
+            running_idx++
+        }
+        if (running_idx >= cells.length) {
+            console.warn(`Cell with id ${linked_cell_id} not found`)
+            continue
+        }
+        if (hidden != current_hidden_status) {
+            hidden_start_stop_idxs.push(running_idx)
+            current_hidden_status = hidden
         }
     }
-    if (tracking_hidden != null) {
-            new_hide.push([tracking_hidden, ""])	
+    // If the number of elements is odd, we just add as last element the number of cells as we want consistent start and stop indices
+    if (hidden_start_stop_idxs.length % 2 !== 0) {
+        hidden_start_stop_idxs.push(cells.length)
     }
-    hide_list_style(new_hide)
+    return hidden_start_stop_idxs
+}
+
+// This function takes as input a vector of start/stop indices of hidden cells (based on toc rows) and apply the `toc-hidden` cell attribute (we don't use a class as pluto constantly rewrites the cell class) to identify that a cell must be hidden
+function hide_main_cells(indices) {
+    const cells = document.querySelectorAll('pluto-cell')
+    let current_hidden_status = false
+    let next_target = indices.shift()
+    for (let i = 0; i < cells.length; i++) {
+        while (i > next_target) {
+            next_target = indices.shift()
+            current_hidden_status = !current_hidden_status
+        }
+        if (i == next_target) {
+            next_target = indices.shift()
+            current_hidden_status = !current_hidden_status
+        }
+        cells[i].toggleAttribute('toc-hidden', current_hidden_status)
+    }
+}
+
+window.toc_utils.tocrows_hidden_indices = tocrows_hidden_indices
+
+function update_hidden_tocrows() {
+    hide_main_cells(tocrows_hidden_indices())
 }
 
 // Reposition the hide_container using the floating-ui library
@@ -431,7 +418,7 @@ function process_row(div, history, old_state, new_state) {
     const hide_span = hide_container.insertAdjacentElement('afterbegin', html`<span class='toc-icon toc-hide'>`)
     hide_span.addEventListener('click', (e) => {
         toggle_state('hidden')(e)
-        update_hidden(e)
+        update_hidden_tocrows()
     })
     if (div.directChildren == undefined) {
         collapse_span.classList.toggle('no-children', true)
@@ -466,7 +453,7 @@ const observer = new MutationObserver(() => {
     }
     window.toc_state = new_state
     toc.classList.toggle('file-state-differs', stateDiffersFile(new_state))
-    update_hidden()
+    update_hidden_tocrows()
 })
 
 observer.observe(toc, {childList: true})
