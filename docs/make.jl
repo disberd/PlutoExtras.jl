@@ -5,15 +5,16 @@ using Documenter
 DocMeta.setdocmeta!(PlutoExtras, :DocTestSetup, :(using PlutoExtras); recursive=true)
 
 makedocs(;
-    modules= Module[],
+    modules= [PlutoExtras],
     authors="Alberto Mengali <disberd@gmail.com>",
-    repo="https://github.com/disberd/PlutoExtras.jl/blob/{commit}{path}#{line}",
+    repo=Remotes.GitHub("disberd", "PlutoExtras.jl"),
     sitename="PlutoExtras.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         edit_link="master",
         assets=String[],
     ),
+    warnonly = true,
     pages=[
         "index.md",
         "basic_widgets.md",

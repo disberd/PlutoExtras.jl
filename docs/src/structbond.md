@@ -160,6 +160,7 @@ StructBondModule.@NTBond
 StructBondModule.@BondsList
 StructBondModule.popoutwrap
 StructBondModule.BondTable
+StructBondModule.StructBondSelect
 ```
 
 ### Secondary/Advanced
