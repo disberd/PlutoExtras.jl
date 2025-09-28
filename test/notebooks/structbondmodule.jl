@@ -1,6 +1,8 @@
 ### A Pluto.jl notebook ###
 # v0.20.17
 
+#> custom_attrs = ["hide-enabled"]
+
 using Markdown
 using InteractiveUtils
 
@@ -347,7 +349,6 @@ asd
 nt
 
 # ╔═╡ 3a066bf4-3466-469e-90d0-6b14be3ed8d5
-# ╠═╡ custom_attrs = ["toc-hidden"]
 md"""
 # BondTable
 """
