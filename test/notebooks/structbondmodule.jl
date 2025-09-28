@@ -27,7 +27,7 @@ end
 # ╔═╡ 949ac1ef-c502-4e28-81ff-f99b0d19aa03
 @frompackage "../.." begin
 	using ^.StructBondModule
-	using ^: ExtendedTableOfContents, Editable
+	using ^: ExtendedTableOfContents, Editable, show_output_when_hidden
 	using >.HypertextLiteral
 	using >.PlutoUI
 end
@@ -368,7 +368,7 @@ BondTable([
 	nt_bond,
 	bl,
 	blc
-]; description = "My Bonds")
+]; description = "My Bonds") |> show_output_when_hidden
 
 # ╔═╡ 08d711c0-e2cc-4444-94ca-0c4c3cfe901f
 nt

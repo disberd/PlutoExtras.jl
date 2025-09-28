@@ -159,25 +159,29 @@ div.toc-row-separator.active.noshow {
 }
 
 /* ==========================================================================
-   Always Show Output Styles
+   Main Cell Hidings
    ========================================================================== */
+
+pluto-notebook[hide-enabled] pluto-cell[toc-hidden] {
+    display: none;
+}
 
 /* This style permits to have a cell whose output is still being shown when
    the cell is hidden. This is useful for having hidden cells that still are
    sending HTML as output (like ToC and BondTable) */
 
-pluto-notebook[hide-enabled] pluto-cell[always-show-output] {
-    display: block !important;
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden] {
+    display: block;
 }
 
-pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-input,
-pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-shoulder,
-pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-trafficlight,
-pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > pluto-runarea,
-pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) > button {
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) > pluto-input,
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) > pluto-shoulder,
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) > pluto-trafficlight,
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) > pluto-runarea,
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) > button {
     display: none;
 }
 
-pluto-notebook[hide-enabled] pluto-cell[always-show-output]:not(.code_differs) {
+pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) {
     margin-top: 0px;
 }

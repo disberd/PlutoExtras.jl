@@ -24,7 +24,7 @@ include("combine_htl/PlutoCombineHTL.jl")
 
 include("basic_widgets.jl")
 include("latex_equations.jl") 
-module ExtendedToc include("extended_toc.jl") end
+module ExtendedToc include("extended_toc/extended_toc.jl") end
 
 include("structbond/StructBondModule.jl")
 using .StructBondModule
