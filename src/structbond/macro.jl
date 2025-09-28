@@ -20,7 +20,7 @@ function replace_single_underscore(ex::Expr, newval::Symbol)
 end
 
 # This will take an expression and check if it contains single underscores identifiers. If it does, it assumes it has to translate this into an anonymous function with a single argument that will go in place of the underscore
-make_function(x) = x
+make_function(x) = return x
 function make_function(ex::Expr)
     Meta.isexpr(ex, :(->)) && return ex
     newsym = gensym()
@@ -33,7 +33,7 @@ function make_function(ex::Expr)
 end
 
 # This function will try parsing the fieldbond expression to eventually deal with `@tv`
-process_fieldbond_expression(x) = x
+process_fieldbond_expression(x) = return x
 function process_fieldbond_expression(ex::Expr)
     Meta.isexpr(ex, :macrocall) || return ex
     args = filter(x -> !(x isa LineNumberNode), ex.args)
