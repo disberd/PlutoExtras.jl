@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.5
+# v0.20.17
 
 #> custom_attrs = ["hide-enabled"]
 
@@ -21,6 +21,7 @@ end
 # ╔═╡ 8db82e94-5c81-4c52-9228-7e22395fb68f
 begin
 	using PlutoDevMacros
+	using LaTeXStrings
 end
 
 # ╔═╡ 949ac1ef-c502-4e28-81ff-f99b0d19aa03
@@ -147,13 +148,86 @@ md"""
 """
 
 # ╔═╡ 7855826e-ccaa-4c27-a060-f5ceb927bbe8
-@bind transformed_value_example @NTBond "Transformed!" begin
+@bind transformed_value_example @NTBond md"Transformed!" begin
 	a = Slider(1:10)
 	b = Slider(1:10)
-end nt -> nt.a + nt.b
+end _.a + _.b # This function is replaced within the macro to be `nt -> nt.a + nt.b`, which could have also been provided as anonymous function directly
 
 # ╔═╡ 1d5573ee-872e-4dfb-a785-1ac9e836ad98
 transformed_value_example
+
+# ╔═╡ 5bb22f07-fbea-44ab-9783-9ca16e0da11e
+md"""
+### Transform only a few fields
+"""
+
+# ╔═╡ 134d6033-2f08-4f49-9829-6a023b368a70
+md"""
+A similar approach can also be achieved on a field by field basis by using the `@tv` decorator (which is not a macro per-se but is directly processed during the macro expansion of `@NTBond`).
+
+`@tv` is a shorthand for transformed_value and it expects two arguments after it, the first being the function to process the value returned by the widget, and the second being the widget itself.
+
+This can be used to be a bit less verbose when one is interested in only transforming one of many fields as below:
+"""
+
+# ╔═╡ 5438e9e7-c0f7-4523-8682-ffb822359d50
+simple_slider = Slider(1:10);
+
+# ╔═╡ 02e58012-5af6-4b91-a9a4-09c9dc038f11
+@bind transform_single_field @NTBond "Field Level Transformed Value" begin
+	a = ("Angle [°]", @tv deg2rad Slider(0:90; default = 60, show_value=true)) # This transforms the angle into radians
+	b = @tv x -> x + 3 simple_slider # You can either use the full anonymous function synthax, or the convenience form where _ is automatically interpreted as the variable of the anonymous function like below
+	c = @tv _^2 Slider(1:10; default = 3) # First argument transformed to the anon func x -> x^2
+	d = Slider(1:10)
+end
+
+# ╔═╡ e102613f-244c-4b49-9837-535bf047a14a
+transform_single_field
+
+# ╔═╡ 8eb18c7f-bb4d-4cdc-9e30-d561f9099800
+md"""
+## Markdown math in description
+"""
+
+# ╔═╡ 052b8bbd-acca-4c00-a5de-0c717ed068e3
+md"""
+The description of an `@NTBond` can now be provided as anything that has a valid `MIME"text/html"` representation. This includes markdown with math inside!
+"""
+
+# ╔═╡ bb04ac12-20a0-467a-af1a-c298301e4838
+markdown_function = nt -> atan(nt.x, nt.y) + 3
+
+# ╔═╡ 36faf18c-11c3-4012-a996-55c7cdae71a8
+math_ntbond = @bind atanval @NTBond md"This is math!: ``\;atan(x,y) + 3``" begin
+	x = (md"``x``", Slider(1:10; show_value=true))
+	y = (md"``y``", Slider(1:10; show_value=true))
+end markdown_function # We can also directly use functions in the caller scope to transform the value
+
+# ╔═╡ 27977526-75dc-44c3-9976-c22e8cbd94da
+atanval
+
+# ╔═╡ da3ae348-083d-4a7d-aabd-d0bc25b3ca17
+md"""
+## Custom HTML description
+"""
+
+# ╔═╡ 3c2c257e-bbee-4a04-b3ba-68f2382fce87
+@NTBond(md"asd", begin a = Slider(1:10) end).description
+
+# ╔═╡ c43c8a65-3f94-45f9-b633-71cade09b666
+md"""
+When providing a description that is not a string, by default the description field inside of the resulting `StructBond` is set to `"No String Description Provided"`.
+
+If for some reason one wants to customize the string description, a tuple with `(string_description, html_description)` can be provided
+"""
+
+# ╔═╡ cf807cb3-5d75-4040-bfd1-05fe70d26e89
+tuple_description_ntbond = @NTBond ("Plain description", html"<span>HTML Description</span>") begin
+	a = Slider(1:10)
+end
+
+# ╔═╡ 564968fe-0a68-48bc-9e11-c7732e2bae04
+tuple_description_ntbond.description
 
 # ╔═╡ f65b3231-f2b2-45dc-b72e-1ad3107083fc
 md"""
@@ -311,19 +385,21 @@ alt
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 PlutoDevMacros = "a0499f29-c39b-4c5c-807c-88074221b949"
 
 [compat]
-PlutoDevMacros = "~0.9.0"
+LaTeXStrings = "~1.4.0"
+PlutoDevMacros = "~0.9.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.4"
+julia_version = "1.12.0-rc2"
 manifest_format = "2.0"
-project_hash = "9c51cf46a1e177639a0c248b9cdccbfd7b4d05d7"
+project_hash = "11800ebf5b54db0d4fffa3305d79ef89c399c1f8"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -339,9 +415,9 @@ version = "1.11.0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "062c5e1a5bf6ada13db96a4ae4749a4c2234f521"
+git-tree-sha1 = "980f01d6d3283b3dbdfd7ed89405f96b7256ad57"
 uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.9"
+version = "2.0.1"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -364,9 +440,19 @@ version = "1.11.0"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "872cd273cb995ed873c58f196659e32f11f31543"
+git-tree-sha1 = "d8337622fe53c05d16f031df24daf0270e53bc64"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.44"
+version = "0.10.5"
+
+[[deps.JuliaSyntaxHighlighting]]
+deps = ["StyledStrings"]
+uuid = "ac6e5ff7-fb65-4e79-a425-ec3bc9c03011"
+version = "1.12.0"
+
+[[deps.LaTeXStrings]]
+git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
+uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+version = "1.4.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -374,24 +460,24 @@ uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
 version = "0.6.4"
 
 [[deps.LibCURL_jll]]
-deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.6.0+0"
+version = "8.11.1+1"
 
 [[deps.LibGit2]]
-deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
+deps = ["LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 version = "1.11.0"
 
 [[deps.LibGit2_jll]]
-deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "OpenSSL_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.7.2+0"
+version = "1.9.0+0"
 
 [[deps.LibSSH2_jll]]
-deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
+deps = ["Artifacts", "Libdl", "OpenSSL_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.0+1"
+version = "1.11.3+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -407,27 +493,27 @@ uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 version = "0.5.16"
 
 [[deps.Markdown]]
-deps = ["Base64"]
+deps = ["Base64", "JuliaSyntaxHighlighting", "StyledStrings"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 version = "1.11.0"
 
-[[deps.MbedTLS_jll]]
-deps = ["Artifacts", "Libdl"]
-uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.6+0"
-
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.12.12"
+version = "2025.5.20"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
-version = "1.2.0"
+version = "1.3.0"
+
+[[deps.OpenSSL_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
+version = "3.5.1+0"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.11.0"
+version = "1.12.0"
 
     [deps.Pkg.extensions]
     REPLExt = "REPL"
@@ -437,9 +523,9 @@ version = "1.11.0"
 
 [[deps.PlutoDevMacros]]
 deps = ["JuliaInterpreter", "Logging", "MacroTools", "Pkg", "TOML"]
-git-tree-sha1 = "72f65885168722413c7b9a9debc504c7e7df7709"
+git-tree-sha1 = "1cb861c9295d79dc6e23170d4b33bce013f69643"
 uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
-version = "0.9.0"
+version = "0.9.1"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -454,6 +540,10 @@ version = "1.11.0"
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
+
+[[deps.StyledStrings]]
+uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
+version = "1.11.0"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -477,17 +567,17 @@ version = "1.11.0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.13+1"
+version = "1.3.1+2"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.59.0+0"
+version = "1.64.0+1"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.4.0+2"
+version = "17.5.0+2"
 """
 
 # ╔═╡ Cell order:
@@ -511,6 +601,21 @@ version = "17.4.0+2"
 # ╟─4cb128aa-7ad8-4d17-bced-36845703e6a8
 # ╠═7855826e-ccaa-4c27-a060-f5ceb927bbe8
 # ╠═1d5573ee-872e-4dfb-a785-1ac9e836ad98
+# ╟─5bb22f07-fbea-44ab-9783-9ca16e0da11e
+# ╟─134d6033-2f08-4f49-9829-6a023b368a70
+# ╠═5438e9e7-c0f7-4523-8682-ffb822359d50
+# ╠═02e58012-5af6-4b91-a9a4-09c9dc038f11
+# ╠═e102613f-244c-4b49-9837-535bf047a14a
+# ╟─8eb18c7f-bb4d-4cdc-9e30-d561f9099800
+# ╟─052b8bbd-acca-4c00-a5de-0c717ed068e3
+# ╠═bb04ac12-20a0-467a-af1a-c298301e4838
+# ╠═36faf18c-11c3-4012-a996-55c7cdae71a8
+# ╠═27977526-75dc-44c3-9976-c22e8cbd94da
+# ╟─da3ae348-083d-4a7d-aabd-d0bc25b3ca17
+# ╠═3c2c257e-bbee-4a04-b3ba-68f2382fce87
+# ╟─c43c8a65-3f94-45f9-b633-71cade09b666
+# ╠═cf807cb3-5d75-4040-bfd1-05fe70d26e89
+# ╠═564968fe-0a68-48bc-9e11-c7732e2bae04
 # ╟─f65b3231-f2b2-45dc-b72e-1ad3107083fc
 # ╟─67c0860b-b4c1-412d-870a-a4ce4987465e
 # ╠═bd5ec086-5156-4e7c-a70b-5ca9f089bb49

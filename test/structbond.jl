@@ -2,7 +2,7 @@
     using PlutoExtras
     using Markdown
     using PlutoExtras.StructBondModule
-    using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond, NotDefined, typeasfield, collect_reinterpret!
+    using PlutoExtras.StructBondModule: structbondtype, popoutwrap, fieldbond,NotDefined, typeasfield, collect_reinterpret!
     import PlutoExtras.AbstractPlutoDingetjes.Bonds
     using Test
 
@@ -128,4 +128,11 @@ end
     @test eval_in_nb(sn, :alt) == 150
     @test eval_in_nb(sn, :freq) == 2e10
     SessionActions.shutdown(ss, nb)
+end
+
+@testitem "StructBondModule misc coverage" begin
+    ex = :(f(x))
+    @test StructBondModule.make_function(ex) == ex
+
+    @test StructBondModule.process_fieldbond_expression(:a) == :a
 end

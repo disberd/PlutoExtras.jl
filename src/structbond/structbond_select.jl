@@ -32,8 +32,8 @@ StructBondSelect(els::Vector[, selectors::Vector{String}]; description = "Struct
 
 # Extended Help
 
-See this image for a visual example:
-![structbondselect-example](https://private-user-images.githubusercontent.com/12846528/435671705-91ff7e4a-2b4c-4688-8f2b-ea53a622dd04.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDUyNDAzMTgsIm5iZiI6MTc0NTI0MDAxOCwicGF0aCI6Ii8xMjg0NjUyOC80MzU2NzE3MDUtOTFmZjdlNGEtMmI0Yy00Njg4LThmMmItZWE1M2E2MjJkZDA0LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA0MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNDIxVDEyNTMzOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTYwMmI1ZTYyNGQ1NDMyZGNlZTE3NzljMjJlNWQyOTU5ODUyMDdiODkzYWQxNDRmNzEwZjYxZmEzNTgwZDUyYmEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.L9eC42c4-Gz0tpjzGgF95LhOvcrGAEPOkJ71HhiICrs)
+See this gif for a visual example:
+![structbondselect-example-gif](https://github.com/disberd/PlutoExtras.jl/blob/assets/gifs/structbond_select_example.gif?raw=true)
 
 See also: [`StructBond`](@ref), [`@NTBond`](@ref)
 """
@@ -43,13 +43,14 @@ struct StructBondSelect
     selector_text::String
     default_idx::Int
     description::String
+    description_html
 end
 
 
-function StructBondSelect(els::Vector, selectors::Vector{String}; default_idx::Int = 1, description = "StructBondSelect", selector_text = "Selector")
+function StructBondSelect(els::Vector, selectors::Vector{String}; default_idx::Int = 1, description = "StructBondSelect", selector_text = "Selector", description_html = description)
     all(valid_structbondselect_el, els) || throw(ArgumentError("All elements in els must be either a StructBond or a TransformedWidget{StructBond} (obtained from a StructBond using `PlutoUI.Experimental.transformed_value`)"))
     default_idx > 0 && default_idx <= length(els) || throw(ArgumentError("default_idx must be a positive integer less than or equal to the number of `StructBond` elements provided as input."))
-    StructBondSelect(els, selectors, selector_text, default_idx, description)
+    StructBondSelect(els, selectors, selector_text, default_idx, description, description_html)
 end
 
 function StructBondSelect(els::Vector; kwargs...)
@@ -139,7 +140,7 @@ function Base.show(io::IO, mime::MIME"text/html", sb::StructBondSelect)
         </style>
     </structbond-select>
     """)
-    show(io, mime, togglereactive_container(inner_bond; description = sb.description, title = "Use the selector to choose which StructBond to display and use.", classes = ["structbond-select"]))
+    show(io, mime, collapsible_togglereactive_container(inner_bond; description = sb.description, description_html = sb.description_html, title = "Use the selector to choose which StructBond to display and use.", classes = ["structbond-select"]))
 end
 
 Bonds.initial_value(sbc::StructBondSelect) = Bonds.initial_value(sbc.els[sbc.default_idx])

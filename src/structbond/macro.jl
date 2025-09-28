@@ -1,4 +1,49 @@
 # Helper Functions #
+##### Functions copied from MacroTools.jl ####
+walk(x, inner, outer) = outer(x)
+walk(x::Expr, inner, outer) = outer(Expr(x.head, map(inner, x.args)...))
+prewalk(f, x)  = walk(f(x), x -> prewalk(f, x), identity)
+##### End of MacroTools.jl functions ####
+
+# This traverse the expression and eventually replaces all single underscores with the provided alternative value
+function replace_single_underscore(ex::Expr, newval::Symbol)
+    changed = Ref(false)
+    newex = prewalk(ex) do x
+        if x === :_
+            changed[] = true
+            return newval
+        else
+            return x
+        end
+    end
+    return newex, changed[]
+end
+
+# This will take an expression and check if it contains single underscores identifiers. If it does, it assumes it has to translate this into an anonymous function with a single argument that will go in place of the underscore
+make_function(x) = return x
+function make_function(ex::Expr)
+    Meta.isexpr(ex, :(->)) && return ex
+    newsym = gensym()
+    newex, changed = replace_single_underscore(ex, newsym)
+    if changed
+        return Expr(:(->), newsym, Expr(:block, newex))
+    else
+        return ex
+    end
+end
+
+# This function will try parsing the fieldbond expression to eventually deal with `@tv`
+process_fieldbond_expression(x) = return x
+function process_fieldbond_expression(ex::Expr)
+    Meta.isexpr(ex, :macrocall) || return ex
+    args = filter(x -> !(x isa LineNumberNode), ex.args)
+    macro_name = args[1]
+    macro_name == Symbol("@tv") || return ex
+    length(args) == 3 || throw(ArgumentError("The @tv decorator has to be called with two arguments after it.\nThe first must be the transforming function and the second the widget"))
+    _, func, widget = args
+    return :($(transformed_value)($(make_function(func)), $widget))
+end
+
 # Generic function for the convenience macros to add methods for the field functions
 function _add_generic_field(s, block, fnames)
 	if !Meta.isexpr(block, [:block, :let])
@@ -18,6 +63,9 @@ function _add_generic_field(s, block, fnames)
 		# If the value is not already a tuple or vect or expressions, we wrap it in a tuple
 		values = Meta.isexpr(value, [:vect, :tuple]) ? value.args : (value,)
 		for (fname,val) in zip(reverse(fnames), reverse(values))
+            if fname == :fieldbond
+                val = process_fieldbond_expression(val)
+            end
 			# Push the expression to overload the method
 			push!(out.args, esc(:($Mod.$fname(::Type{$s}, ::Val{$symbol}) = $val)))
 		end
@@ -286,7 +334,32 @@ PlutoUI.Experimental.transformed_value(x -> x.a + 2, @NTBond "WoW" begin
 end)
 ```
 
-See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref), [`popoutwrap`](@ref), [`@fielddata`](@ref), [`@fieldhtml`](@ref), [`@typeasfield`](@ref), [`@popoutasfield`](@ref)
+!!! note
+    The synthax accepting a function to transformed the resulting NamedTuple also has a convenience shorthand where `_` can be used to represent the original bond value.
+
+    The above example could then also be written as:
+    ```julia
+    @NTBond "WoW" begin
+        a = ("Description", Slider(1:10))
+    end _.a + 2
+    ```
+
+See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref), [`Popout`](@ref)
+
+# Extended Help
+## transform single fields
+Since version 0.7.16, the `@NTBond` macro supports a convenience decorator to transform a single field. This is done by using the `@tv` decorator, which is a shorthand for `PlutoUI.Experimental.transformed_value`.
+
+`@tv` is not a macro actually defined within PlutoExtras, but is directly parsed during the macro expansion of `@NTBond`. See the image below for an example of how to use it:
+
+![@tv decorator](https://raw.githubusercontent.com/disberd/PlutoExtras.jl/assets/imgs/ntbond_transform_fieldbond.png)
+
+## Markdown math in description
+Since version 0.7.16, the `@NTBond` macro supports providing a description as anything that has a valid `MIME"text/html"` representation. This includes markdown with math inside!
+
+See the image below for an example of how to use it:
+
+![@NTBond with math (using markdown) in description](https://raw.githubusercontent.com/disberd/PlutoExtras.jl/assets/imgs/ntbond_markdown_description.png)
 """
 macro NTBond(desc, args...)
     return _NTBond(desc, args...)
@@ -294,6 +367,7 @@ end
 
 function _NTBond(desc, block)
     Meta.isexpr(block, [:let, :block]) || error("You can only give `let` or `begin` blocks to the `@NTBond` macro")
+    desc = esc(desc)
 	# We will return a let block at the end anyhow to avoid method redefinitino errors in Pluto. We already create the two blocks composing the let
 	bindings, block = if block.head == :let
 		block.args
@@ -314,14 +388,24 @@ function _NTBond(desc, block)
 	end
 	T = NamedTuple{Tuple(fields)}
 	out = _add_generic_field(T, block, [:fielddescription, :fieldbond])
+    # We try to extract the string and html description from the first argument
+    push!(out.args, :((string_desc, html_desc) = if $desc isa AbstractString
+        $desc, $desc # We use the string for also for HTML
+    elseif $desc isa Tuple{AbstractString, Any}
+        $desc # we already have a tuple so we simply slit the two elements
+    else
+        "No String Description Provided", $desc # Fallback default for the string name
+    end))
+    # We push an expression that adds a method for the fielddescription
+    push!(out.args, :($(@__MODULE__).typedescription(::Type{$T}) = html_desc))
 	# We add the generation of the StructBond
-	push!(out.args, :($(StructBond)($T;description = $desc)))
+	push!(out.args, :($(StructBond)($T;description = string_desc)))
 	Expr(:let, bindings, out)
 end
 
 function _NTBond(desc, block, tv)
     expr = _NTBond(desc, block)
-    return :($(transformed_value)($(esc(tv)), $expr))
+    return :($(transformed_value)($(esc(make_function(tv))), $expr))
 end
 
 

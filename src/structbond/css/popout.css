@@ -13,6 +13,7 @@ popout-contents {
     padding: 8px;
 }
 popout-container.popped > popout-contents,
+popout-container.contents-hover > popout-contents,
 popout-container.header-hover > popout-contents {
     display: block;
     position: fixed;

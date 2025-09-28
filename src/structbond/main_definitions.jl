@@ -25,46 +25,16 @@ See also: [`BondTable`](@ref), [`@NTBond`](@ref), [`@BondsList`](@ref),
 """
 Base.@kwdef struct StructBond{T}
 	widget::Any
-	description::Any
+	description::String
 	secret_key::String=String(rand('a':'z', 10))
 end
-StructBond(::Type{T}; description = typedescription(T)) where T = StructBond{T}(;widget = typehtml(T), description)
+StructBond(::Type{T}; description = string(nameof(T))) where T = StructBond{T}(;widget = typehtml(T), description)
 
 ## structbondtype ##
 structbondtype(::StructBond{T}) where T = T
 structbondtype(::Type{StructBond{T}}) where T = T
 
 ## Show - StructBond ##
-
-# This does not seem used, leaving here for the moment
-_basics_script = ScriptContent("""
-	const parent = currentScript.parentElement
-	const widget = currentScript.previousElementSibling
-
-	// Overwrite the description
-	const desc = widget.querySelector('.description')
-	desc.innerHTML = 
-
-	// Set-Get bond
-
-	const set_input_value = setBoundElementValueLikePluto
-	const get_input_value = getBoundElementValueLikePluto
-
-	Object.defineProperty(parent, 'value', {
-		get: () => get_input_value(widget),
-		set: (newval) => {
-			set_input_value(widget, newval)
-		},
-		configurable: true,
-	});
-
-	const old_oninput = widget.oninput ?? function(e) {}
-	widget.oninput = (e) => {
-		old_oninput(e)
-		e.stopPropagation()
-		parent.dispatchEvent(new CustomEvent('input'))
-	}
-""")
 
 # Basic script part used for the show method
 _show(t::StructBond{T}) where T = @htl("""
@@ -77,7 +47,6 @@ _show(t::StructBond{T}) where T = @htl("""
 	
 		// Overwrite the description
 		const desc = widget.querySelector('.description')
-		desc.innerHTML = $(t.description)
 	
 		// Set-Get bond
 	
@@ -338,7 +307,7 @@ _show_popout(p::Popout) = wrapped() do Child
 </popout-container>
 <script id='$(p.secret_key)'>
 	// Load the floating-ui and interact libraries
-	window.floating_ui = await import('https://esm.sh/@floating-ui/dom')
+	window.floating_ui = await import('https://esm.sh/@floating-ui/dom@1.7.4')
 
 	const { computePosition, autoPlacement } = floating_ui
 	
@@ -350,12 +319,18 @@ _show_popout(p::Popout) = wrapped() do Child
 	$popup_interaction_handler
 
 	function positionContents() {
+        // Deal with scrolling
+        const scrollContainer = document.querySelector('main') || document.documentElement
+        const scrollTop = scrollContainer.scrollTop || window.pageYOffset
+
 		computePosition(header, contents, {
 			strategy: "fixed",
-			middleware: [autoPlacement()],
+			middleware: [
+                autoPlacement(),
+            ],
 		}).then((pos) => {
 			contents.style.left = pos.x + "px"
-			contents.style.top = pos.y + "px"
+			contents.style.top = pos.y - scrollTop + "px"
 		})
 	}
 
@@ -366,14 +341,32 @@ _show_popout(p::Popout) = wrapped() do Child
 
 	header.onclick = (e) => {container.popout()}
 
-	contents.onmouseenter = (e) => container.classList.toggle('contents-hover', true)
-	contents.onmouseleave = (e) => container.classList.toggle('contents-hover', false)
+	// Create a reusable debounced class removal function
+	const createDebouncedClassRemover = (container, className, delay) => {
+		return _.debounce(() => {
+			container.classList.toggle(className, false)
+		}, delay)
+	}
+
+	const debouncedRemoveContentsHover = createDebouncedClassRemover(container, 'contents-hover', 300)
+	const debouncedRemoveHeaderHover = createDebouncedClassRemover(container, 'header-hover', 300)
+
+	contents.onmouseenter = (e) => {
+		container.classList.toggle('contents-hover', true)
+		debouncedRemoveContentsHover.cancel()
+	}
+	contents.onmouseleave = (e) => {
+		debouncedRemoveContentsHover()
+	}
 
 	header.onmouseenter = (e) => {
 		container.classList.toggle('header-hover', true)
 		container.classList.contains('popped') ? null : positionContents()
+		debouncedRemoveHeaderHover.cancel()
 	}
-	header.onmouseleave = (e) => container.classList.toggle('header-hover', false)
+	header.onmouseleave = (e) => {
+		debouncedRemoveHeaderHover()
+	}
 </script>
 <style>
 	$(CSS_Sheets.popout)

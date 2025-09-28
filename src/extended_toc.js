@@ -178,7 +178,7 @@ function propagate_state(div, state) {
 }
 
 // Floating UI functionality
-const floating_ui = await import('https://esm.sh/@floating-ui/dom')
+const floating_ui = await import('https://esm.sh/@floating-ui/dom@1.7.4')
 
 // Cell attributes modification
 function has_cell_attribute(cell_id, attr) {
@@ -374,15 +374,8 @@ function repositionTooltip(e) {
     computePosition(ref, tooltip, {
         placement: "left",
         strategy: "fixed",
-        middleware: [
-            offset({
-                mainAxis: 0,        // No offset along the main axis (left/right)
-                crossAxis: -scrollTop, // Compensate for vertical scroll
-                alignmentAxis: 0    // No alignment offset
-            })
-        ]
     }).then(pos => {
-        tooltip.style.top = pos.y + "px"
+        tooltip.style.top = pos.y - scrollTop + "px"
     })
 }
 
@@ -725,7 +718,7 @@ header.addEventListener('click', e => {
 })
 
 header.addEventListener('mouseenter', (e) => {
-    const { computePosition, offset } = floating_ui
+    const { computePosition } = floating_ui
     
     // Get the scroll container - this is crucial for proper offset calculation
     const scrollContainer = document.querySelector('main') || document.documentElement
@@ -734,15 +727,8 @@ header.addEventListener('mouseenter', (e) => {
     computePosition(header, header_container, {
         placement: "left",
         strategy: "fixed",
-        middleware: [
-            offset({
-                mainAxis: 0,        // No offset along the main axis (left/right)
-                crossAxis: -scrollTop, // Compensate for vertical scroll
-                alignmentAxis: 0    // No alignment offset
-            })
-        ]
     }).then(pos => {
-        header_container.style.top = pos.y + "px"
+        header_container.style.top = pos.y - scrollTop + "px"
         // header_container.style.left = pos.x + "px"
         // header_container.style.right = `calc(1rem + min(80vw, 300px))`
     })

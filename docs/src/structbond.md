@@ -5,7 +5,7 @@ The StructBondModule submodule of PlutoExtras defines and exports functionality 
 !!! note
     The StructBondModule is currently not re-exported by PlutoExtras so it has to be explicitly used with `using PlutoExtras.StructBondModule`
 
-Open the [structbond test notebook static html](https://rawcdn.githack.com/disberd/PlutoExtras.jl/0e3153d29d3b112f93507c042a35b8161a3bb661/html_exports/test_bondstable.jl.html) to see the look of the widgets exported.\
+Open the [structbond module notebook static html](https://raw.githack.com/disberd/PlutoExtras.jl/assets/html/structbondmodule.html) to see the look of the widgets exported.\
 Or open the [related notebook](https://github.com/disberd/PlutoExtras.jl/blob/master/test/notebooks/structbondmodule.jl) directy in Pluto to check their functionality in action!
 !!! note
     The notebook must be run from the original folder (`test/notebooks`) within the `PlutoExtras` package folder to properly load the PlutoExtras package
@@ -37,6 +37,49 @@ The macro simply create a [`StructBond`](@ref) wrapping the desired NamedTuple t
 </video>
 ```
 
+### Transforming the resulting NamedTuple
+Since version v0.7.16, it is possible to `PlutoUI.Experimental.transformed_value` to transform the resulting value of the NamedTuple return by the `@NTBond` macro by either providing a third argument to the macro (acting on the full `NamedTuple`) or by using the `@tv` decorator directly when defining the bond for a specific field:
+
+#### Transforming the full NamedTuple
+
+When calling the macro with a third argument, this is interpreted as a function that is used to create a bond transformation using `PlutoUI.Experimental.transformed_value`.
+
+This means that the two expressions below yield the same result:
+```julia
+@NTBond "WoW" begin
+	a = ("Description", Slider(1:10))
+end x -> x.a + 2
+```
+and
+```julia
+PlutoUI.Experimental.transformed_value(x -> x.a + 2, @NTBond "WoW" begin
+	a = ("Description", Slider(1:10))
+end)
+```
+
+!!! note
+    The synthax accepting a function to transformed the resulting NamedTuple also has a convenience shorthand where `_` can be used to represent the original bond value.
+
+    The above example could then also be written as:
+    ```julia
+    @NTBond "WoW" begin
+        a = ("Description", Slider(1:10))
+    end _.a + 2
+    ```
+
+#### Transforming a single field
+
+For the use directly at field level, it is sufficient to use the `@tv` decorator in place of the bond widget directly, using the following form and as shown in the image below:
+```julia
+    @tv transform_function widget
+```
+
+![@tv decorator](https://raw.githubusercontent.com/disberd/PlutoExtras.jl/assets/imgs/ntbond_transform_fieldbond.png)
+
+!!! note
+    The `@tv` decorator is not a macro actually defined within PlutoExtras, but is directly parsed during the macro expansion of `@NTBond`.
+
+
 ## StructBondSelect
 Sometimes, one wants to create a more complex binding where the number of parameters to control a bond can vary depending on some other variable. The `StructBondSelect` can be of help in some of these cases, by providing a way to select out of a number of arbitrary `StructBonds` (which include `@NTBond`) by using a dropdown to select the one to be displayed and used for generating the `StructBondSelect` widget's output.
 
@@ -52,7 +95,7 @@ The `description` kwarg can be used to customize the text in the widget containe
 
 ```@raw html
 <video controls=true>
-<source src="https://private-user-images.githubusercontent.com/12846528/435671114-795c3da9-ede1-4f96-a971-038a8ce506c3.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDUyNDA0ODgsIm5iZiI6MTc0NTI0MDE4OCwicGF0aCI6Ii8xMjg0NjUyOC80MzU2NzExMTQtNzk1YzNkYTktZWRlMS00Zjk2LWE5NzEtMDM4YThjZTUwNmMzLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA0MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNDIxVDEyNTYyOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdmMWZmYjJhNTIyNGI5NDFmMDk3ODcxZWU2ZTE3Njk1MGYyZDk2MmQ5ZTI1NzEyNzJlZTZkNjUxMDhkNDI4ODYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.XXQ6NJLqc1MoBVQXY9MNageij2F0DhsEzvQpHSP9F4A" type="video/mp4">
+<source src="https://raw.githubusercontent.com/disberd/PlutoExtras.jl/assets/videos/structbond_select_example.mp4" type="video/mp4">
 </video>
 ```
 
@@ -117,6 +160,7 @@ StructBondModule.@NTBond
 StructBondModule.@BondsList
 StructBondModule.popoutwrap
 StructBondModule.BondTable
+StructBondModule.StructBondSelect
 ```
 
 ### Secondary/Advanced
