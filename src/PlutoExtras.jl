@@ -2,6 +2,7 @@ module PlutoExtras
 using HypertextLiteral
 using AbstractPlutoDingetjes.Bonds
 using AbstractPlutoDingetjes
+using Dates
 import PlutoUI
 
 # This is similar to `@reexport` but does not exports undefined names and can
@@ -16,13 +17,13 @@ function re_export(m::Module; modname = false)
     eval(:(export $(exprts...)))
 end
 
-export Editable, StringOnEnter # from basic_widgets.jl
-
 include("helpers.jl")
 
 include("combine_htl/PlutoCombineHTL.jl")
 
 include("basic_widgets.jl")
+export Editable, StringOnEnter, DateTimePicker
+
 include("latex_equations.jl") 
 module ExtendedToc include("extended_toc/extended_toc.jl") end
 
