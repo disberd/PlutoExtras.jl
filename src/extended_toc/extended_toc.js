@@ -748,8 +748,8 @@ window.scroll_to = scroll_to;
 window.save_to_file = save_to_file;
 window.floating_ui = floating_ui;
 
-// Set cell attribute for always-show
-cell.toggleAttribute('always-show', true)
+// Set cell attribute for always-show-output
+cell.toggleAttribute('always-show-output', true)
 
 invalidation.then(() => {
     observer.disconnect()
