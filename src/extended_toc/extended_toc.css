@@ -184,4 +184,5 @@ pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.cod
 
 pluto-notebook[hide-enabled] pluto-cell[always-show-output][toc-hidden]:not(.code_differs) {
     margin-top: 0px;
+    min-height: 0px;
 }

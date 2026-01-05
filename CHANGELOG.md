@@ -2,6 +2,11 @@
 
 This file contains the changelog for the PlutoExtras package. It follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
+## [0.7.17] - 2026-05-01
+### Fixed
+- Fixed the `ExtendedTableOfContents()` output getting hidden if contained in a hidden part of the notebook
+- Make hidden cells with `always-show-output` be completely invisible in the notebook by ensuring they don't have a `min-height` value.
+
 ## [0.7.16] - 2025-09-26
 
 ### Fixed
