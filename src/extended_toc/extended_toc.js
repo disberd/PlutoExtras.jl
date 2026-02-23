@@ -724,11 +724,13 @@ header.addEventListener('mouseenter', (e) => {
 notebook_hide_icon.addEventListener('click', (e) => {
         // We find the x coordinate of the pluto-notebook element, to avoid missing the cell when UI is disabled
         const { x } = document.querySelector('pluto-notebook').getBoundingClientRect()
-        const ref = document.elementFromPoint(x+1,100).closest('pluto-cell')
-        const { y } = ref.getBoundingClientRect()
+        const ref = document.elementFromPoint(x+1,100)?.closest('pluto-cell')
+        const y = ref?.getBoundingClientRect().y
         toggle_notebook_attribute('hide-enabled')
-        const dy = ref.getBoundingClientRect().y - y
-        window.scrollBy(0, dy)
+        if (ref != null && y != null) {
+            const dy = ref.getBoundingClientRect().y - y
+            window.scrollBy(0, dy)
+        }
 })
 
 // Save to file functionality
