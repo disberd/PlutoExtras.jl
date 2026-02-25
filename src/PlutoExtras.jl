@@ -29,6 +29,9 @@ module ExtendedToc include("extended_toc/extended_toc.jl") end
 include("structbond/StructBondModule.jl")
 using .StructBondModule
 
+include("table/editable_table.jl")
+export EditableTable
+
 ## ReExports ##
 re_export(StructBondModule)
 re_export.((ExtendedToc, LaTeXEqModule); modname = false)
