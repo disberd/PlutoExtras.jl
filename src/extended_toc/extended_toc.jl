@@ -1,6 +1,7 @@
 using HypertextLiteral
 using PlutoUI
 using AbstractPlutoDingetjes.Display: @embed
+using AbstractPlutoDingetjes: is_inside_pluto
 
 # Exports #
 export ExtendedTableOfContents, show_output_when_hidden
@@ -125,6 +126,6 @@ show_output_when_hidden(x::Union{HTML, HypertextLiteral.Result}) = @htl(
     </script>
     """
 )
-show_output_when_hidden(x) = isdefined(Main, :PlutoRunner) ?
+show_output_when_hidden(x) = is_inside_pluto() ?
     show_output_when_hidden(@htl("$(@embed(x))")) : error("You can't call
                              this function outside Pluto")
