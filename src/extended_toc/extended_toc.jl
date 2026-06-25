@@ -1,5 +1,6 @@
 using HypertextLiteral
 using PlutoUI
+using AbstractPlutoDingetjes.Display: @embed
 
 # Exports #
 export ExtendedTableOfContents, show_output_when_hidden
@@ -108,9 +109,8 @@ inside a non-hidden part of the notebook.
 
 # Note
 When calling this function with an input object that is not of type `HTML` or
-`HypertextLiteral.Result`, the function will wrap the object first using `@htl`
-and `PlutoRunner.embed_display`. Since the `embed_display` function is only
-available inside of Pluto,  
+`HypertextLiteral.Result`, the function wraps the object first using `@htl`
+and `AbstractPlutoDingetjes.Display.@embed`.
 """
 show_output_when_hidden(x::Union{HTML, HypertextLiteral.Result}) = @htl(
     """
@@ -125,6 +125,4 @@ show_output_when_hidden(x::Union{HTML, HypertextLiteral.Result}) = @htl(
     </script>
     """
 )
-show_output_when_hidden(x) = isdefined(Main, :PlutoRunner) ?
-    show_output_when_hidden(@htl("$(Main.PlutoRunner.embed_display(x))")) : error("You can't call
-                             this function outside Pluto")
+show_output_when_hidden(x) = show_output_when_hidden(@htl("$(@embed(x))"))
