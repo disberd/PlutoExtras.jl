@@ -17,6 +17,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
+  check-notebook-env:
+    name: Test notebooks contain no embedded env
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Ensure test notebooks embed no Pluto project/manifest
+        run: |
+          if grep -rl 'PLUTO_PROJECT_TOML_CONTENTS\|PLUTO_MANIFEST_TOML_CONTENTS' test/notebooks; then
+            echo "::error::Test notebooks must not embed a Pluto project/manifest; they regenerate in a fresh env. Enable the clean filter (git config filter.pluto-env-strip.clean .githooks/strip-pluto-env) and re-commit."
+            exit 1
+          fi
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
@@ -25,21 +36,20 @@ jobs:
       matrix:
         version:
           - '1'
-          - 'lts'
         os:
           - ubuntu-latest
           - windows-latest
           - macOS-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v7
         with:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}

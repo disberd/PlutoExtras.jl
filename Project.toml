@@ -1,7 +1,10 @@
 name = "PlutoExtras"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
-version = "0.7.18"
+version = "0.7.19"
+
+[workspace]
+projects = ["test", "docs"]
 
 [deps]
 AbstractPlutoDingetjes = "6e696c72-6542-2067-7265-42206c756150"
@@ -14,7 +17,7 @@ REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-AbstractPlutoDingetjes = "1"
+AbstractPlutoDingetjes = "1.4"
 DocStringExtensions = "0.9"
 HypertextLiteral = "0.9, 1"
 InteractiveUtils = "1"

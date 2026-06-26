@@ -2,6 +2,13 @@
 
 This file contains the changelog for the PlutoExtras package. It follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
+## [0.7.19] - 2026-06-26
+### Changed
+- Bumped the minimum `AbstractPlutoDingetjes` compat to `1.4`, the version that introduced the `@embed` macro now used by `show_output_when_hidden`.
+
+### Fixed
+- `show_output_when_hidden` no longer depends on `PlutoRunner.embed_display`, which was removed in Pluto 1.0 and broke hidden-cell output embedding. Non-HTML values are now embedded via `AbstractPlutoDingetjes.Display.@embed`, with the outside-Pluto error path gated by `is_inside_pluto()` (#56).
+
 ## [0.7.18] - 2026-05-01
 ### Fixed
 - Fixed another bug in hiding the `ExtendedTableOfContents` and trying to reshow it (see Issue #52)
