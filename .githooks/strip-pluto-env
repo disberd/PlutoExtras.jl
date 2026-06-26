@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+# Git clean filter: strip the machine-generated Pluto project/manifest cells from
+# a test notebook on its way INTO git, leaving the working copy untouched. Reads a
+# notebook on stdin, writes the stripped version to stdout.
+#
+# Test notebooks always run in a fresh notebook environment, so the embedded env
+# is pure churn in git history. The CI guard in .github/workflows/CI.yml enforces
+# that no committed test notebook contains it.
+#
+# Enable once per clone (the .gitattributes mapping is committed, this config is
+# per-clone and cannot be committed, for security):
+#   git config filter.pluto-env-strip.clean .githooks/strip-pluto-env
+#
+# Portable POSIX sh + awk (no GNU-isms, matches on ASCII only): works on Linux,
+# macOS, and Windows Git Bash. awk with no file argument reads stdin.
+exec awk '
+  index($0, "00000000-0000-0000-0000-000000000001") && !seen { skip=1; seen=1 }
+  index($0, "Cell order:") { skip=0 }
+  skip { next }
+  index($0, "00000000-0000-0000-0000-000000000001") { next }
+  index($0, "00000000-0000-0000-0000-000000000002") { next }
+  { print }
+'

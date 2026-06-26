@@ -1,1 +1,7 @@
 html_exports/* linguist-generated
+
+# Strip the machine-generated Pluto project/manifest from test notebooks on the
+# way into git (clean filter), keeping the working copy untouched so Pluto still
+# loads the local env. Enable once per clone:
+#   git config filter.pluto-env-strip.clean .githooks/strip-pluto-env
+test/notebooks/*.jl filter=pluto-env-strip
