@@ -19,8 +19,9 @@ jobs:
           version: '1'
       - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-docdeploy@v1
-        with:
-          install-package: false # the docs workspace already sources PlutoExtras via [sources]
+        # Keep install-package at its default (true): it runs Pkg.develop on the
+        # package into the docs env. Instantiate alone (relying on [sources]) does
+        # not install PlutoExtras in CI, so the build's `using PlutoExtras` fails.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
