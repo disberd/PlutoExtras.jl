@@ -1,7 +1,7 @@
 name = "PlutoExtras"
 uuid = "ed5d0301-4775-4676-b788-cf71e66ff8ed"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
-version = "0.7.18"
+version = "0.7.19"
 
 [workspace]
 projects = ["test", "docs"]
