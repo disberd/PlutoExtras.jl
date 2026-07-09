@@ -311,3 +311,53 @@ Bonds.possible_values(t::StringOnEnter) = Bonds.InfinitePossibilities()
 function Bonds.validate_value(t::StringOnEnter, val)
 	val isa AbstractString
 end
+
+
+
+# DateTimePicker #
+#=
+Create an element to utilize the HTML5 date-time input type.
+=#
+
+## Struct ##
+
+"""
+	DateTimePicker(default::DateTime=now(), min::Union{DateTime,Nothing}=nothing, max::Union{DateTime,Nothing}=nothing, step::Dates.Period=Dates.Minute(1))
+Creates a Pluto widget that allows to provide a DateTime as output when used with `@bind`.
+
+Due to the implementation of the HTML5 date-time input type, only date-times with a precision up to the minute are supported.
+
+Options:
+- `default::DateTime`: The default value to show when the widget is created. Defaults to the current date-time floored to the minute.
+- `min::Union{DateTime,Nothing}`: The minimum date-time that can be selected. Defaults to `nothing` (no minimum)
+- `max::Union{DateTime,Nothing}`: The maximum date-time that can be selected. Defaults to `nothing` (no maximum)
+- `step::Dates.Period`: The step size, defaults to `Dates.Minute(1)`. This defines the increments in which the date-time can be changed.
+
+When rendered in HTML, the widget will use the native date-time picker of the browser.
+"""
+Base.@kwdef struct DateTimePicker
+	default::DateTime=floor(now(), Dates.Minute)
+	min::Union{DateTime,Nothing}=nothing
+	max::Union{DateTime,Nothing}=nothing
+	step::Dates.Period=Dates.Minute(1)
+
+	function DateTimePicker(default, min, max, step)
+		flrd_default = floor(default, Dates.Minute)
+		flrd_min = isnothing(min) ? nothing : floor(min, Dates.Minute)
+		flrd_max = isnothing(max) ? nothing : floor(max, Dates.Minute)
+		new(flrd_default, flrd_min, flrd_max, step)
+	end
+end
+
+Base.show(io::IO, mime::MIME"text/html", dtp::DateTimePicker) = show(io, mime, @htl """
+	<input $((type="datetime-local", value=dtp.default, min=dtp.min, max=dtp.max, step=Dates.seconds(dtp.step)))></input>
+""")
+
+Base.get(dtp::DateTimePicker) = dtp.default
+Bonds.initial_value(dtp::DateTimePicker) = dtp.default
+function Bonds.transform_value(dtp::DateTimePicker, val)
+	something(tryparse(DateTime, val, dateformat"YYYY-mm-ddTHH:MM"), DateTime(1970,1,1))
+end
+function Bonds.validate_value(dtp::DateTimePicker, val)
+	!isnothing(tryparse(DateTime, val, dateformat"YYYY-mm-ddTHH:MM"))
+end

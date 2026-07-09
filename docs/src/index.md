@@ -1,8 +1,7 @@
-# PlutoExtras
+# PlutoExtras.jl - Overview
 
-Documentation for [PlutoExtras](https://github.com/disberd/PlutoExtras.jl).
+The [PlutoExtras.jl](https://github.com/disberd/PlutoExtras.jl) package provides several extensions to Pluto and PlutoUI, including additional widgets, support for LaTeX equations, an improved table of contents, and useful macros for binding structs and named tuples to widgets.
 
-## Outline
 ```@contents
 Pages = [
     "basic_widgets.md",
